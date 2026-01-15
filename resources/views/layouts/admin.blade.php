@@ -54,7 +54,13 @@
     <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
     <a href="{{ route('admin.products.index') }}"><i class="bi bi-box-seam me-2"></i>Products</a>
     <a href="{{ route('admin.projects.index') }}"><i class="bi bi-building me-2"></i>Projects</a>
-    <a href="{{ route('admin.dashboard') }}"><i class="bi bi-people me-2"></i>Clients</a>
+    <a href="{{ route('admin.orders.index') }}"><i class="bi bi-receipt me-2"></i>Orders</a>
+    <a href="{{ route('admin.coupons.index') }}"><i class="bi bi-ticket-perforated me-2"></i>Coupons</a>
+    <a href="{{ route('admin.income.index') }}"><i class="bi bi-cash-coin me-2"></i>Income</a>
+    <a href="{{ route('admin.reports.orders') }}"><i class="bi bi-graph-up-arrow me-2"></i>Order Reports</a>
+    <a href="{{ route('admin.reviews.index') }}"><i class="bi bi-chat-heart me-2"></i>Testimonials</a>
+    <a href="{{ route('admin.home-settings') }}"><i class="bi bi-gear me-2"></i>Home Settings</a>
+    <a href="{{ route('admin.admin-users.index') }}"><i class="bi bi-person-badge me-2"></i>Admin Users</a>
     <form action="{{ route('admin.logout') }}" method="POST" class="mt-4 px-3">
         @csrf
         <button class="btn btn-sm btn-outline-light w-100">Logout</button>

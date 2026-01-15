@@ -13,8 +13,23 @@ class RoleService
      */
     public function all(): Collection
     {
-        // return Role::with('permissions')->get();
         return collect([]); // Placeholder - Role model not created
+    }
+
+    // Placeholder: Replace $role type and return type with actual Role model when created
+    public function grantPermission($role, string $permission)
+    {
+        // $permission = Permission::where('name', $permission)->firstOrFail(); // Uncomment when Permission model exists
+        // $role->permissions()->attach($permission);
+        return $role;
+    }
+
+    // Placeholder: Replace $role type and return type with actual Role model when created
+    public function revokePermission($role, string $permission)
+    {
+        // $permission = Permission::where('name', $permission)->firstOrFail(); // Uncomment when Permission model exists
+        // $role->permissions()->detach($permission);
+        return $role;
     }
 
     /**
@@ -22,7 +37,6 @@ class RoleService
      */
     public function getById(int $id) // : Role
     {
-        // return Role::with('permissions')->findOrFail($id);
         return null; // Placeholder
     }
 
@@ -96,8 +110,12 @@ class RoleService
     public function syncRoles(User $user, array $roles): User
     {
         $roleIds = collect($roles)->map(function ($role) {
-            return is_string($role) ? $this->getByName($role)->id : $role;
-        })->toArray();
+            if (is_string($role)) {
+                $roleObj = $this->getByName($role);
+                return $roleObj ? $roleObj->id : null;
+            }
+            return $role;
+        })->filter()->toArray();
 
         $user->roles()->sync($roleIds);
         return $user;
@@ -160,25 +178,6 @@ class RoleService
             ->unique('id');
     }
 
-    /**
-     * Grant permission to role
-     */
-    public function grantPermission(Role $role, string $permission): Role
-    {
-        $permission = Permission::where('name', $permission)->firstOrFail();
-        $role->permissions()->attach($permission);
-        return $role;
-    }
-
-    /**
-     * Revoke permission from role
-     */
-    public function revokePermission(Role $role, string $permission): Role
-    {
-        $permission = Permission::where('name', $permission)->firstOrFail();
-        $role->permissions()->detach($permission);
-        return $role;
-    }
 
     /**
      * Get role hierarchy
