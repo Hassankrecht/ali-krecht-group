@@ -1,3 +1,38 @@
+# Ignore environment files except example
+.env
+.env.production
+.env.testing
+
+# IDE and cache
+.phpunit.result.cache
+.vscode/
+__pycache__/
+
+# Node and vendor
+node_modules/
+vendor/
+
+# Temp, debug, and backup files
+New folder/
+video.jpg
+__c.php
+__c56.php
+__c57.php
+__chk.php
+__diag.php
+__dump.php
+__tmp.php
+__tmp_check.php
+__wel.php
+
+# Reports and markdown
+reports/
+
+# Storage except .gitignore
+storage/*
+!storage/.gitignore
+# Ignore reports directory
+reports/
 # Laravel
 /vendor/
 /node_modules/
