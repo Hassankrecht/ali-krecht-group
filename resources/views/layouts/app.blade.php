@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-        <title>@yield('title', config('app.name', 'Ali Krecht Group'))</title>
-        <meta name="description" content="@yield('meta_description', config('app.name', 'Ali Krecht Group'))">
-        <meta property="og:title" content="@yield('og_title', View::getSection('title') ?? config('app.name', 'Ali Krecht Group'))">
-        <meta property="og:description" content="@yield('og_description', View::getSection('meta_description') ?? config('app.name', 'Ali Krecht Group'))">
+        <title>@yield('title', config('app.name', __('messages.meta.site_name')))</title>
+        <meta name="description" content="@yield('meta_description', config('app.name', __('messages.meta.site_name')))">
+        <meta property="og:title" content="@yield('og_title', View::getSection('title') ?? config('app.name', __('messages.meta.site_name')))">
+        <meta property="og:description" content="@yield('og_description', View::getSection('meta_description') ?? config('app.name', __('messages.meta.site_name')))">
         <meta property="og:image" content="@yield('og_image', asset('assets/img/ChatGPT Image Nov 7, 2025, 11_50_19 AM.png'))">
         <meta property="og:type" content="website">
 
@@ -26,13 +26,13 @@
         {
             "@context": "https://schema.org",
             "@type": "Organization",
-            "name": "Ali Krecht Group",
+            "name": "{{ __('messages.meta.site_name') }}",
             "url": "{{ url('/') }}",
             "logo": "{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 11_50_19 AM.png') }}",
             "contactPoint": [{
                 "@type": "ContactPoint",
                 "telephone": "+971-50-000-0000",
-                "contactType": "customer service",
+                "contactType": "{{ __('messages.meta.contact_type') }}",
                 "areaServed": "AE"
             }],
             "sameAs": [
