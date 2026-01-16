@@ -26,7 +26,9 @@ __tmp_check.php
 __wel.php
 
 # Reports and markdown
+# Reports and markdown
 reports/
+!README.md
 
 # Storage except .gitignore
 storage/*
