@@ -1,12 +1,58 @@
 # Laravel
-/vendor
-/node_modules
+/vendor/
+/node_modules/
 .env
-.env.*
 /storage/*
 !/storage/.gitignore
 /storage/*.key
-/bootstrap/cache
+/bootstrap/cache/
+
+# IDE & dev files
+__pycache__/
+.vscode/
+New folder/
+tmp_home_settings.bak
+temp.txt
+temp_check.php
+bigfiles.txt
+allfileshas.txt
+git_filter_repo.py
+git-filter-repo
+_ide_helper.php
+*.bak
+*.log
+*.tmp
+
+# Test & docs
+tests/
+*.md
+API_DOCUMENTATION.md
+DEPLOYMENT_READY.md
+
+# Node & frontend build
+node_modules/
+package-lock.json
+vite.config.js
+
+# Public large media folders
+/public/img/
+/public/image/
+/public/assets/img/
+/public/assets/gallery/
+/public/assets/home/
+/public/assets/videos/
+/public/assets/product/
+/public/assets/products/
+/public/assets/product_gallery/
+/public/assets/project_images/
+/public/assets/projects/
+/public/assets/reviews/
+/public/build/
+/public/hot/
+/public/videos/
+
+# Python cache
+__pycache__/
 
 # Frontend
 /public/build
