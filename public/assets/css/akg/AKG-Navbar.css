@@ -1,0 +1,135 @@
+/* --------------------------------------------------
+   AKG LUXURY NAVBAR (WOOD EDITION)
+   Wood × Gold × Black
+-------------------------------------------------- */
+
+/* TOP GOLD LINE */
+.akg-navbar-topline {
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        #b89650,
+        #d7b56d,
+        #f0d79d,
+        #d7b56d,
+        #b89650
+    );
+}
+
+/* NAVBAR MAIN */
+.akg-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 2000;
+
+    background: rgba(15, 12, 10, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    border-bottom: 1px solid rgba(215, 181, 109, 0.35);
+
+    padding: 0.6rem 0;
+    transition: background 0.25s ease, border-color 0.25s ease;
+
+    overflow-x: hidden !important;
+}
+
+/* Scroll effect */
+.akg-navbar.scrolled {
+    background: rgba(10, 8, 7, 0.96);
+    border-bottom-color: rgba(240, 215, 157, 0.55);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.65);
+}
+
+/* LOGO */
+.akg-logo {
+    height: 48px;
+    width: auto;
+    border-radius: 8px;
+}
+
+.akg-brand-text {
+    color: var(--akg-gold);
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: .7px;
+}
+
+/* NAV LINKS */
+.akg-navbar .nav-link {
+    color: var(--akg-text-muted) !important;
+    font-weight: 500;
+    padding: 0.7rem 1.1rem !important;
+    font-size: 0.92rem;
+    position: relative;
+    transition: color .2s ease;
+}
+
+/* Underline animation */
+.akg-navbar .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 4px;
+    transform: translateX(-50%);
+    height: 2px;
+    width: 0;
+    background: linear-gradient(90deg, #d7b56d, #f0d79d);
+    transition: width 0.3s ease;
+    border-radius: 10px;
+}
+
+.akg-navbar .nav-link:hover,
+.akg-navbar .nav-link.active {
+    color: var(--akg-gold) !important;
+}
+
+.akg-navbar .nav-link:hover::after,
+.akg-navbar .nav-link.active::after {
+    width: 60%;
+}
+
+/* CART BADGE */
+.bg-gold {
+    background: linear-gradient(135deg, #d7b56d, #f0d79d);
+    color: #111 !important;
+    font-weight: bold;
+}
+
+/* DROPDOWNS */
+.akg-dropdown-menu {
+    background: #1a1511;
+    border: 1px solid rgba(215, 181, 109, 0.25);
+    border-radius: 14px;
+    box-shadow: var(--akg-shadow-md);
+    padding: 0.5rem 0;
+}
+
+.akg-dropdown-menu .dropdown-item {
+    color: var(--akg-text-main);
+    transition: background 0.2s ease;
+}
+
+.akg-dropdown-menu .dropdown-item:hover {
+    background: rgba(215, 181, 109, 0.12);
+}
+
+/* MOBILE MENU */
+.navbar-nav {
+    padding-top: 0.5rem;
+    overflow-x: hidden !important;
+}
+
+.navbar-collapse {
+    background: rgba(12,10,9,0.95);
+    padding: 0.5rem 0;
+    border-radius: 0 0 10px 10px;
+}
+
+/* Remove horizontal scroll everywhere */
+body {
+    overflow-x: hidden !important;
+}

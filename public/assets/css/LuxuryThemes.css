@@ -1,0 +1,327 @@
+/* ===========================================================
+   ALI KRECHT GROUP 2025 THEME - Luxury + Craftsmanship Style
+   -----------------------------------------------------------
+   Author: ChatGPT (Customized)
+   Palette: Dark wood #2b1e0f | Gold #d4af37 | Bright gold #ffd700 | Cream #fff8dc
+   Typography: Poppins / Cairo / Sans-serif
+   =========================================================== */
+
+/* ---------- ROOT VARIABLES ---------- */
+:root {
+  --gold: #d4af37;
+  --bright-gold: #ffd700;
+  --dark-wood: #2b1e0f;
+  --matte-bg: #1a1208;
+  --cream: #fff8dc;
+  --text-main: #f8f8f8;
+  --shadow-dark: rgba(0, 0, 0, 0.5);
+  --shadow-light: rgba(255, 215, 0, 0.15);
+  --radius: 14px;
+}
+
+/* ---------- GLOBAL RESET ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--matte-bg);
+  color: var(--text-main);
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+a {
+  color: var(--bright-gold);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+a:hover {
+  color: #fff;
+}
+
+/* ---------- SCROLLBAR ---------- */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-track {
+  background: var(--dark-wood);
+}
+
+/* ---------- NAVBAR ---------- */
+.navbar.akg-navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1100;
+  background: transparent;
+  backdrop-filter: blur(4px);
+  transition: all 0.4s ease;
+  padding: 0.8rem 2rem;
+}
+
+.navbar.akg-navbar.scrolled {
+  background: rgba(27, 18, 8, 0.96);
+  box-shadow: 0 4px 18px var(--shadow-dark);
+}
+
+.navbar.akg-navbar .navbar-brand {
+  font-weight: 700;
+  color: var(--gold) !important;
+  font-size: 1.6rem;
+  letter-spacing: 1px;
+}
+
+.navbar.akg-navbar .nav-link {
+  color: var(--bright-gold) !important;
+  font-weight: 500;
+  margin: 0 8px;
+  transition: all 0.3s;
+}
+
+.navbar.akg-navbar .nav-link:hover,
+.navbar.akg-navbar .nav-link.active {
+  color: #fff !important;
+}
+
+.navbar.akg-navbar .dropdown-menu {
+  background: var(--dark-wood);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: var(--radius);
+  margin-top: 12px;
+  z-index: 2000;
+}
+
+.navbar.akg-navbar .dropdown-item {
+  color: var(--cream);
+}
+.navbar.akg-navbar .dropdown-item:hover {
+  background: rgba(255, 215, 0, 0.1);
+}
+
+/* ---------- HERO SECTION ---------- */
+.hero-header {
+  position: relative;
+  height: 100vh;
+  background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+              url('../img/hero-bg.jpg') center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--bright-gold);
+}
+
+.hero-header h1 {
+  font-size: 3.5rem;
+  font-weight: 900;
+  background: linear-gradient(90deg, #ffd700, #d4af37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-header p {
+  color: var(--cream);
+  font-size: 1.2rem;
+  margin-top: 15px;
+}
+
+/* ---------- BUTTONS ---------- */
+.btn-akg {
+  background: linear-gradient(135deg, #d4af37, #ffd700);
+  color: #000;
+  border: none;
+  padding: 10px 24px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-akg:hover {
+  transform: scale(1.07);
+  background: linear-gradient(135deg, #ffd700, #d4af37);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.25);
+}
+
+/* ---------- SECTION BOX ---------- */
+.section-box {
+  background-color: var(--dark-wood);
+  border-radius: 18px;
+  box-shadow: 0 0 35px rgba(0, 0, 0, 0.35);
+  padding: 60px 40px;
+  margin-bottom: 70px;
+}
+
+/* ---------- HEADINGS ---------- */
+.section-title {
+  color: var(--bright-gold);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.section-subtitle {
+  color: var(--cream);
+  opacity: 0.9;
+}
+
+/* ---------- PROJECT / PRODUCT CARDS ---------- */
+.akg-card {
+  background-color: var(--dark-wood);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 25px var(--shadow-light);
+}
+
+.akg-card img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  transition: all 0.4s ease;
+}
+
+.akg-card:hover img {
+  transform: scale(1.1);
+  filter: brightness(80%);
+}
+
+.akg-card .card-body {
+  padding: 20px;
+}
+
+.akg-card h5 {
+  color: var(--bright-gold);
+  margin-bottom: 10px;
+}
+
+.akg-card p {
+  color: var(--cream);
+  opacity: 0.85;
+}
+
+/* ---------- TESTIMONIALS ---------- */
+.testimonial-box {
+  background: var(--dark-wood);
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 5px 25px rgba(255, 215, 0, 0.12);
+  transition: all 0.3s ease;
+}
+
+.testimonial-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+}
+
+.testimonial-box i {
+  color: var(--gold);
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.testimonial-box p {
+  color: var(--cream);
+  font-style: italic;
+}
+
+/* ---------- FORMS ---------- */
+.form-control,
+textarea,
+select {
+  background: #1f150a;
+  border: 1px solid #3c2b18;
+  color: var(--cream);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.form-control:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 8px var(--gold);
+}
+
+/* ---------- FOOTER ---------- */
+.footer {
+  background-color: var(--dark-wood);
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--cream);
+  border-top: 2px solid rgba(255, 215, 0, 0.2);
+}
+
+.footer a {
+  color: var(--bright-gold);
+}
+.footer a:hover {
+  color: #fff;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 992px) {
+  .hero-header h1 {
+    font-size: 2.5rem;
+  }
+  .section-box {
+    padding: 40px 20px;
+  }
+}
+@media (max-width: 768px) {
+  .hero-header h1 {
+    font-size: 2rem;
+  }
+}
+/* ✅ ضبط حجم الصور وتناسقها */
+.project-image-wrapper {
+    width: 100%;
+    height: 320px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #000;
+}
+
+.project-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease, filter 0.3s ease;
+}
+
+/* تأثير عند تمرير الماوس */
+.project-card:hover .project-image {
+    transform: scale(1.08);
+    filter: brightness(0.85);
+}
+
+/* ✅ الطبقة الشفافة فوق الصورة */
+.project-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.project-card:hover .project-overlay {
+    opacity: 1;
+}
+
+/* تأثير ناعم لظهور الصورة */
+.project-image {
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out, transform 0.5s ease;
+}
+.project-image.loaded {
+    opacity: 1;
+}
+

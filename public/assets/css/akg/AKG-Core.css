@@ -1,0 +1,75 @@
+/* --------------------------------------------------
+   AKG LUXURY THEME V2 (WOOD EDITION)
+   Color Palette: Gold × Dark Brown × Wood
+-------------------------------------------------- */
+
+/* ===== ROOT COLORS ===== */
+:root {
+
+    /* Backgrounds */
+    --akg-bg: #0c0a09;
+    --akg-bg-soft: #1a1511;
+    --akg-bg-card: #201b16;
+
+    /* Brown / Wood Colors */
+    --akg-wood-dark: #2d1f14;
+    --akg-wood: #4d3424;
+    --akg-wood-light: #6e4b31;
+
+    /* Gold Colors */
+    --akg-gold: #d7b56d;
+    --akg-gold-soft: #f0d79d;
+    --akg-gold-deep: #b89650;
+
+    /* Text */
+    --akg-text-main: #f5f3ee;
+    --akg-text-muted: #b8b2aa;
+
+    /* Shadows */
+    --akg-shadow-lg: 0 20px 50px rgba(0,0,0,0.55);
+    --akg-shadow-md: 0 10px 30px rgba(0,0,0,0.35);
+}
+
+/* ===== GLOBAL RESET ===== */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: radial-gradient(circle at top, #1a1511 0%, #0c0a09 60%);
+    font-family: "Poppins", sans-serif;
+    color: var(--akg-text-main);
+    overflow-x: hidden !important;
+}
+
+/* Smooth text */
+body, h1, h2, h3, h4, h5 {
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5 {
+    color: var(--akg-text-main);
+    font-weight: 600;
+}
+
+p {
+    color: var(--akg-text-muted);
+}
+
+/* Remove Bootstrap “blue” forever */
+.text-primary {
+    color: var(--akg-gold) !important;
+}
+
+.bg-primary {
+    background-color: var(--akg-wood-light) !important;
+}
+
+/* GENERAL CONTAINER SPACING */
+section {
+    padding-top: 80px;
+    padding-bottom: 80px;
+}

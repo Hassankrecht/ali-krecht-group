@@ -13,12 +13,21 @@
 /public/hot
 
 # Media & assets (IMPORTANT)
-/public/assets
-/public/videos
-/public/uploads
-/public/media
-/public/images
-/public/img
+/public/img/
+/public/videos/
+/public/assets/img/
+/public/assets/gallery/
+/public/assets/home/
+/public/assets/videos/
+/public/assets/product/
+/public/assets/products/
+/public/assets/product_gallery/
+/public/assets/project_images/
+/public/assets/projects/
+/public/assets/reviews/
+/public/uploads/
+/public/media/
+/public/images/
 
 # Logs & cache
 .phpunit.result.cache

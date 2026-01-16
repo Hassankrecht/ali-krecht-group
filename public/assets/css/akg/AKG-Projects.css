@@ -1,0 +1,198 @@
+/* --------------------------------------------------
+   AKG PROJECTS SYSTEM
+   Luxury Project Cards • Lightbox • Modal • Grid
+-------------------------------------------------- */
+
+/* ===== PROJECT CARD ===== */
+.akg-project-card {
+    background: var(--akg-bg-card);
+    border-radius: 22px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.07);
+    transition: 0.25s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Hover */
+.akg-project-card:hover {
+    transform: translateY(-7px);
+    border-color: rgba(212,175,55,0.65);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.95);
+}
+
+/* ===== PROJECT IMAGE ===== */
+.akg-project-img {
+    height: 240px;
+    width: 100%;
+    object-fit: cover;
+    transition: 0.3s ease;
+}
+
+/* slight zoom effect */
+.akg-project-card:hover .akg-project-img {
+    transform: scale(1.05);
+}
+
+/* ===== PROJECT BODY ===== */
+.akg-project-body {
+    padding: 1.3rem;
+    text-align: center;
+    flex-grow: 1;
+}
+
+.akg-project-title {
+    font-size: 1.25rem;
+    color: var(--akg-gold-soft);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.akg-project-desc {
+    font-size: 0.9rem;
+    color: var(--akg-text-muted);
+    margin-bottom: 1rem;
+}
+
+/* ===== VIEW BTN ===== */
+.akg-project-btn {
+    border-radius: 999px;
+    border: 1px solid var(--akg-gold-soft);
+    color: var(--akg-gold-soft);
+    font-weight: 600;
+    padding: 0.55rem 1.6rem;
+    background: transparent;
+    transition: 0.25s ease;
+}
+
+.akg-project-btn:hover {
+    background: var(--akg-gold-soft);
+    color: #111 !important;
+    border-color: var(--akg-gold-soft);
+    box-shadow: 0 8px 25px rgba(212,175,55,0.5);
+}
+
+/* ===== GRID SPACING ===== */
+.akg-project-grid {
+    row-gap: 2rem;
+}
+
+/* --------------------------------------------------
+   PROJECT MODAL (Popup)
+-------------------------------------------------- */
+.akg-project-modal .modal-content {
+    background: var(--akg-bg-soft);
+    border: 1px solid rgba(212,175,55,0.25);
+    border-radius: 20px;
+    box-shadow: 0 15px 45px rgba(0,0,0,0.8);
+}
+
+.akg-project-modal .modal-title {
+    color: var(--akg-gold-soft);
+    font-weight: 700;
+    font-size: 1.4rem;
+}
+
+.akg-project-modal .btn-close {
+    filter: brightness(1.5);
+}
+
+/* text inside modal */
+.akg-project-modal p {
+    color: var(--akg-text-muted);
+}
+
+/* --------------------------------------------------
+   LIGHTBOX (Full image viewer)
+-------------------------------------------------- */
+
+#akg-lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.94);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 4000;
+}
+
+#akg-lightbox-img {
+    max-width: 85vw;
+    max-height: 85vh;
+    border-radius: 14px;
+    box-shadow: 0 0 25px rgba(212,175,55,0.25);
+    transition: 0.25s ease;
+}
+
+/* NAV arrows */
+.akg-lightbox-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--akg-gold-soft);
+    font-size: 2.6rem;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.akg-lightbox-arrow:hover {
+    filter: brightness(1.3);
+}
+
+.akg-lightbox-prev {
+    left: 25px;
+}
+
+.akg-lightbox-next {
+    right: 25px;
+}
+
+/* close X button */
+.akg-lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    font-size: 2rem;
+    color: var(--akg-gold-soft);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.akg-lightbox-close:hover {
+    filter: brightness(1.5);
+}
+
+/* thumbs inside modal */
+.akg-thumb-gallery img {
+    width: 170px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 14px;
+    margin: 6px;
+    transition: 0.25s ease;
+    border: 1px solid rgba(255,255,255,0.07);
+    cursor: pointer;
+}
+
+.akg-thumb-gallery img:hover {
+    transform: scale(1.05);
+    border-color: rgba(212,175,55,0.7);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+}
+
+/* --------------------------------------------------
+   RESPONSIVE FIXES
+-------------------------------------------------- */
+
+@media(max-width: 575.98px) {
+    .akg-project-img {
+        height: 200px;
+    }
+
+    .akg-thumb-gallery img {
+        width: 140px;
+        height: 100px;
+    }
+}

@@ -1,0 +1,49 @@
+/* -----------------------------------------
+   AKG FOOTER
+   Clean bottom section • Links • Copy
+----------------------------------------- */
+
+.akg-footer {
+    background: #050505;
+    border-top: 1px solid rgba(212,175,55,0.35);
+    padding: 1.8rem 0;
+    margin-top: 4rem;
+}
+
+.akg-footer p {
+    margin: 0;
+    color: var(--akg-text-muted);
+    font-size: 0.9rem;
+}
+
+/* Links */
+.akg-footer-menu a {
+    color: var(--akg-text-muted);
+    text-decoration: none;
+    margin: 0 0.35rem;
+    font-size: 0.88rem;
+    transition: 0.2s ease;
+}
+
+.akg-footer-menu a:hover {
+    color: var(--akg-gold-soft);
+}
+
+/* Optional social icons */
+.akg-footer-social a {
+    color: var(--akg-text-muted);
+    margin: 0 0.3rem;
+    font-size: 1.1rem;
+    transition: 0.2s ease;
+}
+
+.akg-footer-social a:hover {
+    color: var(--akg-gold-soft);
+}
+
+/* Responsive */
+@media (max-width: 575.98px) {
+    .akg-footer-menu {
+        margin-top: 0.4rem;
+    }
+}
