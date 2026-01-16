@@ -47,6 +47,31 @@
                         <textarea name="description" rows="4" class="form-control">{{ old('description') }}</textarea>
                     </div>
 
+                    {{-- Translations --}}
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-warning">Translations</h5>
+                        @foreach (config('app.supported_locales', []) as $locale)
+                            @continue($locale === config('app.locale'))
+                            <div class="border rounded p-3 mb-3 bg-white">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-semibold text-uppercase">{{ $locale }}</span>
+                                    @if ($locale === config('app.locale'))
+                                        <small class="text-muted">Fallback language</small>
+                                    @endif
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small mb-1">Title ({{ $locale }})</label>
+                                    <input type="text" name="translations[{{ $locale }}][title]" class="form-control"
+                                        value="{{ old('translations.' . $locale . '.title') }}">
+                                </div>
+                                <div class="mb-0">
+                                    <label class="form-label small mb-1">Description ({{ $locale }})</label>
+                                    <textarea name="translations[{{ $locale }}][description]" rows="3" class="form-control">{{ old('translations.' . $locale . '.description') }}</textarea>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
                     {{-- Price --}}
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Price</label>

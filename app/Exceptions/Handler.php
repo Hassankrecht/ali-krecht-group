@@ -8,6 +8,16 @@ use Throwable;
 class Handler extends ExceptionHandler
 {
     /**
+     * Convert an authentication exception into an unauthenticated response.
+     */
+    protected function unauthenticated($request, \Illuminate\Auth\AuthenticationException $exception)
+    {
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+        return redirect()->guest(route('login'));
+    }
+    /**
      * The list of the inputs that are never flashed to the session on validation exceptions.
      *
      * @var array<int, string>

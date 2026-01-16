@@ -11,7 +11,6 @@ class AdminReviewController extends Controller
 {
     public function index(Request $request)
     {
-        $this->authorize('viewAny', Review::class);
         // Default to "all" so records stay visible after approval
         $status = $request->query('status', 'all');
         $q      = $request->query('q');
@@ -22,7 +21,7 @@ class AdminReviewController extends Controller
         $approvedCount = (clone $baseQuery)->where('is_approved', true)->count();
         $totalCount    = (clone $baseQuery)->count();
 
-        $reviews = Review::with('user')
+        $reviews = Review::query()
             ->when($status === 'approved', fn($q) => $q->where('is_approved', true))
             ->when($status === 'pending', fn($q) => $q->where('is_approved', false))
             ->when($q, function ($qq) use ($q) {
@@ -50,7 +49,6 @@ class AdminReviewController extends Controller
 
     public function approve(Review $review)
     {
-        $this->authorize('update', $review);
         $review->update(['is_approved' => true]);
 
         return back()->with('success', 'Review approved and will appear on the site.');
@@ -58,7 +56,6 @@ class AdminReviewController extends Controller
 
     public function reject(Review $review)
     {
-        $this->authorize('update', $review);
         $review->update(['is_approved' => false]);
 
         return back()->with('success', 'Review marked as hidden.');
@@ -66,7 +63,6 @@ class AdminReviewController extends Controller
 
     public function destroy(Review $review)
     {
-        $this->authorize('delete', $review);
         $this->deletePhoto($review->photo);
 
         $review->delete();

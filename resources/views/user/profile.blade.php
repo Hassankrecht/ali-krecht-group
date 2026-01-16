@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'My Profile')
+@section('meta_description', 'Manage your profile, contact details, and preferences with Ali Krecht Group. Update your information securely.')
 
 @section('content')
     <div class="container py-5" style="margin-top: 80px;">

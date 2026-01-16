@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', '403 - Forbidden')
+@section('meta_description', 'Access denied. You do not have permission to view this page. Return to Ali Krecht Group home or contact support.')
 
 @section('content')
 <div class="error-container min-vh-100 d-flex align-items-center justify-content-center bg-light">

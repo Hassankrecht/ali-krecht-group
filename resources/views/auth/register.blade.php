@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', __('messages.auth.register_title'))
+@section('meta_description', 'Register for an account with Ali Krecht Group to enjoy luxury carpentry, interior design, and personalized services.')
 
 @section('content')
     <div class=" akg-hero-img-box">
@@ -33,8 +34,9 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('register') }}" class="row g-3">
+                <form method="POST" action="{{ route('register') }}" class="row g-3 js-recaptcha">
                     @csrf
+                    <input type="hidden" name="g-recaptcha-response">
                     <div class="col-12">
                         <input id="name" type="text" class="form-control akg-input @error('name') is-invalid @enderror"
                             name="name" value="{{ old('name') }}" placeholder="Full name" required autocomplete="name"
@@ -73,7 +75,13 @@
                     </div>
 
                     <div class="col-12 mt-2">
-                        <button class="btn btn-gold w-100 py-3 fw-semibold" type="submit">{{ __('messages.auth.btn_register') }}</button>
+                        <button class="btn btn-gold w-100 py-3 fw-semibold"
+                                type="submit"
+                                data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"
+                                data-size="invisible"
+                                data-badge="bottomright">
+                            {{ __('messages.auth.btn_register') }}
+                        </button>
                     </div>
                     <div class="col-12 text-center text-muted small">
                         {{ __('messages.auth.has_account') }} <a href="{{ route('login') }}" class="text-gold">{{ __('messages.auth.btn_login') }}</a>

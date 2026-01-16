@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Our Work Process')
+@section('meta_description', 'Learn about our step-by-step process for delivering luxury carpentry and interior design projects at Ali Krecht Group.')
 
 @php
     $lang = app()->getLocale();
@@ -92,7 +93,7 @@
 
 @section('content')
     <div class="akg-hero-img-box position-relative">
-        <img src="{{ asset('assets/img/services/hero.jpg') }}" class="akg-hero-img" alt="Process" loading="lazy">
+        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_12_34 PM.png') }}" class="akg-hero-img" alt="Process" loading="lazy">
         <div class="akg-hero-overlay"></div>
         <div class="container text-center hero-content">
             <h1 class="akg-hero-title text-gold mb-2">

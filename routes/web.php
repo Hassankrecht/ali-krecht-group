@@ -1,3 +1,6 @@
+use App\Http\Controllers\SitemapController;
+// Sitemap.xml
+Route::get('/sitemap.xml', [SitemapController::class, 'index']);
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -13,7 +16,16 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AdminProjectController;
 use App\Http\Controllers\Admin\AdminProductController;
 use App\Http\Controllers\Admin\AdminCategoryController;
+use App\Http\Controllers\Admin\AdminReviewController;
+use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminCouponController;
+use App\Http\Controllers\Admin\AdminOrderController;
+use App\Http\Controllers\Admin\AdminIncomeController;
+use App\Http\Controllers\Admin\AdminHomeSettingController;
+use App\Http\Controllers\PageEventController;
+use App\Http\Controllers\CouponController;
 use App\Models\Admin\Admin;
+use App\Http\Controllers\Admin\Reports\OrderReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,7 +37,20 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/services', [HomeController::class, 'services'])->name('services');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
+Route::get('/services/{slug}', [\App\Http\Controllers\ServiceController::class, 'show'])->name('services.show');
+Route::get('/process', [HomeController::class, 'process'])->name('process');
+Route::get('/gallery', [\App\Http\Controllers\GalleryController::class, 'index'])->name('gallery');
+Route::get('/pricing', [HomeController::class, 'pricing'])->name('pricing');
+Route::get('/testimonials', [HomeController::class, 'testimonials'])->name('testimonials');
+// Prevent accidental GET to the POST-only contact endpoint
+Route::get('/contact/send', function () {
+    return redirect()->route('contact');
+});
 Route::post('/contact/send', [ContactController::class, 'send'])->name('contact.send');
+Route::post('/reviews', [HomeController::class, 'storeReview'])->name('reviews.store');
+Route::post('/events/track', [PageEventController::class, 'store'])->name('events.track');
+Route::post('/coupon/apply', [CouponController::class, 'apply'])->name('coupon.apply');
+Route::post('/coupon/remove', [CouponController::class, 'remove'])->name('coupon.remove');
 
 /*
 |--------------------------------------------------------------------------
@@ -61,7 +86,12 @@ Route::get('/lang/{locale}', function ($locale) {
 | Authentication (for normal users)
 |--------------------------------------------------------------------------
 */
-Auth::routes();
+Auth::routes(['login' => false, 'verify' => true]);
+// Custom login route with guest.custom middleware
+Route::middleware('guest.custom')->group(function () {
+    Route::get('login', [App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('login', [App\Http\Controllers\Auth\LoginController::class, 'login']);
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -70,6 +100,9 @@ Auth::routes();
 */
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard/orders', [HomeController::class, 'orders'])->name('dashboard.orders');
+    Route::get('/dashboard/profile', [HomeController::class, 'profile'])->name('dashboard.profile');
+    Route::post('/dashboard/profile', [HomeController::class, 'updateProfile'])->name('dashboard.profile.update');
 });
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -79,11 +112,14 @@ Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.c
 Route::post('/cart/increase/{id}', [CartController::class, 'increase'])->name('cart.increase');
 Route::post('/cart/decrease/{id}', [CartController::class, 'decrease'])->name('cart.decrease');
 
-Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.process');
-Route::post('/checkout/confirm', [CheckoutController::class, 'confirm'])->name('checkout.confirm');
-Route::get('/checkout/thank-you/{order}', [CheckoutController::class, 'thankYou'])->name('checkout.thankyou');
-Route::get('/checkout/invoice/{order}', [CheckoutController::class, 'downloadInvoice'])->name('checkout.invoice');
+Route::middleware('cart.hasProducts')->group(function () {
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.process');
+    Route::post('/checkout/confirm', [CheckoutController::class, 'confirm'])->name('checkout.confirm');
+    Route::get('/checkout/check-email', [CheckoutController::class, 'checkEmail'])->name('checkout.checkEmail');
+    Route::get('/checkout/thank-you/{order}', [CheckoutController::class, 'thankYou'])->name('checkout.thankyou');
+    Route::get('/checkout/invoice/{order}', [CheckoutController::class, 'downloadInvoice'])->name('checkout.invoice');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -93,8 +129,10 @@ Route::get('/checkout/invoice/{order}', [CheckoutController::class, 'downloadInv
 Route::prefix('admin')->name('admin.')->group(function () {
 
     // 🔐 صفحة تسجيل الدخول الخاصة بالمدير
-    Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('login', [AuthController::class, 'login'])->name('login.submit');
+    Route::middleware('guest.custom')->group(function () {
+        Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
+        Route::post('login', [AuthController::class, 'login'])->name('login.submit');
+    });
 
     // 🧱 لوحة التحكم ومساراتها (تتطلب صلاحيات مدير)
     Route::middleware('admin.auth')->group(function () {
@@ -128,6 +166,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Add gallery images
         Route::post('products/{product}/gallery', [AdminProductController::class, 'addImages'])
             ->name('products.addImages');
+
         // categories
         Route::get('/categories', [App\Http\Controllers\Admin\AdminCategoryController::class, 'index'])->name('categories.index');
         Route::post('/categories', [App\Http\Controllers\Admin\AdminCategoryController::class, 'store'])->name('categories.store');
@@ -136,5 +175,32 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Filter Products by Category
         Route::get('/products/category/{id}', [App\Http\Controllers\Admin\AdminProductController::class, 'filterByCategory'])->name('products.category');
+
+        // Project categories inline management
+        Route::post('project-categories', [\App\Http\Controllers\Admin\ProjectCategoryController::class, 'store'])->name('projects.categories.store');
+        Route::put('project-categories/{category}', [\App\Http\Controllers\Admin\ProjectCategoryController::class, 'update'])->name('projects.categories.update');
+        Route::delete('project-categories/{category}', [\App\Http\Controllers\Admin\ProjectCategoryController::class, 'destroy'])->name('projects.categories.destroy');
+
+        // Reviews moderation
+        Route::get('reviews', [AdminReviewController::class, 'index'])->name('reviews.index');
+        Route::patch('reviews/{review}/approve', [AdminReviewController::class, 'approve'])->name('reviews.approve');
+        Route::patch('reviews/{review}/reject', [AdminReviewController::class, 'reject'])->name('reviews.reject');
+        Route::delete('reviews/{review}', [AdminReviewController::class, 'destroy'])->name('reviews.destroy');
+
+        // Admin users CRUD
+        Route::resource('admin-users', AdminUserController::class)->parameters(['admin-users' => 'admin_user']);
+
+        // Coupons
+        Route::resource('coupons', AdminCouponController::class)->only(['index','store','update','destroy']);
+
+        // Orders
+        Route::resource('orders', AdminOrderController::class)->only(['index','show','update','destroy']);
+        Route::post('orders/{order}/refund', [AdminOrderController::class, 'refund'])->name('orders.refund');
+        Route::get('home-settings', [AdminHomeSettingController::class, 'edit'])->name('home.settings.edit');
+        Route::post('home-settings', [AdminHomeSettingController::class, 'update'])->name('home.settings.update');
+        Route::get('income', [AdminIncomeController::class, 'index'])->name('income.index');
+        Route::get('income/export', [AdminIncomeController::class, 'export'])->name('income.export');
+        Route::get('reports/orders', [OrderReportController::class, 'index'])->name('reports.orders.index');
+        Route::get('reports/orders/export', [OrderReportController::class, 'export'])->name('reports.orders.export');
     });
 });

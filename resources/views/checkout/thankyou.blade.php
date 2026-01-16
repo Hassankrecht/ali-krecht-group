@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Order Placed')
+@section('meta_description', 'Thank you for your order! Your luxury product from Ali Krecht Group is being processed. View your order details here.')
 
 @section('content')
   
@@ -26,10 +27,10 @@
                 <table class="table table-dark table-striped mt-4">
                     <thead class="table-warning text-dark">
                         <tr>
-                            <th>Product</th>
-                            <th>Qty</th>
-                            <th>Price</th>
-                            <th>Total</th>
+                            <th>{{ __('messages.checkout.table_product') }}</th>
+                            <th>{{ __('messages.checkout.table_qty') }}</th>
+                            <th>{{ __('messages.checkout.table_price') }}</th>
+                            <th>{{ __('messages.checkout.table_total') }}</th>
                         </tr>
                     </thead>
                     <tbody>

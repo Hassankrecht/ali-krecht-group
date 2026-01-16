@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Services\WelcomeCouponAssigner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,6 +23,7 @@ class LoginController extends Controller
     protected function authenticated(Request $request, $user)
     {
         if (Auth::check()) {
+            app(WelcomeCouponAssigner::class)->assign($user->id);
             // 🔁 توجيه المستخدم مباشرة إلى الصفحة الرئيسية
             return redirect()->intended('/');
         }
@@ -30,4 +32,5 @@ class LoginController extends Controller
         Auth::logout();
         return redirect('/login')->withErrors(['email' => 'Unauthorized login attempt.']);
     }
+
 }

@@ -51,12 +51,49 @@
                                 class="form-control bg-transparent text-light border-warning">
                         </div>
 
+                        {{-- CATEGORIES --}}
+                        <div class="col-md-6">
+                            <label class="form-label text-warning fw-semibold">Categories</label>
+                            <select name="categories[]" class="form-select bg-transparent text-light border-warning" multiple>
+                                @foreach($categories as $cat)
+                                    <optgroup label="{{ $cat->name }}">
+                                        @foreach($cat->children as $child)
+                                            <option value="{{ $child->id }}" {{ collect(old('categories', []))->contains($child->id) ? 'selected' : '' }}>
+                                                {{ $child->name }}
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
+                            </select>
+                            <small class="text-muted">Select one or more categories (hold CTRL/CMD).</small>
+                        </div>
+
                         {{-- DESCRIPTION --}}
                         <div class="col-12">
-                            <label class="form-label text-warning fw-semibold">Description</label>
-                            <textarea name="description" rows="4"
-                                class="form-control bg-transparent text-light border-warning">{{ old('description') }}</textarea>
+                        <label class="form-label text-warning fw-semibold">Description</label>
+                        <textarea name="description" rows="4"
+                            class="form-control bg-transparent text-light border-warning">{{ old('description') }}</textarea>
+                    </div>
+
+                    {{-- TRANSLATIONS --}}
+                    <div class="col-12">
+                        <div class="akg-newcard bg-dark text-light p-3">
+                            <h6 class="text-warning fw-bold mb-2">Translations</h6>
+                            <div class="row g-3">
+                                @foreach(config('app.supported_locales', []) as $locale)
+                                    @continue($locale === config('app.locale'))
+                                    <div class="col-md-6">
+                                        <label class="form-label text-warning">Title ({{ strtoupper($locale) }})</label>
+                                        <input type="text" name="translations[{{ $locale }}][title]" class="form-control bg-transparent text-light border-warning" value="{{ old('translations.'.$locale.'.title') }}">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label text-warning">Description ({{ strtoupper($locale) }})</label>
+                                        <textarea name="translations[{{ $locale }}][description]" rows="2" class="form-control bg-transparent text-light border-warning">{{ old('translations.'.$locale.'.description') }}</textarea>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
+                    </div>
 
                         {{-- STATUS --}}
                         <div class="col-md-4">

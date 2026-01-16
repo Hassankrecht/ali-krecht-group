@@ -19,3 +19,17 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Block .env, .git, and other sensitive files
+<FilesMatch "^\.(env|git|htaccess|env\.example|env\.backup|gitignore|gitattributes|composer\.json|composer\.lock|phpunit\.xml)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Block access to vendor folder
+RedirectMatch 404 ^/vendor/
+
+# Force HTTPS (uncomment if you want to enforce SSL)
+# RewriteEngine On
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]

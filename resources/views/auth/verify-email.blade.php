@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Verify Email Address')
+@section('meta_description', 'Verify your email address to activate your Ali Krecht Group account and access all features securely.')
 
 @section('content')
 <div class="container mt-5">

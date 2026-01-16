@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'My Dashboard')
+@section('meta_description', 'Access your Ali Krecht Group dashboard to manage orders, profile, and view your project history securely.')
 
 @section('content')
     <div class="container py-5" style="margin-top: 82px">

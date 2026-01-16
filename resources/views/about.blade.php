@@ -1,22 +1,23 @@
 @extends('layouts.app')
 
-@section('title', 'About Us')
+@section('title', __('messages.about_page.hero_title'))
+@section('meta_description', 'Learn about Ali Krecht Group, our mission, values, and expertise in luxury carpentry and interior design in the UAE.')
 
 @section('content')
 
     <!-- ===================== HERO SECTION (FULL IMAGE – NO CROP) ===================== -->
     <div class=" akg-hero-img-box">
-        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 11_50_19 AM.png') }}" alt="Ali Krecht Group workshop"
+        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 11_50_19 AM.png') }}" alt="{{ __('messages.about_page.hero_title') }}"
             class="akg-hero-img" loading="lazy">
 
 
 
         <div class="container text-center hero-content">
-            <h1 class="akg-hero-title text-gold mb-3">About Us</h1>
+            <h1 class="akg-hero-title text-gold mb-3">{{ __('messages.about_page.hero_title') }}</h1>
 
             <ol class="breadcrumb justify-content-center text-uppercase">
-                <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                <li class="breadcrumb-item text-light active">About</li>
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('messages.nav.home') }}</a></li>
+                <li class="breadcrumb-item text-light active">{{ __('messages.about_page.breadcrumb') }}</li>
             </ol>
         </div>
     </div>
@@ -60,68 +61,60 @@
 
                 <!-- Text -->
                 <div class="col-lg-6 about-text">
-                    <h5 class="akg-section-label">About Us</h5>
+                    <h5 class="akg-section-label">{{ __('messages.about_page.about_label') }}</h5>
 
                     <h1 class="mb-4 text-gold">
-                        Welcome to <span class="text-light">Ali Krecht Group</span>
+                        {{ __('messages.about_page.about_head') }}
                     </h1>
 
                     <p class="text-light">
-                        At <strong>Ali Krecht Group</strong>, craftsmanship is not only a profession—it is a heritage.
-                        We bring together decades of experience in construction, carpentry,
-                        and interior design to deliver projects defined by elegance, precision, and long-lasting value.
+                        {{ __('messages.about_page.p1') }}
                     </p>
 
                     <p class="text-light">
-                        From structural development to the final artistic touches, our work reflects a deep commitment
-                        to detail and refined quality. Every material, every design choice, and every finishing element
-                        is handled with exceptional care—ensuring that the spaces we build carry a signature of excellence.
+                        {{ __('messages.about_page.p2') }}
                     </p>
 
                     <p class="text-muted">
-                        Our team consists of engineers, master carpenters, designers, and specialists dedicated to
-                        transforming
-                        raw materials into functional, luxurious environments. Whether it’s a custom-made furniture piece,
-                        a full interior renovation, or a complete construction project, we deliver with integrity and
-                        passion.
+                        {{ __('messages.about_page.p3') }}
                     </p>
 
                     <p class="text-warning fw-bold" style="font-size: 1.25rem;">
-                        Your vision. Our craftsmanship. A partnership built on trust and excellence.
+                        {{ __('messages.about_page.p_quote') }}
                     </p>
 
                     <!-- Trust stats -->
                     <div class="row g-3 mt-4">
                         <div class="col-sm-6 col-lg-3">
                             <div class="akg-card text-center">
-                                <span class="akg-trust-number">15+</span>
-                                <span class="akg-trust-label">Years Mastery</span>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="akg-card text-center">
-                                <span class="akg-trust-number">50+</span>
-                                <span class="akg-trust-label">Turnkey Projects</span>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="akg-card text-center">
-                                <span class="akg-trust-number">24/7</span>
-                                <span class="akg-trust-label">Client Support</span>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="akg-card text-center">
-                                <span class="akg-trust-number">Q/A</span>
-                                <span class="akg-trust-label">European Standards</span>
-                            </div>
-                        </div>
+                        <span class="akg-trust-number">15+</span>
+                        <span class="akg-trust-label">{{ __('messages.about_page.trust_years') }}</span>
                     </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="akg-card text-center">
+                        <span class="akg-trust-number">50+</span>
+                        <span class="akg-trust-label">{{ __('messages.about_page.trust_projects') }}</span>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="akg-card text-center">
+                        <span class="akg-trust-number">24/7</span>
+                        <span class="akg-trust-label">{{ __('messages.about_page.trust_support') }}</span>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-lg-3">
+                    <div class="akg-card text-center">
+                        <span class="akg-trust-number">Q/A</span>
+                        <span class="akg-trust-label">{{ __('messages.about_page.trust_quality') }}</span>
+                    </div>
+                </div>
+            </div>
 
-                    <div class="d-flex gap-3 flex-wrap mt-4">
-                        <a href="{{ route('projects.index') }}" class="btn btn-gold px-4 py-2">View Work</a>
-                        <a href="{{ route('contact') }}" class="btn btn-outline-gold px-4 py-2">Book a Consultation</a>
-                    </div>
+            <div class="d-flex gap-3 flex-wrap mt-4">
+                <a href="{{ route('projects.index') }}" class="btn btn-gold px-4 py-2">{{ __('messages.home.projects_view') }}</a>
+                <a href="{{ route('contact') }}" class="btn btn-outline-gold px-4 py-2">{{ __('messages.projects_page.cta_consult') }}</a>
+            </div>
                 </div>
 
             </div>
@@ -133,30 +126,26 @@
         <div class="container">
             <div class="row g-4 align-items-center">
                 <div class="col-lg-6">
-                    <h5 class="akg-section-label">How We Work</h5>
-                    <h2 class="akg-section-head mb-4">From Brief to Handover</h2>
+                    <h5 class="akg-section-label">{{ __('messages.about_page.how_we_work_label') }}</h5>
+                    <h2 class="akg-section-head mb-4">{{ __('messages.about_page.how_we_work_head') }}</h2>
                     <ul class="list-unstyled text-light small">
-                        <li class="mb-3"><i class="fa fa-check text-gold me-2"></i>Discovery & site visit to capture goals,
-                            budget, and timeline.</li>
-                        <li class="mb-3"><i class="fa fa-check text-gold me-2"></i>Concept + detailed BOQ for full cost
-                            clarity.</li>
-                        <li class="mb-3"><i class="fa fa-check text-gold me-2"></i>Execution led by dedicated project
-                            manager with weekly updates.</li>
-                        <li><i class="fa fa-check text-gold me-2"></i>Quality control, snag-free finishing, and supported
-                            handover.</li>
+                        <li class="mb-3"><i class="fa fa-check text-gold me-2"></i>{{ __('messages.about_page.how_step1') }}</li>
+                        <li class="mb-3"><i class="fa fa-check text-gold me-2"></i>{{ __('messages.about_page.how_step2') }}</li>
+                        <li class="mb-3"><i class="fa fa-check text-gold me-2"></i>{{ __('messages.about_page.how_step3') }}</li>
+                        <li><i class="fa fa-check text-gold me-2"></i>{{ __('messages.about_page.how_step4') }}</li>
                     </ul>
                 </div>
                 <div class="col-lg-6">
                     <div class="akg-card p-4">
-                        <h5 class="text-gold mb-3">Trusted By</h5>
+                        <h5 class="text-gold mb-3">{{ __('messages.about_page.trusted_by') }}</h5>
                         <div class="d-flex flex-wrap gap-3 align-items-center">
-                            <span class="badge bg-dark text-gold border border-gold">Hospitality</span>
-                            <span class="badge bg-dark text-gold border border-gold">Residential</span>
-                            <span class="badge bg-dark text-gold border border-gold">Retail</span>
-                            <span class="badge bg-dark text-gold border border-gold">Offices</span>
-                            <span class="badge bg-dark text-gold border border-gold">Developers</span>
+                            <span class="badge bg-dark text-gold border border-gold">{{ __('messages.about_page.badge_hospitality') }}</span>
+                            <span class="badge bg-dark text-gold border border-gold">{{ __('messages.about_page.badge_residential') }}</span>
+                            <span class="badge bg-dark text-gold border border-gold">{{ __('messages.about_page.badge_retail') }}</span>
+                            <span class="badge bg-dark text-gold border border-gold">{{ __('messages.about_page.badge_offices') }}</span>
+                            <span class="badge bg-dark text-gold border border-gold">{{ __('messages.about_page.badge_developers') }}</span>
                         </div>
-                        <p class="text-muted small mb-0 mt-3">Add client logos here to strengthen credibility.</p>
+                        <p class="text-muted small mb-0 mt-3">{{ __('messages.about_page.trusted_note') }}</p>
                     </div>
                 </div>
             </div>

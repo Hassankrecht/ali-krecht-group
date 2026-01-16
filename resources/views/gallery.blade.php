@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Gallery')
+@section('meta_description', 'Browse our gallery of completed luxury carpentry and interior design projects by Ali Krecht Group.')
 
 @section('content')
     <div class="akg-hero-img-box position-relative">

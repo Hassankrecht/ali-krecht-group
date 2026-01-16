@@ -14,6 +14,7 @@
 @endphp
 
 @section('title', $serviceTitle)
+@section('meta_description', 'Learn more about our ' . $serviceTitle . ' service at Ali Krecht Group. Bespoke carpentry and interior design in the UAE.')
 @section('meta_description', $serviceExcerpt)
 @section('og_title', $serviceTitle)
 @section('og_description', $serviceExcerpt)

@@ -50,6 +50,34 @@
                         <textarea name="description" rows="4" class="form-control">{{ $product->description }}</textarea>
                     </div>
 
+                    {{-- Translations --}}
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-warning">Translations</h5>
+                        @foreach (config('app.supported_locales', []) as $locale)
+                            @continue($locale === config('app.locale'))
+                            @php
+                                $t = $product->translations->firstWhere('locale', $locale);
+                            @endphp
+                            <div class="border rounded p-3 mb-3 bg-white">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-semibold text-uppercase">{{ $locale }}</span>
+                                    @if ($locale === config('app.locale'))
+                                        <small class="text-muted">Fallback language</small>
+                                    @endif
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label small mb-1">Title ({{ $locale }})</label>
+                                    <input type="text" name="translations[{{ $locale }}][title]" class="form-control"
+                                        value="{{ old('translations.' . $locale . '.title', $t->title ?? '') }}">
+                                </div>
+                                <div class="mb-0">
+                                    <label class="form-label small mb-1">Description ({{ $locale }})</label>
+                                    <textarea name="translations[{{ $locale }}][description]" rows="3" class="form-control">{{ old('translations.' . $locale . '.description', $t->description ?? '') }}</textarea>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
                     {{-- Price --}}
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Price</label>
@@ -62,8 +90,16 @@
                     <div class="mb-4">
                         <label class="form-label fw-semibold">Main Image</label><br>
 
-                        @if ($product->image)
-                            <img src="{{ asset('storage/' . $product->image) }}"
+                        @php
+                            $mainImg = $product->image
+                                ? (str_starts_with($product->image, 'public/') || str_starts_with($product->image, 'assets/')
+                                    ? asset($product->image)
+                                    : asset('storage/' . $product->image))
+                                : null;
+                        @endphp
+
+                        @if ($mainImg)
+                            <img src="{{ $mainImg }}"
                                  class="img-thumbnail mb-3"
                                  style="max-width:200px;">
                         @endif
@@ -103,11 +139,20 @@
                 <div class="d-flex flex-wrap gap-3">
 
                     @foreach ($product->images as $img)
+                        @php
+                            $gallerySrc = $img->image
+                                ? (str_starts_with($img->image, 'public/') || str_starts_with($img->image, 'assets/')
+                                    ? asset($img->image)
+                                    : asset('storage/' . $img->image))
+                                : null;
+                        @endphp
                         <div class="position-relative">
 
-                            <img src="{{ asset('storage/' . $img->image) }}"
+                            @if ($gallerySrc)
+                            <img src="{{ $gallerySrc }}"
                                  style="width:120px; height:90px; object-fit:cover;"
                                  class="rounded shadow-sm">
+                            @endif
 
                             {{-- Delete one gallery image --}}
                             <form action="{{ route('admin.products.image.delete', $img->id) }}"

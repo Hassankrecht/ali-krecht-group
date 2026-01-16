@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Illuminate\Support\Facades\Storage;
+
 use App\Http\Controllers\Controller;
 use App\Models\HomeSetting;
 use Illuminate\Http\Request;
@@ -30,6 +32,8 @@ class AdminHomeSettingController extends Controller
             ]);
 
             if ($request->hasFile('banner_image')) {
+                // احذف القديم ثم خزّن الجديد
+                $this->deleteAsset($settings->banner_image_path);
                 $settings->banner_image_path = $request->file('banner_image')->store('home', 'public');
             }
             $settings->banner_enabled = $request->boolean('banner_enabled', false);
@@ -44,10 +48,10 @@ class AdminHomeSettingController extends Controller
             'hero_title'       => 'nullable|string|max:255',
             'hero_subtitle'    => 'nullable|string|max:255',
             'hero_media_type'  => 'required|in:image,video',
-            'hero_image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'hero_image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10000',
             'hero_video_url'   => 'nullable|url|max:255',
             'hero_video_upload'=> 'nullable|file|mimetypes:video/mp4,video/webm,video/ogg|max:51200',
-            'hero_gallery.*'   => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'hero_gallery.*'   => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10000',
             'hero_bg_color'    => 'nullable|string|max:20',
             'hero_title_size'  => 'nullable|integer|min:16|max:96',
             'hero_subtitle_size'=> 'nullable|integer|min:12|max:64',
@@ -90,16 +94,21 @@ class AdminHomeSettingController extends Controller
         ]);
 
         if ($request->hasFile('hero_image')) {
+            $this->deleteAsset($settings->hero_image_path);
             $path = $this->storeToAssetsHome($request->file('hero_image'));
             $settings->hero_image_path = $path; // assets/home/<file>
             // صورة منفردة: امسح المعرض والفيديو ليكون الخيار الوحيد
+            $this->deleteAssets($settings->hero_gallery ?? []);
             $settings->hero_gallery = [];
-            $settings->hero_video_path = null;
+            $this->deleteAsset($settings->hero_video_path);
             $settings->hero_video_url = null;
             $settings->hero_media_type = 'image';
         }
 
         if ($request->hasFile('hero_video_upload')) {
+            $this->deleteAsset($settings->hero_video_path);
+            $this->deleteAsset($settings->hero_image_path);
+            $this->deleteAssets($settings->hero_gallery ?? []);
             $videoPath = $this->storeToAssetsHome($request->file('hero_video_upload'));
             $settings->hero_video_path = $videoPath;
             // prefer uploaded video when set
@@ -111,6 +120,9 @@ class AdminHomeSettingController extends Controller
 
         if ($request->hasFile('hero_gallery')) {
             // استبدل المعرض بالكامل بالصور الجديدة
+            $this->deleteAssets($settings->hero_gallery ?? []);
+            $this->deleteAsset($settings->hero_image_path);
+            $this->deleteAsset($settings->hero_video_path);
             $gallery = [];
             foreach ($request->file('hero_gallery') as $file) {
                 $gallery[] = $this->storeToAssetsHome($file);
@@ -213,5 +225,48 @@ class AdminHomeSettingController extends Controller
         $file->move($dir, $name);
         // أضف "public/" لأن الملفات تحفظ تحت htdocs/public/assets/...
         return 'public/assets/home/' . $name;
+    }
+
+    /**
+     * حذف ملف مفرد من public/assets أو من تخزين public.
+     */
+    private function deleteAsset(?string $path): void
+    {
+        if (!$path) {
+            return;
+        }
+
+        // public/assets/...
+        if (str_starts_with($path, 'public/')) {
+            $full = public_path(substr($path, strlen('public/')));
+            if (file_exists($full)) {
+                @unlink($full);
+            }
+            return;
+        }
+
+        // assets/...
+        if (str_starts_with($path, 'assets/')) {
+            $full = public_path($path);
+            if (file_exists($full)) {
+                @unlink($full);
+            }
+            return;
+        }
+
+        // fallback: أي ملف محفوظ على قرص public
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+    }
+
+    /**
+     * حذف مجموعة ملفات.
+     */
+    private function deleteAssets(array $paths): void
+    {
+        foreach ($paths as $p) {
+            $this->deleteAsset($p);
+        }
     }
 }

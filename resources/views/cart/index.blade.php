@@ -63,12 +63,12 @@
             <table class="table table-dark table-hover align-middle mb-0">
                 <thead class="table-dark">
                     <tr class="text-center text-gold">
-                        <th>Image</th>
-                        <th>Product</th>
-                        <th width="180">Quantity</th>
-                        <th>Price</th>
-                        <th>Total</th>
-                        <th>Remove</th>
+                        <th>{{ __('messages.cart.table_image') }}</th>
+                        <th>{{ __('messages.cart.table_product') }}</th>
+                        <th width="180">{{ __('messages.cart.table_qty') }}</th>
+                        <th>{{ __('messages.cart.table_price') }}</th>
+                        <th>{{ __('messages.cart.table_total') }}</th>
+                        <th>{{ __('messages.cart.table_remove') }}</th>
                     </tr>
                 </thead>
 
@@ -77,16 +77,25 @@
 
                     @foreach ($cartItems as $id => $item)
                         @php
-                            $title = $item['title'];
-                            $imgPath = $item['image'];
-                            $itemTotal = $item['price'] * $item['quantity'];
+                            $title = $item['title'] ?? ($item['name'] ?? '—');
+                            $imgPath = $item['image'] ?? null;
+                            $price = $item['price'] ?? 0;
+                            $qty = $item['quantity'] ?? 0;
+                            $itemTotal = $price * $qty;
                             $grandTotal += $itemTotal;
                         @endphp
 
                         <tr data-row="{{ $id }}">
                             {{-- PRODUCT IMAGE --}}
                             <td class="text-center">
-                                <img src="{{ $imgPath ? asset('storage/'.$imgPath) : asset('assets/img/default.jpg') }}"
+                                @php
+                                    $imgSrc = $imgPath
+                                        ? ((str_starts_with($imgPath, 'public/') || str_starts_with($imgPath, 'assets/'))
+                                            ? asset($imgPath)
+                                            : asset('storage/'.$imgPath))
+                                        : asset('assets/img/default.jpg');
+                                @endphp
+                                <img src="{{ $imgSrc }}"
                                      class="rounded shadow-sm"
                                      style="width: 70px; height: 60px; object-fit: cover;" alt="{{ $title }}"
                                      loading="lazy">
@@ -128,24 +137,48 @@
         </div>
 
         {{-- ======================== SUMMARY BOX ======================== --}}
-        <div class="shadow-lg p-4 rounded-4 bg-dark text-light border gold-border mt-4 ms-auto" style="max-width: 420px;">
+        <div class="shadow-lg p-4 rounded-4 bg-dark text-light border gold-border mt-4 ms-auto" style="max-width: 420px;"
+             data-discount="{{ $discount ?? 0 }}">
             <h4 class="fw-bold mb-3">{{ __('messages.cart.order_summary') }}</h4>
+
+            @auth
+                <form class="mb-3" method="POST" action="{{ route('coupon.apply') }}">
+                    @csrf
+                    <div class="input-group">
+                        <input type="text" name="code" class="form-control" placeholder="Coupon code" required>
+                        <button class="btn btn-outline-gold">Apply</button>
+                    </div>
+                </form>
+            @else
+                <div class="alert alert-info small">Please log in to use coupons.</div>
+            @endauth
+            @if(!empty($appliedCoupon))
+                <div class="d-flex justify-content-between text-success mb-2">
+                    <span>Coupon {{ $appliedCoupon['code'] }}</span>
+                    <span>- ${{ number_format($discount, 2) }}</span>
+                </div>
+                <form method="POST" action="{{ route('coupon.remove') }}" class="mb-2">
+                    @csrf
+                    <button class="btn btn-sm btn-outline-danger">Remove coupon</button>
+                </form>
+            @endif
 
             <div class="d-flex justify-content-between mb-2">
                 <span>Subtotal:</span>
-                <span class="gold-text fw-bold" id="grandTotal">${{ number_format($grandTotal, 2) }}</span>
+                <span class="gold-text fw-bold" id="grandTotal">${{ number_format($subtotal ?? $grandTotal, 2) }}</span>
             </div>
-
-            <div class="d-flex justify-content-between mb-2">
-                <span>Tax:</span>
-                <span class="text-muted">Included</span>
-            </div>
+            @if(!empty($appliedCoupon))
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Discount:</span>
+                    <span class="text-success fw-bold" id="discountAmount">- ${{ number_format($discount, 2) }}</span>
+                </div>
+            @endif
 
             <hr>
 
             <div class="d-flex justify-content-between fs-4 mb-3">
                 <span class="fw-bold">Total:</span>
-                <span class="gold-text fw-bold">${{ number_format($grandTotal, 2) }}</span>
+                <span class="gold-text fw-bold" id="totalAfter">${{ number_format($totalAfter ?? $grandTotal, 2) }}</span>
             </div>
 
             <a href="{{ route('checkout.index') }}" class="btn btn-gold fw-semibold w-100 py-2">
@@ -198,6 +231,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (grandTotalEl && data.grand_total) {
                 grandTotalEl.textContent = `$${data.grand_total}`;
+            }
+            const totalAfterEl = document.getElementById('totalAfter');
+            const discount = parseFloat(document.querySelector('[data-discount]')?.dataset.discount || 0);
+            if (totalAfterEl && data.grand_total_raw !== undefined) {
+                const totalAfter = Math.max(parseFloat(data.grand_total_raw) - discount, 0).toFixed(2);
+                totalAfterEl.textContent = `$${totalAfter}`;
             }
 
             // If cart is empty, show message

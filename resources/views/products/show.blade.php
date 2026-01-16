@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', $product->title . ' | ' . __('messages.products.hero_title'))
+@section('meta_description', 'View details and features of ' . $product->title . ' from Ali Krecht Group. Luxury woodwork and custom furniture in the UAE.')
 
 @section('content')
     <div class=" akg-hero-img-box">
@@ -19,10 +20,18 @@
     </div>
   
     @php
-        $mainImage = $product->image
-            ? asset('storage/' . $product->image)
-            : ($product->images->first()
-                ? asset('storage/' . $product->images->first()->image)
+        $resolvePath = function ($path) {
+            if (!$path) {
+                return null;
+            }
+            return (str_starts_with($path, 'public/') || str_starts_with($path, 'assets/'))
+                ? asset($path)
+                : asset('storage/' . $path);
+        };
+
+        $mainImage = $resolvePath($product->image)
+            ?? ($product->images->first()
+                ? $resolvePath($product->images->first()->image)
                 : asset('assets/img/default.jpg'));
     @endphp
 
@@ -40,10 +49,13 @@
                         class="rounded shadow" style="width:90px;height:70px;object-fit:cover;cursor:pointer;"
                         alt="{{ $product->title }}" loading="lazy">
                     @foreach ($product->images as $img)
-                        <img src="{{ asset('storage/' . $img->image) }}"
+                        @php $thumb = $resolvePath($img->image); @endphp
+                        @if ($thumb)
+                        <img src="{{ $thumb }}"
                             onclick="document.getElementById('mainImage').src=this.src" class="rounded shadow"
                             style="width:90px;height:70px;object-fit:cover;cursor:pointer;"
                             alt="{{ $product->title }} thumbnail" loading="lazy">
+                        @endif
                     @endforeach
                 </div>
 
@@ -52,14 +64,17 @@
             {{-- RIGHT INFO --}}
             <div class="col-lg-6">
 
-                <h2 class="text-gold fw-bold">{{ $product->title }}</h2>
+                <h2 class="text-gold fw-bold">{{ $product->title_localized }}</h2>
                 <h4 class="text-light mb-3">${{ number_format($product->price, 2) }}</h4>
 
-                <p class="text-muted">{{ $product->description }}</p>
+                <p class="text-muted">{{ $product->description_localized }}</p>
 
                 <form action="{{ route('cart.add', $product->id) }}" method="POST" class="d-inline">
                     @csrf
-                    <button type="submit" class="btn btn-gold text-dark fw-semibold px-4 mt-3">
+                    <button type="submit"
+                            class="btn btn-gold text-dark fw-semibold px-4 mt-3"
+                            data-track-action="buy_click"
+                            data-track-meta='@json(["product_id" => $product->id, "source" => "product_show"])'>
                         <i class="fa fa-cart-plus me-1"></i> {{ __('messages.product_show.add_to_cart') }}
                     </button>
                 </form>
@@ -71,7 +86,7 @@
 
                 <ul class="list-group mb-4">
                     <li class="list-group-item bg-dark text-light border-secondary">
-                        <strong>Category:</strong> {{ $product->category->name ?? 'N/A' }}
+                        <strong>Category:</strong> {{ $product->category->name_localized ?? 'N/A' }}
                     </li>
                     <li class="list-group-item bg-dark text-light border-secondary">
                         <strong>SKU:</strong> {{ $product->id }}

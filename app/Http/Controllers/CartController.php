@@ -13,7 +13,18 @@ class CartController extends Controller
     public function index()
     {
         $cart = session()->get('cart', []);
-        return view('cart.index', ['cartItems' => $cart]);
+        $subtotal = collect($cart)->sum(fn($i) => $i['price'] * $i['quantity']);
+        $applied = session('coupon');
+        $discount = $applied['discount'] ?? 0;
+        $totalAfter = max($subtotal - $discount, 0);
+
+        return view('cart.index', [
+            'cartItems' => $cart,
+            'subtotal' => $subtotal,
+            'discount' => $discount,
+            'totalAfter' => $totalAfter,
+            'appliedCoupon' => $applied,
+        ]);
     }
 
     /**

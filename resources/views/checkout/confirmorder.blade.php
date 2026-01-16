@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
-@section('title', __('messages.checkout.confirm_title') ?? 'Confirm Order')
+@section('title', 'Confirm Order')
+@section('meta_description', 'Review and confirm your order for luxury products and services from Ali Krecht Group. Secure checkout process.')
 
 @section('content')
     <div class=" akg-hero-img-box">
@@ -8,11 +9,11 @@
              class="akg-hero-img" loading="lazy">
 
         <div class="container text-center hero-content">
-            <h1 class="akg-hero-title text-gold mb-3">{{ __('messages.checkout.confirm_title') }}</h1>
+            <h1 class="akg-hero-title text-gold mb-3">Order Confirmation</h1>
 
             <ol class="breadcrumb justify-content-center text-uppercase">
-                <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('messages.nav.home') }}</a></li>
-                <li class="breadcrumb-item text-light active">{{ __('messages.checkout.confirm_label') ?? __('messages.checkout.confirm_title') }}</li>
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+                <li class="breadcrumb-item text-light active">Order Confirmation</li>
             </ol>
         </div>
     </div>

@@ -7,6 +7,9 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 class AdminProductController extends Controller
@@ -14,13 +17,78 @@ class AdminProductController extends Controller
     /* ============================================================
         INDEX
     ============================================================ */
-    public function index()
-{
-    $products = Product::latest()->paginate(12);
-    $categories = Category::orderBy('name')->get();
+    public function index(Request $request)
+    {
+        // الفئات بشكل هرمي (أب/ابن)
+        $parentCategories = Category::with(['translations', 'children.translations'])
+            ->whereNull('parent_id')
+            ->orderBy('order')
+            ->get();
+        $childCategories = Category::with('translations')
+            ->whereNotNull('parent_id')
+            ->orderBy('order')
+            ->get();
 
-    return view('admins.products.index', compact('products', 'categories'));
-}
+        if ($parentCategories->isEmpty() && $childCategories->isEmpty()) {
+            $parentCategories = Category::with('translations')->get()->map(function ($cat) {
+                $cat->setRelation('children', collect());
+                return $cat;
+            });
+            $childCategories = $parentCategories;
+        }
+
+        $categoryId = $request->query('category');
+        $q = $request->query('q');
+        $sort = $request->query('sort', 'newest');
+
+        $productsQuery = Product::with(['category.translations', 'translations'])
+            ->when($categoryId, fn($qq) => $qq->where('category_id', $categoryId))
+            ->when($q, function($qq) use ($q) {
+                $qq->where(function($sub) use ($q) {
+                    $sub->where('title', 'like', "%{$q}%")
+                        ->orWhere('description', 'like', "%{$q}%");
+                });
+            });
+
+        switch ($sort) {
+            case 'price_asc':
+                $productsQuery->orderBy('price', 'asc');
+                break;
+            case 'price_desc':
+                $productsQuery->orderBy('price', 'desc');
+                break;
+            case 'oldest':
+                $productsQuery->orderBy('id', 'asc');
+                break;
+            default:
+                $productsQuery->orderBy('id', 'desc');
+        }
+
+        $products = $productsQuery->paginate(12)->appends($request->query());
+
+        $allCategories = Category::with('translations')->orderBy('order')->get();
+        $productCounts = Product::selectRaw('category_id, COUNT(*) as total')
+            ->groupBy('category_id')
+            ->pluck('total', 'category_id');
+
+        $productsTotal = Product::count();
+        $parentCount = $parentCategories->count();
+        $childCount = $childCategories->count();
+
+        return view('admins.products.index', [
+            'products' => $products,
+            'parentCategories' => $parentCategories,
+            'childCategories' => $childCategories,
+            'categoryId' => $categoryId,
+            'allCategories' => $allCategories,
+            'productCounts' => $productCounts,
+            'productsTotal' => $productsTotal,
+            'parentCount' => $parentCount,
+            'childCount' => $childCount,
+            'search' => $q,
+            'sort' => $sort,
+        ]);
+    }
 
     /* ============================================================
         CREATE
@@ -34,50 +102,57 @@ class AdminProductController extends Controller
     /* ============================================================
         STORE
     ============================================================ */
-   public function store(Request $request)
+    public function store(StoreProductRequest $request)
 {
-    $validated = $request->validate([
-        'category_id' => 'required|exists:categories,id',
-        'title'       => 'required|string|max:255',
-        'description' => 'nullable|string',
-        'price'       => 'required|numeric',
-        'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
-        'gallery.*'   => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
-    ]);
+    $validated = $request->validated();
 
     // Create product without image first
-    $product = Product::create([
-        'category_id' => $request->category_id,
-        'title'       => $request->title,
-        'description' => $request->description,
-        'price'       => $request->price,
-        'image'       => null, // initially empty
-    ]);
+        $product = Product::create([
+            'category_id' => $request->category_id,
+            'title'       => $request->title,
+            'description' => $request->description,
+            'price'       => $request->price,
+            'image'       => null, // initially empty
+        ]);
+
+    // Sync translations for all supported locales
+    $translations = $request->input('translations', []);
+    $locales = config('app.supported_locales', [config('app.locale', 'en')]);
+
+    foreach ($locales as $locale) {
+        $title = $translations[$locale]['title'] ?? $validated['title'];
+        $desc  = $translations[$locale]['description'] ?? ($validated['description'] ?? '');
+
+        $product->translations()->updateOrCreate(
+            ['locale' => $locale],
+            [
+                'title'       => $title,
+                'description' => $desc,
+            ]
+        );
+    }
 
     /* -------------------- SAVE MAIN IMAGE -------------------- */
     if ($request->hasFile('image')) {
-        $filename = time() . '_' . uniqid() . "." . $request->image->extension();
-        $request->image->storeAs('products', $filename, 'public');
-
-        $product->image = "products/$filename";
+        $product->image = $this->storeAssetTo('products', $request->image);
         $product->save();
     }
 
     /* -------------------- SAVE GALLERY -------------------- */
     if ($request->hasFile('gallery')) {
         foreach ($request->gallery as $file) {
-            $gname = time() . '_' . uniqid() . "." . $file->extension();
-            $file->storeAs('product_gallery', $gname, 'public');
-
+            $gname = $this->storeAssetTo('product_gallery', $file);
             ProductImage::create([
                 'product_id' => $product->id,
-                'image'      => "product_gallery/$gname",
+                'image'      => $gname,
             ]);
         }
     }
 
-    return redirect()->route('admin.products.index')
-                     ->with('success', 'Product created successfully!');
+    // After creating a product, redirect to the edit page so the admin can
+    // immediately add gallery images or change the main image.
+    return redirect()->route('admin.products.edit', $product->id)
+                     ->with('success', 'Product created successfully! You can add images or update details below.');
 }
 
 
@@ -86,7 +161,7 @@ class AdminProductController extends Controller
     ============================================================ */
     public function edit(Product $product)
     {
-        $product->load('images');
+        $product->load(['images', 'translations']);
         $categories = Category::all();
         return view('admins.products.edit', compact('product', 'categories'));
     }
@@ -94,16 +169,10 @@ class AdminProductController extends Controller
     /* ============================================================
         UPDATE
     ============================================================ */
-    public function update(Request $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product)
 {
     // Validate WITHOUT touching image directly
-    $validated = $request->validate([
-        'category_id' => 'required|exists:categories,id',
-        'title'       => 'required|max:255',
-        'description' => 'nullable|string',
-        'price'       => 'required|numeric',
-        'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
-    ]);
+    $validated = $request->validated();
 
     // Update normal fields manually (to avoid overwriting image)
     $product->category_id = $validated['category_id'];
@@ -112,20 +181,31 @@ class AdminProductController extends Controller
     $product->price       = $validated['price'];
     $product->save();
 
+    // Update translations based on submitted locales
+    $translations = $request->input('translations', []);
+    $locales = config('app.supported_locales', [config('app.locale', 'en')]);
+
+    foreach ($locales as $locale) {
+        $title = $translations[$locale]['title'] ?? $validated['title'];
+        $desc  = $translations[$locale]['description'] ?? ($validated['description'] ?? '');
+
+        $product->translations()->updateOrCreate(
+            ['locale' => $locale],
+            [
+                'title'       => $title,
+                'description' => $desc,
+            ]
+        );
+    }
+
     /* ---------------- UPDATE MAIN IMAGE ---------------- */
     if ($request->hasFile('image')) {
 
         // Delete old main image (if exists)
-        if ($product->image && Storage::disk('public')->exists($product->image)) {
-            Storage::disk('public')->delete($product->image);
-        }
+        $this->deleteAsset($product->image);
 
         // Upload new image
-        $filename = time() . '_' . uniqid() . "." . $request->image->extension();
-        $request->image->storeAs('products', $filename, 'public');
-
-        // Save new image path
-        $product->image = "products/$filename";
+        $product->image = $this->storeAssetTo('products', $request->image);
         $product->save();
     }
 
@@ -139,9 +219,7 @@ class AdminProductController extends Controller
     ============================================================ */
     public function deleteMainImage(Product $product)
     {
-        if ($product->image && Storage::disk('public')->exists($product->image)) {
-            Storage::disk('public')->delete($product->image);
-        }
+        $this->deleteAsset($product->image);
 
         $product->update(['image' => null]);
 
@@ -153,9 +231,7 @@ class AdminProductController extends Controller
     ============================================================ */
     public function deleteGalleryImage(ProductImage $image)
     {
-        if (Storage::disk('public')->exists($image->image)) {
-            Storage::disk('public')->delete($image->image);
-        }
+        $this->deleteAsset($image->image);
 
         $image->delete();
 
@@ -165,7 +241,7 @@ class AdminProductController extends Controller
     /* ============================================================
         ADD IMAGES TO GALLERY
     ============================================================ */
-    public function addImages(Request $request, Product $product)
+    public function addImages(StoreProductRequest $request, Product $product)
     {
         $request->validate([
             'gallery.*' => 'required|image|mimes:jpg,jpeg,png,webp|max:4096',
@@ -173,12 +249,11 @@ class AdminProductController extends Controller
 
         foreach ($request->gallery as $file) {
 
-            $galleryName = time() . '_' . uniqid() . "." . $file->extension();
-            $file->storeAs('product_gallery', $galleryName, 'public');
+            $galleryName = $this->storeAssetTo('product_gallery', $file);
 
             ProductImage::create([
                 'product_id' => $product->id,
-                'image'      => "product_gallery/$galleryName",
+                'image'      => $galleryName,
             ]);
         }
 
@@ -191,15 +266,11 @@ class AdminProductController extends Controller
     public function destroy(Product $product)
     {
         // Delete main image
-        if ($product->image && Storage::disk('public')->exists($product->image)) {
-            Storage::disk('public')->delete($product->image);
-        }
+        $this->deleteAsset($product->image);
 
         // Delete gallery
         foreach ($product->images as $img) {
-            if (Storage::disk('public')->exists($img->image)) {
-                Storage::disk('public')->delete($img->image);
-            }
+            $this->deleteAsset($img->image);
             $img->delete();
         }
 
@@ -208,13 +279,50 @@ class AdminProductController extends Controller
         return redirect()->route('admin.products.index')
                          ->with('success', 'Product deleted successfully!');
     }
-    public function filterByCategory($id)
-{
-    $categories = Category::all();
-    $products = Product::where('category_id', $id)->paginate(12);
-    $selectedCategory = Category::findOrFail($id);
+    public function filterByCategory(Request $request, $id)
+    {
+        $request->merge(['category' => $id]);
+        return $this->index($request);
+    }
 
-    return view('admins.products.index', compact('products', 'categories', 'selectedCategory'));
-}
+    private function storeAssetTo(string $folder, UploadedFile $file): string
+    {
+        // نحفظ داخل public/assets/<folder> حتى يكون الرابط متاحًا عبر asset()
+        $dir = public_path("assets/{$folder}");
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+        $name = $file->hashName();
+        $file->move($dir, $name);
 
+        // نخزن المسار كما سيُستخدم في asset()
+        return "public/assets/{$folder}/{$name}";
+    }
+
+    private function deleteAsset(?string $path): void
+    {
+        if (!$path) {
+            return;
+        }
+
+        if (str_starts_with($path, 'public/assets/')) {
+            $full = public_path(substr($path, strlen('public/')));
+            if (file_exists($full)) {
+                @unlink($full);
+            }
+            return;
+        }
+
+        if (str_starts_with($path, 'assets/')) {
+            $full = public_path($path);
+            if (file_exists($full)) {
+                @unlink($full);
+            }
+            return;
+        }
+
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+    }
 }

@@ -11,6 +11,7 @@ class Checkout extends Model
 
     protected $fillable = [
         'user_id',
+        'coupon_id',
         'name',
         'email',
         'phone_number',
@@ -19,7 +20,9 @@ class Checkout extends Model
         'zipcode',
         'address',
         'total_price',
-        'status', // pending, completed, cancelled
+        'total_before_discount',
+        'discount_amount',
+        'status', // Pending, Paid, Shipped, Cancelled
     ];
 
     public function user()
@@ -30,5 +33,10 @@ class Checkout extends Model
     public function items()
     {
         return $this->hasMany(CheckoutItem::class);
+    }
+
+    public function coupon()
+    {
+        return $this->belongsTo(Coupon::class);
     }
 }

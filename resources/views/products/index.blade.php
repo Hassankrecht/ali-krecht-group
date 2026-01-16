@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Products')
+@section('meta_description', 'Browse our exclusive collection of luxury wood products, custom furniture, and interior solutions by Ali Krecht Group.')
 
 @section('content')
     <!-- Hero Section -->
@@ -20,9 +21,9 @@
         </div>
     </div>
   
-    @php
-        $activeCategory = $categoryId ?? request('category');
-    @endphp
+        @php
+            $activeCategory = $categoryId ?? request('category');
+        @endphp
 
     <div class="container-xxl py-5">
         <div class="text-center mb-4">
@@ -30,23 +31,44 @@
             <h2 class="akg-section-head">{{ __('messages.products.browse') }}</h2>
         </div>
 
-        <ul class="nav akg-tabs justify-content-center mb-5 flex-wrap">
-            <li class="nav-item">
-                <a class="nav-link {{ $activeCategory ? '' : 'active' }}" href="{{ route('products.index') }}">
-                    {{ __('messages.products.all') }}
-                </a>
-            </li>
-            @foreach ($categories as $category)
-                <li class="nav-item">
-                    <a class="nav-link {{ (string) $activeCategory === (string) $category->id ? 'active' : '' }}"
-                        href="{{ route('products.index', ['category' => $category->id]) }}">
-                        {{ ucfirst($category->name) }}
-                    </a>
-                </li>
-            @endforeach
-        </ul>
+        @if(isset($parentCategories) && $parentCategories->count())
+            @php
+                $activeParent = $parentCategories->first()->id ?? null;
+                foreach ($parentCategories as $parent) {
+                    if ($parent->children->contains(fn($c) => (string)$c->id === (string)($activeCategory ?? ''))) {
+                        $activeParent = $parent->id;
+                        break;
+                    }
+                }
+            @endphp
+            <div class="akg-newcard mb-4 p-3 text-center akg-cat-nav">
+                <ul class="nav nav-pills justify-content-center mb-3 flex-wrap gap-2" id="prodParentNav">
+                    @foreach($parentCategories as $parent)
+                        <li class="nav-item">
+                            <a class="nav-link {{ $activeParent === $parent->id ? 'active' : '' }}" href="#"
+                               data-parent="{{ $parent->id }}"
+                               onclick="event.preventDefault(); document.querySelectorAll('.prod-child').forEach(el => el.classList.add('d-none')); document.getElementById('prod-child-{{ $parent->id }}').classList.remove('d-none'); document.querySelectorAll('#prodParentNav .nav-link').forEach(l=>l.classList.remove('active')); this.classList.add('active');">
+                                {{ $parent->name_localized }}
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+                @foreach($parentCategories as $parent)
+                    <ul class="nav nav-pills justify-content-center flex-wrap gap-2 prod-child {{ $activeParent === $parent->id ? '' : 'd-none' }}" id="prod-child-{{ $parent->id }}">
+                        @foreach($parent->children as $child)
+                            <li class="nav-item">
+                                <a class="nav-link {{ (string) $activeCategory === (string) $child->id ? 'active' : '' }}"
+                                   href="{{ route('products.index', ['category' => $child->id]) }}">
+                                    {{ $child->name_localized }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endforeach
+            </div>
+        @endif
 
-        <div class="row g-4">
+            <div class="row g-4">
 
             @forelse ($products as $item)
                 <div class="col-md-3">
@@ -55,10 +77,18 @@
 
                         {{-- IMAGE --}}
                         @php
-                            $img = $item->image
-                                ? asset('storage/' . $item->image)
-                                : ($item->images->first()
-                                    ? asset('storage/' . $item->images->first()->image)
+                            $resolvePath = function ($path) {
+                                if (!$path) {
+                                    return null;
+                                }
+                                return (str_starts_with($path, 'public/') || str_starts_with($path, 'assets/'))
+                                    ? asset($path)
+                                    : asset('storage/' . $path);
+                            };
+
+                            $img = $resolvePath($item->image)
+                                ?? ($item->images->first()
+                                    ? $resolvePath($item->images->first()->image)
                                     : asset('assets/img/default.jpg'));
                         @endphp
 
@@ -67,10 +97,10 @@
 
                         <div class="card-body">
 
-                            <h5 class="text-gold fw-bold">{{ $item->title }}</h5>
+                            <h5 class="text-gold fw-bold">{{ $item->title_localized }}</h5>
 
                             <p class="small text-muted mb-1">
-                                Category: {{ $item->category->name ?? '—' }}
+                                Category: {{ $item->category->name_localized ?? '—' }}
                             </p>
 
                             <p class="fw-bold text-gold">${{ number_format($item->price, 2) }}</p>

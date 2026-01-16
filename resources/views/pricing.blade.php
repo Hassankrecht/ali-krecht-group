@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', __('messages.nav.pricing') ?? 'Pricing')
+@section('meta_description', 'See transparent pricing for all Ali Krecht Group luxury carpentry and interior design services in the UAE.')
 
 @php
     $lang = app()->getLocale();
@@ -56,7 +57,7 @@
     @endpush
 
     <div class="akg-hero-img-box position-relative">
-        <img src="{{ asset('assets/img/services/hero.jpg') }}" class="akg-hero-img" alt="Pricing" loading="lazy">
+        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_12_34 PM.png') }}" class="akg-hero-img" alt="Pricing" loading="lazy">
         <div class="akg-hero-overlay"></div>
         <div class="container text-center hero-content">
             <h1 class="akg-hero-title text-gold mb-2">

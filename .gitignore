@@ -18,6 +18,7 @@
 /public/uploads
 /public/media
 /public/images
+/public/img
 
 # Logs & cache
 .phpunit.result.cache

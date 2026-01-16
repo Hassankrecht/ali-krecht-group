@@ -1,288 +1,538 @@
 @extends('layouts.app')
 
+@section('meta_description', 'Ali Krecht Group: Luxury carpentry, interior design, and bespoke woodwork in the UAE. Discover our services and projects.')
 @section('content')
+    @php
+        $hs = $homeSettings ?? null;
+        $heroType = $hs->hero_media_type ?? 'image';
+        $heroImg = $hs?->hero_image_path ? asset($hs->hero_image_path) : asset('assets/img/video.jpg');
+        $heroVideo = $hs?->hero_video_path
+            ? asset($hs->hero_video_path)
+            : ($hs?->hero_video_url ?:
+            asset('assets/videos/last.mp4'));
+        $heroHeight = 620; // ثابت للمظهر المتناسق
+        $heroWidth = null;
+        $heroBgColor = $hs->hero_bg_color ?? '#0b1220';
+        $heroAutoFit = $hs->hero_auto_fit ?? true;
+        $heroStretch = $hs->hero_stretch ?? true;
+        $heroTitleSize = $hs->hero_title_size ?? null;
+        $heroSubtitleSize = $hs->hero_subtitle_size ?? null;
+        $heroButtonSize = $hs->hero_button_size ?? null;
+        $heroContentPosX = $hs->hero_content_pos_x ?? 10;
+        $heroContentPosY = $hs->hero_content_pos_y ?? 20;
+        $heroTitleColor = $hs->hero_title_color ?? '#ffffff';
+        $heroSubtitleColor = $hs->hero_subtitle_color ?? '#ffffff';
+        $showTitle = $hs->show_title ?? true;
+        $showSubtitle = $hs->show_subtitle ?? true;
+        $heroBgSize = $hs->hero_bg_size ?? 100;
+        $heroBgPosX = $hs->hero_bg_pos_x ?? 50;
+        $heroBgPosY = $hs->hero_bg_pos_y ?? 50;
+        $overlayEnabled = $hs->overlay_enabled ?? true;
+        $overlayColor = $hs->overlay_color ?? '#000000';
+        $overlayOpacity = ($hs->overlay_opacity ?? 65) / 100;
+        $heroTitle = $hs->hero_title ?? __('messages.home.hero_title');
+        $heroSubtitle = $hs->hero_subtitle ?? __('messages.home.hero_subtitle');
+        $titleFont = $hs->hero_title_font ?? null;
+        $subtitleFont = $hs->hero_subtitle_font ?? null;
+        $bannerEnabled = $hs->banner_enabled ?? false;
+        $bannerText = $hs->banner_text ?? null;
+        $bannerLink = $hs->banner_link ?? null;
+        $bannerImage = $hs?->banner_image_path ? asset($hs->banner_image_path) : null;
+        $heroGalleryAll = collect($hs->hero_gallery ?? [])
+            ->filter()
+            ->map(fn($p) => asset($p));
+        $heroGallery = $heroGalleryAll->count() >= 2 ? $heroGalleryAll : collect();
+        $primaryColor = $hs->primary_color ?? null;
+        $secondaryColor = $hs->secondary_color ?? null;
+        $btnPrimaryText = $hs->btn_primary_text ?? __('messages.home.cta_projects');
+        $btnPrimaryLink = $hs->btn_primary_link ?? '#projects';
+        $btnPrimaryColor = $hs->btn_primary_color ?? '#c7954b';
+        $btnPrimaryStyle = $hs->btn_primary_style ?? 'solid';
+        $btnPrimaryVisible = $hs->btn_primary_visible ?? true;
+        $btnSecondaryText = $hs->btn_secondary_text ?? __('messages.home.cta_quote');
+        $btnSecondaryLink = $hs->btn_secondary_link ?? '#contact';
+        $btnSecondaryColor = $hs->btn_secondary_color ?? '#ffffff';
+        $btnSecondaryStyle = $hs->btn_secondary_style ?? 'outline';
+        $btnSecondaryVisible = $hs->btn_secondary_visible ?? true;
+    @endphp
+    {{-- font reset: no custom body font --}}
+    @if ($primaryColor || $secondaryColor)
+        <style>
+            :root {
+                @if ($primaryColor)
+                    --akg-gold: {{ $primaryColor }};
+                @endif
+                @if ($secondaryColor)
+                    --akg-dark: {{ $secondaryColor }};
+                @endif
+            }
+        </style>
+    @endif
     {{-- ================= HERO ================= --}}
-    <section class="akg-hero container-xxl d-flex align-items-center" style="margin-top: 25px;">
+    <section class="akg-hero container-xxl d-flex align-items-center akg-hero-ma "
+        style=" min-height: {{ $heroHeight }}px; background: {{ $heroBgColor }}; {{ $heroWidth ? 'max-width:' . $heroWidth . 'px; margin-left:auto; margin-right:auto;' : '' }}">
 
-        <!-- VIDEO BACKGROUND -->
-        <video class="akg-hero-video" autoplay loop muted playsinline
-            poster="{{ asset('assets/img/video.jpg') }}">
-            <source src="{{ asset('assets/videos/last.mp4') }}" type="video/mp4">
-        </video>
-
-        <!-- OVERLAY -->
-        <div class="akg-hero-overlay"></div>
-
-        <!-- HERO CONTENT -->
-        <div class="container py-5 position-relative">
-            <div class="row align-items-center justify-content-between">
-                <div class="col-lg-6 text-light ps-lg-5">
-
-                    <h1 class="akg-hero-title mb-3">
-                        {{ __('messages.home.hero_title') }}
-                    </h1>
-
-                    <p class="akg-hero-subtitle mb-4">
-                        {{ __('messages.home.hero_subtitle') }}
-                    </p>
-
-                    <div class="d-flex gap-3 flex-wrap">
-                        <a href="#projects" class="btn btn-gold px-4 py-2">{{ __('messages.home.cta_projects') }}</a>
-                        <a href="#contact" class="btn btn-outline-gold px-4 py-2">{{ __('messages.home.cta_quote') }}</a>
+        @if ($heroType === 'video')
+            <video class="akg-hero-video" autoplay loop muted playsinline poster="{{ $heroImg }}"
+                style="min-height: {{ $heroHeight }}px; max-height: 720px; min-height: 480px; width:100%; object-fit: {{ $heroStretch ? 'fill' : 'contain' }}; background: {{ $heroBgColor }}; z-index:1;">
+                <source src="{{ $heroVideo }}" type="video/mp4">
+            </video>
+        @else
+            @if ($heroGallery->count() > 0)
+                <div id="heroCarousel" class="carousel slide w-100 h-100 position-absolute" data-bs-ride="carousel">
+                    <div class="carousel-inner h-100">
+                        @foreach ($heroGallery as $idx => $img)
+                            <div class="carousel-item h-100 {{ $idx === 0 ? 'active' : '' }}" data-bs-interval="5000">
+                                <img src="{{ $img }}" class="w-100 h-100 d-block"
+                                    style="object-fit: {{ $heroStretch ? 'fill' : 'contain' }}; background: {{ $heroBgColor }};">
+                            </div>
+                        @endforeach
                     </div>
                 </div>
+            @else
+                <img src="{{ $heroImg }}" class="w-100 h-100 d-block"
+                    style="object-fit: {{ $heroStretch ? 'fill' : 'contain' }}; background: {{ $heroBgColor }}; position:absolute; inset:0; z-index:1;">
+            @endif
+        @endif
+
+        @if ($overlayEnabled)
+            <div class="akg-hero-overlay"
+                style="background: {{ $overlayColor }}; opacity: {{ $overlayOpacity }}; z-index:2; pointer-events:none;">
+            </div>
+        @endif
+
+        <div class="position-absolute text-light"
+            style="top: {{ $heroContentPosY ?? 20 }}%; left: {{ $heroContentPosX ?? 10 }}%; max-width:60%; z-index:3; padding:0;">
+
+            @if ($showTitle)
+                <h1 class="akg-hero-title mb-3"
+                    style="color: {{ $heroTitleColor }}; {{ $heroTitleSize ? 'font-size:' . $heroTitleSize . 'px;' : '' }}{{ $titleFont ? ' font-family:' . $titleFont . ';' : '' }}">
+                    {{ $heroTitle }}
+                </h1>
+            @endif
+
+            @if ($showSubtitle)
+                <p class="akg-hero-subtitle mb-4"
+                    style="white-space: pre-line; color: {{ $heroSubtitleColor }}; {{ $heroSubtitleSize ? 'font-size:' . $heroSubtitleSize . 'px;' : '' }}{{ $subtitleFont ? ' font-family:' . $subtitleFont . ';' : '' }}">
+                    {{ $heroSubtitle }}
+                </p>
+            @endif
+
+            <div class="d-flex gap-3 flex-wrap">
+                @if ($btnPrimaryVisible)
+                    @php
+                        $primaryRadius = $btnPrimaryStyle === 'pill' ? '999px' : '6px';
+                        $primaryBg = $btnPrimaryStyle === 'outline' ? 'transparent' : $btnPrimaryColor;
+                        $primaryTextColor = $btnPrimaryStyle === 'outline' ? $btnPrimaryColor : '#0f172a';
+                    @endphp
+                    <a href="{{ $btnPrimaryLink }}" class="btn px-4 py-2"
+                        style="background: {{ $primaryBg }}; border:1px solid {{ $btnPrimaryColor }}; color: {{ $primaryTextColor }}; border-radius: {{ $primaryRadius }}; {{ $heroButtonSize ? 'font-size:' . $heroButtonSize . 'px;' : '' }}">
+                        {{ $btnPrimaryText }}
+                    </a>
+                @endif
+                @if ($btnSecondaryVisible)
+                    @php
+                        $secondaryRadius = $btnSecondaryStyle === 'pill' ? '999px' : '6px';
+                        $secondaryBg = $btnSecondaryStyle === 'solid' ? $btnSecondaryColor : 'transparent';
+                        $secondaryTextColor = $btnSecondaryStyle === 'solid' ? '#0f172a' : $btnSecondaryColor;
+                        $secondaryBorder = $btnSecondaryColor;
+                    @endphp
+                    <a href="{{ $btnSecondaryLink }}" class="btn px-4 py-2"
+                        style="background: {{ $secondaryBg }}; border:1px solid {{ $secondaryBorder }}; color: {{ $secondaryTextColor }}; border-radius: {{ $secondaryRadius }}; {{ $heroButtonSize ? 'font-size:' . $heroButtonSize . 'px;' : '' }}">
+                        {{ $btnSecondaryText }}
+                    </a>
+                @endif
             </div>
         </div>
 
     </section>
+    @if ($bannerEnabled && $bannerText)
+        <div class="modal fade" id="heroBannerModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark text-light border border-gold">
+                    <div class="modal-header border-0">
+                        <h6 class="modal-title text-gold mb-0">Notice</h6>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body d-flex flex-column gap-3">
+                        @if ($bannerImage)
+                            <img src="{{ $bannerImage }}" alt="Banner" class="w-100 rounded" style="object-fit: cover;">
+                        @endif
+                        <div class="fw-bold">{{ $bannerText }}</div>
+                        @if ($bannerLink)
+                            <div>
+                                <a href="{{ $bannerLink }}" class="btn btn-gold text-dark">Learn more</a>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                if (typeof bootstrap !== 'undefined') {
+                    const modalEl = document.getElementById('heroBannerModal');
+                    const bannerModal = new bootstrap.Modal(modalEl, {
+                        backdrop: 'static'
+                    });
+                    bannerModal.show();
+                }
+            });
+        </script>
+    @endif
 
     {{-- ================= TRUST BAR ================= --}}
     <section class="container-xxl py-5">
-        <div class="container akg-newcard ">
-            <div class="  row g-3 text-center">
-                <div class=" col-6 col-lg-3">
+        <div class="container akg-newcard">
+            <div class="row g-3 text-center">
+                <div class="col-6 col-lg-3">
                     <div class="akg-card text-center">
-                        <span class=" akg-trust-number">15+</span>
-                        <span class=" akg-trust-label">{{ __('messages.home.trust_years') }}</span>
+                        <span class="akg-trust-number">15+</span>
+                        <span class="akg-trust-label">
+                            {{ __('messages.home.trust_years') }}
+                        </span>
                     </div>
                 </div>
                 <div class="col-6 col-lg-3">
                     <div class="akg-card text-center">
                         <span class="akg-trust-number">50+</span>
-                        <span class="akg-trust-label">{{ __('messages.home.trust_projects') }}</span>
+                        <span class="akg-trust-label">
+                            {{ __('messages.home.trust_projects') }}
+                        </span>
                     </div>
                 </div>
                 <div class="col-6 col-lg-3">
                     <div class="akg-card text-center">
-                        <span class="akg-trust-number">Full-Scope</span>
-                        <span class="akg-trust-label">{{ __('messages.home.trust_scope') }}</span>
+                        <span class="akg-trust-number">
+                            {{ __('messages.home.trust_scope_number') }}
+                        </span>
+                        <span class="akg-trust-label">
+                            {{ __('messages.home.trust_scope') }}
+                        </span>
                     </div>
                 </div>
                 <div class="col-6 col-lg-3">
                     <div class="akg-card text-center">
                         <span class="akg-trust-number">24/7</span>
-                        <span class="akg-trust-label">{{ __('messages.home.trust_support') }}</span>
+                        <span class="akg-trust-label">
+                            {{ __('messages.home.trust_support') }}
+                        </span>
                     </div>
                 </div>
+            </div>
+            <div class="text-center mt-4">
+                <a href="{{ route('services') }}" class="btn btn-gold px-4 py-2">
+                    All Services
+                </a>
             </div>
         </div>
     </section>
 
+    {{-- ================= WHY CHOOSE US ================= --}}
+    <section class="container-xxl py-5 ">
+        <div class="container akg-newcard text-center py-5">
 
-    {{-- ================= SERVICES ================= --}}
-    <section id="services" class="container-xxl py-5">
-        <div class="container akg-newcard">
-            <h2 class="akg-section-head text-center mb-5">{{ __('messages.home.services_title') }}</h2>
+            <h2 class="akg-section-head mb-5">
+                {{ __('messages.home.why.title') }}
+            </h2>
 
             <div class="row g-4">
-                @php
-                    $services = [
-                        [
-                            'icon' => 'fa-screwdriver-wrench',
-                            'title' => 'Carpentry & Woodwork',
-                            'desc' => 'Doors, kitchens, furniture & luxury wood finishes.',
-                            'proof' => 'Premium ash/oak, millimeter-precise joinery.',
-                        ],
-                        [
-                            'icon' => 'fa-hard-hat',
-                            'title' => 'Construction & Renovation',
-                            'desc' => 'Professional building, renovation & maintenance.',
-                            'proof' => 'Site-led teams, predictable schedules.',
-                        ],
-                        [
-                            'icon' => 'fa-paint-roller',
-                            'title' => 'Interior Decoration',
-                            'desc' => 'Modern, classic & luxury décor solutions.',
-                            'proof' => 'Curated palettes, artisan metal and glass.',
-                        ],
-                        [
-                            'icon' => 'fa-compass-drafting',
-                            'title' => 'Custom Design',
-                            'desc' => 'Tailored solutions for homes & commercial spaces.',
-                            'proof' => 'Concept-to-handover, single point of contact.',
-                        ],
-                    ];
-                @endphp
 
-                @foreach ($services as $service)
+                <div class="col-lg-3 col-md-6">
+                    <div class="akg-card">
+                        <i class="fa fa-award akg-card-icon"></i>
+                        <h4 class="text-gold">{{ __('messages.home.why.quality_title') }}</h4>
+                        <p class="text-muted">{{ __('messages.home.why.quality_desc') }}</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="akg-card">
+                        <i class="fa fa-users-gear akg-card-icon"></i>
+                        <h4 class="text-gold">{{ __('messages.home.why.team_title') }}</h4>
+                        <p class="text-muted">{{ __('messages.home.why.team_desc') }}</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="akg-card">
+                        <i class="fa fa-clock akg-card-icon"></i>
+                        <h4 class="text-gold">{{ __('messages.home.why.delivery_title') }}</h4>
+                        <p class="text-muted">{{ __('messages.home.why.delivery_desc') }}</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="akg-card">
+                        <i class="fa fa-handshake akg-card-icon"></i>
+                        <h4 class="text-gold">{{ __('messages.home.why.trust_title') }}</h4>
+                        <p class="text-muted">{{ __('messages.home.why.trust_desc') }}</p>
+                    </div>
+                </div>
+
+            </div>
+            <div class="mt-4">
+                <a href="{{ route('contact') }}" class="btn btn-gold px-4 py-2">{{ __('messages.home.why.cta') }}</a>
+            </div>
+
+        </div>
+    </section>
+    {{-- ================= SERVICES ================= --}}
+
+    <section id="services" class="container-xxl py-5">
+        <div class="container akg-newcard">
+
+            <h2 class="akg-section-head text-center mb-5">
+                {{ __('messages.home.services_title') }}
+            </h2>
+
+            @php
+                // جلب الخدمات من المتغير القادم من الكنترولر، وإن لم يتوفر نترجم من config مباشرة
+                $homeServices = collect($services ?? [])
+                    ->whenEmpty(function () {
+                        return collect(config('services', []))->map(function ($s) {
+                            $key = $s['translation_key'] ?? null;
+                            return [
+                                'slug' => $s['slug'] ?? '',
+                                'icon' => $s['icon'] ?? null,
+                                'title' => $key ? __($key . '.title') : '',
+                                'excerpt' => $key ? __($key . '.excerpt') : '',
+                            ];
+                        });
+                    })
+                    ->take(4);
+            @endphp
+
+            <div class="row g-4">
+                @foreach ($homeServices as $service)
                     <div class="col-lg-3 col-md-6">
-                        <div class="akg-card text-center">
-                            <i class="fa {{ $service['icon'] }} akg-card-icon"></i>
-                            <h5 class="mt-3 text-gold">{{ $service['title'] }}</h5>
-                            <p class="text-muted small mb-1">{{ $service['desc'] }}</p>
-                            <p class="text-gold small fw-semibold mb-0">{{ $service['proof'] }}</p>
+                        <div class="akg-card text-center h-100">
+
+                            {{-- ICON (optional) --}}
+                            @if (!empty($service['icon']))
+                                <i class="fa {{ $service['icon'] }} akg-card-icon"></i>
+                            @endif
+
+                            {{-- TITLE --}}
+                            <h5 class="mt-3 text-gold">
+                                {{ $service['title'] ?? '' }}
+                            </h5>
+
+                            {{-- EXCERPT --}}
+                            <p class="text-muted small mb-3" style="min-height: 48px;">
+                                {{ \Illuminate\Support\Str::limit($service['excerpt'] ?? '', 90) }}
+                            </p>
+
+                            {{-- CTA --}}
+                            @php
+                                $viewMoreText = __('messages.services_page.view_more');
+                                if ($viewMoreText === 'messages.services_page.view_more') {
+                                    $viewMoreText = app()->getLocale() === 'ar' ? 'عرض المزيد' : 'View More';
+                                }
+                            @endphp
+                            <div class="d-flex justify-content-center">
+                                <a href="{{ route('services.show', $service['slug']) }}"
+                                    class="btn btn-outline-gold btn-sm fw-bold">
+                                    {{ $viewMoreText }}
+                                </a>
+                            </div>
+
                         </div>
                     </div>
                 @endforeach
             </div>
-        </div>
-    </section>
 
-    {{-- ================= ABOUT ================= --}}
-    <section id="about" class="container-xxl py-5  ">
-        <div class="container akg-newcard">
-            <div class="row g-5 align-items-center">
-
-                <!-- ============== IMAGES SIDE ============== -->
-                <div class="col-lg-6">
-                    <div class="row g-3 about-lux-grid">
-
-                        <div class=" col-6 d-flex align-items-end">
-                            <!-- صورة 1 -->
-                            <img src="{{ asset('assets/img/pexels-cottonbro-7492889.jpg') }}"
-                                class="img-fluid rounded w-100 shadow-sm" alt="Craftsman at work"
-                                style="height: 280px; object-fit: cover;" loading="lazy">
-                        </div>
-
-                        <div class="col-6 d-flex align-items-end">
-                            <!-- صورة 2 -->
-                            <img src="{{ asset('assets/img/pexels-pixabay-159375.jpg') }}"
-                                class="img-fluid rounded w-100 shadow-sm" alt="Premium carpentry tools"
-                                style="height: 240px; object-fit: cover; margin-top: 40px;" loading="lazy">
-                        </div>
-
-                        <!-- الصف الثاني -->
-                        <div class="col-6 d-flex align-items-start">
-                            <!-- صورة 3 -->
-                            <img src="{{ asset('assets/img/pexels-enginakyurt-1463917.jpg') }}"
-                                class="img-fluid rounded w-100 shadow-sm" alt="Luxury interior details"
-                                style="height: 240px; object-fit: cover; margin-bottom: 40px;" loading="lazy">
-                        </div>
-
-                        <div class="col-6 d-flex align-items-start">
-                            <!-- صورة 4 -->
-                            <img src="{{ asset('assets/img/pexels-ivan-s-4491884.jpg') }}"
-                                class="img-fluid rounded w-100 shadow-sm" alt="Custom wood paneling"
-                                style="height: 280px; object-fit: cover;" loading="lazy">
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- ============== TEXT SIDE ============== -->
-                <div class="col-lg-6">
-                    <h5 class="akg-hero-title text-gold mb-3">{{ __('messages.home.about_title') }}</h5>
-
-                    <h2 class="text-light mb-4">
-                        Craftsmanship at <span class="text-gold">Its Finest</span>
-                    </h2>
-
-                    <p class="text-muted mb-3">
-                        Ali Krecht Group specializes in carpentry, construction, interiors, and decorative designs.
-                        We combine modern techniques with traditional craftsmanship to deliver premium results.
-                    </p>
-
-                    <p class="text-muted mb-4">
-                        Every project we create reflects precision, creativity, and quality that lasts for years.
-                        From bespoke wardrobes to full-scale builds — excellence is our standard.
-                    </p>
-
-                    <div class="akg-why-box">
-                        <div class="akg-why-item">
-                            <i class="fa fa-check text-gold me-2"></i>
-                            Turnkey delivery: design, build, interiors under one roof.
-                        </div>
-                        <div class="akg-why-item">
-                            <i class="fa fa-check text-gold me-2"></i>
-                            Cost and timeline transparency from day one.
-                        </div>
-                        <div class="akg-why-item">
-                            <i class="fa fa-check text-gold me-2"></i>
-                            Dedicated project lead with 24/7 support.
-                        </div>
-                    </div>
-
-                    <!-- ============== EXPERIENCE BOXES ============== -->
-                    <div class="row g-4 mb-4">
-
-                        <!-- BOX 1 -->
-
-                        <div class=" col-sm-6">
-                            <div class="experience-box">
-                                <h1 class="experience-number">15</h1>
-                                <div class="ps-3">
-                                    <p class="mb-0 small text-muted">Years of</p>
-                                    <h6 class="text-uppercase text-light mb-0">Experience</h6>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <!-- BOX 2 -->
-                        <div class="col-sm-6">
-                            <div class="experience-box">
-                                <h1 class="experience-number">50</h1>
-                                <div class="ps-3">
-                                    <p class="mb-0 small text-muted">Successful</p>
-                                    <h6 class="text-uppercase text-light mb-0">Projects Completed</h6>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="d-flex gap-3 flex-wrap">
-                        <a href="{{ route('about') }}" class="btn btn-gold px-4 mt-2">{{ __('messages.home.about_cta_learn') }}</a>
-                        <a href="#contact" class="btn btn-outline-gold px-4 mt-2">{{ __('messages.home.about_cta_visit') }}</a>
-                    </div>
-                </div>
-
+            {{-- BUTTON --}}
+            @php
+                $allServicesText = __('messages.services_page.all_services');
+                if ($allServicesText === 'messages.services_page.all_services') {
+                    $allServicesText = app()->getLocale() === 'ar' ? 'كل الخدمات' : 'All Services';
+                }
+            @endphp
+            <div class="text-center mt-4">
+                <a href="{{ route('services') }}" class="btn btn-gold px-4 py-2">
+                    {{ $allServicesText }}
+                </a>
             </div>
+
         </div>
     </section>
-
-
-
+    {{-- end services --}}
 
     {{-- ================= PROJECTS ================= --}}
-    <section id="projects" class="container-xxl py-5  ">
+    <section id="projects" class="container-xxl py-5 ">
         <div class="container akg-newcard">
-            <h2 class="akg-section-head text-center">{{ __('messages.home.projects_title') }}</h2>
-            <p class="text-center text-muted mb-5">{{ __('messages.home.projects_sub') }}</p>
+            <h2 class="akg-section-head text-center">
+                {{ __('messages.home.projects_title') }}
+            </h2>
+            <p class="text-center text-muted mb-5">
+                {{ __('messages.home.projects_sub') }}
+            </p>
 
-            <div class="row g-4">
-                @forelse($projects as $project)
+            @php
+                $projectParents = $projectParents ?? collect();
+                $projectChildren = $projectChildren ?? collect();
+                $activeProjParent = $projectParents->first()->id ?? null;
+                $activeProjChild =
+                    optional($projectParents->first()?->children?->first())->id ??
+                    optional($projectChildren->first())->id;
+            @endphp
+
+            @if ($projectParents->count())
+                <div class="akg-newcard mb-4 p-3 text-center akg-cat-nav">
+                    <ul class="nav nav-pills justify-content-center mb-3 flex-wrap gap-2" id="projParentNav">
+                        @foreach ($projectParents as $parent)
+                            <li class="nav-item">
+                                <a class="nav-link {{ $activeProjParent === $parent->id ? 'active' : '' }}"
+                                    href="#" data-parent="{{ $parent->id }}">
+                                    {{ $parent->name_localized }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                    @foreach ($projectParents as $parent)
+                        <ul class="nav nav-pills justify-content-center flex-wrap gap-2 proj-child {{ $activeProjParent === $parent->id ? '' : 'd-none' }}"
+                            id="proj-child-{{ $parent->id }}">
+                            @forelse($parent->children as $child)
+                                <li class="nav-item">
+                                    <a class="nav-link {{ $child->id === $activeProjChild ? 'active' : '' }}"
+                                        data-bs-toggle="pill" href="#proj-tab-{{ $child->id }}">
+                                        {{ $child->name_localized }}
+                                    </a>
+                                </li>
+                            @empty
+                                <li class="nav-item">
+                                    <span class="nav-link">{{ __('messages.projects.all') ?? 'All' }}</span>
+                                </li>
+                            @endforelse
+                        </ul>
+                    @endforeach
+                </div>
+            @endif
+
+            <div class="tab-content">
+                @forelse($projectChildren as $child)
                     @php
-                        // Choose image
-                        $imagePath = $project->main_image ?? ($project->images->first()->image_path ?? null);
-
-                        if ($imagePath && file_exists(public_path('storage/' . $imagePath))) {
-                            $img = asset('storage/' . $imagePath);
-                        } else {
-                            $img = asset('assets/img/default.jpg');
-                        }
-
-                        // Gallery images
-                        $gallery = $project->images->pluck('image_path')->map(fn($img) => asset('storage/' . $img));
+                        $projList = $projectsByCategory[$child->id] ?? collect();
+                        $resolvePath = function ($path) {
+                            if (!$path) {
+                                return null;
+                            }
+                            // مسارات قديمة مُخزنة كـ storage/public/assets/... نصححها إلى assets/...
+                            if (str_contains($path, 'storage/public/assets/')) {
+                                $path = str_replace('storage/public/', '', $path);
+                            }
+                            return str_starts_with($path, 'public/') || str_starts_with($path, 'assets/')
+                                ? asset($path)
+                                : asset('storage/' . $path);
+                        };
                     @endphp
+                    <div id="proj-tab-{{ $child->id }}"
+                        class="tab-pane fade {{ $child->id === $activeProjChild ? 'show active' : '' }}">
+                        <div class="row g-4">
+                            @forelse($projList as $project)
+                                @php
+                                    $imagePath =
+                                        $project->main_image ?? ($project->images->first()->image_path ?? null);
+                                    $img =
+                                        $resolvePath($imagePath) ??
+                                        ($project->main_image_url ?? asset('assets/img/default.jpg'));
+                                    $gallery =
+                                        collect($project->gallery_urls ?? [])
+                                            ->filter()
+                                            ->values() ?:
+                                        $project->images
+                                            ->pluck('image_path')
+                                            ->map(fn($g) => $resolvePath($g))
+                                            ->filter()
+                                            ->values();
+                                @endphp
+                                <div class="col-lg-4 col-md-6 ">
+                                    <div class="akg-card h-100">
+                                        <img src="{{ $img }}" class="akg-project-img"
+                                            alt="{{ $project->title }}" loading="lazy">
 
-                    <div class="col-lg-4 col-md-6">
-                        <div class="akg-card">
-                            <img src="{{ $img }}" class="akg-project-img" alt="{{ $project->title }}" loading="lazy">
+                                        <div class="p-3 text-center">
+                                            <h4 class="text-gold">{{ $project->title_localized }}</h4>
+                                            <p class="small text-muted">
+                                                {{ Str::limit($project->description_localized, 80) }}
+                                            </p>
 
-                            <div class="p-3 text-center">
-                                <h4 class="text-gold">{{ $project->title }}</h4>
-                                <p class="small text-muted">{{ Str::limit($project->description, 80) }}</p>
-
-                                <button class="btn btn-outline-gold px-4 mt-2 view-project-btn"
-                                    data-id="{{ $project->id }}" data-title="{{ e($project->title) }}"
-                                    data-description="{{ e($project->description) }}" data-image="{{ $img }}"
-                                    data-gallery='@json($gallery)'>
-                                    {{ __('messages.home.projects_view') }}
-                                </button>
-                            </div>
+                                            <button class="btn btn-outline-gold px-4 mt-2 view-project-btn"
+                                                data-id="{{ $project->id }}"
+                                                data-title="{{ e($project->title_localized) }}"
+                                                data-description="{{ e($project->description_localized) }}"
+                                                data-image="{{ $img }}"
+                                                data-gallery='@json($gallery)'>
+                                                {{ __('messages.home.projects_view') }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="col-12">
+                                    <div class="akg-card text-center py-4">
+                                        <p class="text-muted mb-0">
+                                            {{ __('messages.projects.no_projects') ?? 'No projects available.' }}</p>
+                                    </div>
+                                </div>
+                            @endforelse
                         </div>
                     </div>
-
                 @empty
-                    <p class="text-center text-light">No projects available.</p>
+                    <div class="row g-4 j">
+                        @forelse($projects as $project)
+                            @php
+                                $imagePath = $project->main_image ?? ($project->images->first()->image_path ?? null);
+                                $img =
+                                    $resolvePath($imagePath) ??
+                                    ($project->main_image_url ?? asset('assets/img/default.jpg'));
+                                $gallery = $project->images
+                                    ->pluck('image_path')
+                                    ->map(fn($imgPath) => $resolvePath($imgPath))
+                                    ->filter()
+                                    ->values();
+                            @endphp
+
+                            <div class="col-lg-4 col-md-6">
+                                <div class="akg-card h-100">
+                                    <img src="{{ $img }}" class="akg-project-img" alt="{{ $project->title }}"
+                                        loading="lazy">
+
+                                    <div class="p-3 text-center">
+                                        <h4 class="text-gold">{{ $project->title_localized }}</h4>
+                                        <p class="small text-muted">
+                                            {{ Str::limit($project->description_localized, 80) }}
+                                        </p>
+
+                                        <button class="btn btn-outline-gold px-4 mt-2 view-project-btn"
+                                            data-id="{{ $project->id }}"
+                                            data-title="{{ e($project->title_localized) }}"
+                                            data-description="{{ e($project->description_localized) }}"
+                                            data-image="{{ $img }}"
+                                            data-gallery='@json($gallery)'>
+                                            {{ __('messages.home.projects_view') }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        @empty
+                            <p class="text-center text-light">
+                                {{ __('messages.projects.no_projects') ?? 'No projects available.' }}</p>
+                        @endforelse
+                    </div>
                 @endforelse
             </div>
+
             <div class="text-center mt-4">
-                <a href="{{ url('/projects') }}" class="btn btn-outline-gold px-4">{{ __('messages.home.projects_all') }}</a>
+                <a href="{{ url('/projects') }}" class="btn btn-gold px-4 py-2">
+                    {{ __('messages.home.projects_all') }}
+                </a>
             </div>
         </div>
     </section>
+
     <!-- Project Modal -->
     <div id="projectModal" class="modal fade" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -319,52 +569,455 @@
 
 
 
+
+
+
+
+
+    {{-- ================= ABOUT ================= --}}
+    <section id="about" class="container-xxl py-5">
+        <div class="container akg-newcard">
+            <div class="row g-5 align-items-center">
+
+                <!-- IMAGES SIDE -->
+                <div class="col-lg-6">
+                    <div class="row g-3 about-lux-grid">
+
+                        <div class="col-6 d-flex align-items-end">
+                            <img src="{{ asset('assets/img/pexels-cottonbro-7492889.jpg') }}"
+                                class="img-fluid rounded w-100 shadow-sm" alt="Craftsman at work"
+                                style="height: 280px; object-fit: cover;" loading="lazy">
+                        </div>
+
+                        <div class="col-6 d-flex align-items-end">
+                            <img src="{{ asset('assets/img/pexels-pixabay-159375.jpg') }}"
+                                class="img-fluid rounded w-100 shadow-sm" alt="Premium carpentry tools"
+                                style="height: 240px; object-fit: cover; margin-top: 40px;" loading="lazy">
+                        </div>
+
+                        <div class="col-6 d-flex align-items-start">
+                            <img src="{{ asset('assets/img/pexels-enginakyurt-1463917.jpg') }}"
+                                class="img-fluid rounded w-100 shadow-sm" alt="Luxury interior details"
+                                style="height: 240px; object-fit: cover; margin-bottom: 40px;" loading="lazy">
+                        </div>
+
+                        <div class="col-6 d-flex align-items-start">
+                            <img src="{{ asset('assets/img/pexels-ivan-s-4491884.jpg') }}"
+                                class="img-fluid rounded w-100 shadow-sm" alt="Custom wood paneling"
+                                style="height: 280px; object-fit: cover;" loading="lazy">
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- TEXT SIDE -->
+                <div class="col-lg-6">
+                    <h5 class="akg-hero-title text-gold mb-3">
+                        {{ __('messages.home.about_title') }}
+                    </h5>
+
+                    <h2 class="text-light mb-4">
+                        {{ __('messages.home.about.heading_full') }}
+                    </h2>
+
+                    <p class="text-muted mb-3">
+                        {{ __('messages.home.about.paragraph1') }}
+                    </p>
+
+                    <p class="text-muted mb-4">
+                        {{ __('messages.home.about.paragraph2') }}
+                    </p>
+
+                    <div class="akg-why-box">
+                        <div class="akg-why-item">
+                            <i class="fa fa-check text-gold me-2"></i>
+                            {{ __('messages.home.about.why_1') }}
+                        </div>
+                        <div class="akg-why-item">
+                            <i class="fa fa-check text-gold me-2"></i>
+                            {{ __('messages.home.about.why_2') }}
+                        </div>
+                        <div class="akg-why-item">
+                            <i class="fa fa-check text-gold me-2"></i>
+                            {{ __('messages.home.about.why_3') }}
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-sm-6">
+                            <div class="experience-box">
+                                <h1 class="experience-number">15</h1>
+                                <div class="ps-3">
+                                    <p class="mb-0 small text-muted">
+                                        {{ __('messages.home.about.experience_years') }}
+                                    </p>
+                                    <h6 class="text-uppercase text-light mb-0">
+                                        {{ __('messages.home.about.experience_label') }}
+                                    </h6>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <div class="experience-box">
+                                <h1 class="experience-number">50</h1>
+                                <div class="ps-3">
+                                    <p class="mb-0 small text-muted">
+                                        {{ __('messages.home.about.projects_success') }}
+                                    </p>
+                                    <h6 class="text-uppercase text-light mb-0">
+                                        {{ __('messages.home.about.projects_label') }}
+                                    </h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a href="{{ route('about') }}" class="btn btn-gold px-4 mt-2">
+                            {{ __('messages.home.about_cta_learn') }}
+                        </a>
+                        <a href="#contact" class="btn btn-outline-gold px-4 mt-2">
+                            {{ __('messages.home.about_cta_visit') }}
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    {{-- ================= TESTIMONIALS ================= --}}
+    <section id="testimonials" class="container-xxl py-5">
+        <div class="container akg-newcard text-center">
+
+            <h5 class="akg-section-label">
+                {{ __('messages.home.testimonials_label') }}
+            </h5>
+            <h2 class="akg-section-head mb-5">
+                {{ __('messages.home.testimonials_title') }}
+            </h2>
+            <p class="text-muted mb-4">
+                {{ __('messages.home.rating_text') }}:
+                <span class="text-gold fw-bold">
+                    {{ $reviewsCount ? number_format($reviewsAvg, 1) : '—' }} / 5
+                </span>
+                @if ($reviewsCount)
+                    <small class="text-muted">({{ $reviewsCount }}
+                        {{ __('messages.home.testimonials_label') }})</small>
+                @endif
+            </p>
+
+            @if (session('review_success'))
+                <div class="alert alert-success text-start">
+                    {{ session('review_success') }}
+                </div>
+            @endif
+
+            <div class="row g-4 justify-content-center">
+                @forelse($reviews as $review)
+                    @php
+                        // الصور الجديدة تحفظ في public/assets/reviews، والقديمة في storage/public أو storage
+                        if ($review->photo) {
+                            $path = $review->photo;
+
+                            // تطبيع مسارات قديمة
+                            if (str_contains($path, 'storage/public/assets/reviews/')) {
+                                $path = str_replace('storage/', '', $path); // -> public/assets/...
+                            }
+
+                            // جرّب مباشرة public/ أو assets/
+                            if (str_starts_with($path, 'public/')) {
+                                $candidate = public_path(substr($path, strlen('public/')));
+                                $photo = file_exists($candidate)
+                                    ? asset($path)
+                                    : asset(substr($path, strlen('public/')));
+                            } elseif (str_starts_with($path, 'assets/')) {
+                                $candidate = public_path($path);
+                                $photo = file_exists($candidate)
+                                    ? asset($path)
+                                    : asset('assets/img/clients/client1.jpg');
+                            } else {
+                                // مسارات مخزنة كـ reviews/.. داخل storage
+                                $photo = asset('storage/' . $path);
+                            }
+                        } else {
+                            $photo = asset('assets/img/clients/client1.jpg');
+                        }
+                    @endphp
+                    <div class="col-lg-4 col-md-6">
+                        <div class="akg-card text-center h-100">
+                            <div class="akg-testimonial-icon">
+                                <i class="fa fa-quote-left"></i>
+                            </div>
+                            <div class="akg-testimonial-stars mb-2">
+                                @for ($i = 1; $i <= 5; $i++)
+                                    @if ($i <= $review->rating)
+                                        <i class="fa fa-star"></i>
+                                    @else
+                                        <i class="fa fa-star-o"></i>
+                                    @endif
+                                @endfor
+                            </div>
+
+                            <p class="akg-testimonial-text">
+                                “{{ $review->review }}”
+                            </p>
+
+                            <div class="akg-testimonial-client mt-3">
+                                <img src="{{ $photo }}" class="akg-client-img"
+                                    alt="Client - {{ $review->name }}" loading="lazy">
+                                <h6 class="text-gold mt-2">{{ $review->name }}</h6>
+                                <span class="text-muted small">{{ $review->profession }}</span>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-12">
+                        <div class="akg-card text-center py-4">
+                            <h6 class="text-gold mb-1">{{ __('messages.home.testimonials_label') }}</h6>
+                            <p class="text-muted mb-0">{{ __('messages.home.projects_sub') }}</p>
+                        </div>
+                    </div>
+                @endforelse
+            </div>
+
+            <div class="mt-4">
+                <button class="btn btn-gold px-5" data-bs-toggle="modal" data-bs-target="#reviewModal">
+                    {{ __('messages.home.testimonial_form.open_btn') }}
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Review Modal -->
+    <div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content bg-dark-soft text-light">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title text-gold">{{ __('messages.home.testimonial_form.title') }}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="reviewForm" action="{{ route('reviews.store') }}" method="POST"
+                        enctype="multipart/form-data" class="row g-3 js-recaptcha">
+                        @csrf
+                        <input type="hidden" name="g-recaptcha-response">
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">{{ __('messages.home.testimonial_form.name') }}
+                                *</label>
+                            <input type="text" name="name" class="form-control akg-input" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label
+                                class="form-label small text-muted">{{ __('messages.home.testimonial_form.profession') }}</label>
+                            <input type="text" name="profession" class="form-control akg-input">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label small text-muted">{{ __('messages.home.testimonial_form.rating') }}
+                                *</label>
+                            <div class="d-flex align-items-center gap-2 akg-rating-stars">
+                                @for ($i = 1; $i <= 5; $i++)
+                                    <button type="button" class="akg-star-btn" data-value="{{ $i }}">
+                                        <i class="fa fa-star"></i>
+                                    </button>
+                                @endfor
+                            </div>
+                            <input type="hidden" name="rating" id="ratingInput" required value="5">
+                            <small class="text-muted">{{ __('messages.home.testimonial_form.rating_hint') }}</small>
+                        </div>
+                        <div class="col-md-12">
+                            <label
+                                class="form-label small text-muted">{{ __('messages.home.testimonial_form.photo') }}</label>
+                            <input type="file" name="photo" class="form-control akg-input" accept="image">
+                            <small class="text-muted">{{ __('messages.home.testimonial_form.photo_hint') }}</small>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small text-muted">{{ __('messages.home.testimonial_form.review') }}
+                                *</label>
+                            <textarea name="review" rows="4" class="form-control akg-input" required></textarea>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-gold px-4"
+                                data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}" data-size="invisible"
+                                data-badge="bottomright">
+                                {{ __('messages.home.testimonial_form.submit') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ================= CONTACT ================= --}}
+    <section id="contact" class="container-xxl py-5">
+        <div class="container akg-newcard text-center">
+            <h2 class="akg-section-head">
+                {{ __('messages.home.contact_title') }}
+            </h2>
+            <p class="text-muted mb-3">
+                {{ __('messages.home.contact_sub') }}
+            </p>
+
+            @if (session('success'))
+                <div class="alert alert-success text-start">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if ($errors->any() && old('form_origin') === 'home-contact')
+                <div class="alert alert-danger text-start">
+                    <ul class="mb-0 small">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <div class="row justify-content-center mb-4">
+                <div class="col-md-4">
+                    <a class="akg-quick-contact d-inline-flex align-items-center justify-content-center"
+                        href="tel:+96176082394">
+                        <i class="fa fa-phone me-2"></i> +971 50 123 4567
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a class="akg-quick-contact d-inline-flex align-items-center justify-content-center"
+                        href="https://wa.me/+9613682782" target="_blank" rel="noopener">
+                        <i class="fa fa-whatsapp me-2"></i> WhatsApp available
+                    </a>
+                </div>
+            </div>
+
+            <div class="akg-card p-4">
+                <form action="{{ route('contact.send') }}" method="POST" class="row g-3 mt-4 js-recaptcha"
+                    id="homeContactForm">
+                    @csrf
+                    <input type="hidden" name="g-recaptcha-response">
+                    <input type="hidden" name="subject"
+                        value="{{ __('messages.home.contact_title') ?? 'Quick Inquiry' }} - Home">
+                    <input type="hidden" name="form_origin" value="home-contact">
+
+                    <div class="col-md-6">
+                        <input type="text" name="name" class="form-control akg-input" placeholder="Your Name"
+                            value="{{ old('name') }}" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <input type="email" name="email" class="form-control akg-input" placeholder="Your Email"
+                            value="{{ old('email') }}" required>
+                    </div>
+
+                    <div class="col-12">
+                        <textarea name="message" class="form-control akg-input" rows="5" placeholder="Your Message" required>{{ old('message') }}</textarea>
+                    </div>
+
+                    <div class="col-12 mt-3">
+                        <button type="submit" class="btn btn-gold px-5 py-3"
+                            data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}" data-size="invisible"
+                            data-badge="bottomright" id="homeContactSubmit">
+                            {{ __('messages.home.contact_send') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
     {{-- ================= PRODUCTS ================= --}}
     <section id="products" class="container-xxl py-5">
         <div class="container akg-newcard">
 
-            <!-- SECTION HEAD -->
             <div class="text-center mb-5">
-                <h5 class="akg-section-label">{{ __('messages.home.products_label') }}</h5>
-                <h2 class="akg-section-head">{{ __('messages.home.products_title') }}</h2>
+                <h5 class="akg-section-label">
+                    {{ __('messages.home.products_label') }}
+                </h5>
+                <h2 class="akg-section-head">
+                    {{ __('messages.home.products_title') }}
+                </h2>
             </div>
 
-            <!-- CATEGORY TABS -->
-            <ul class="nav akg-tabs justify-content-center mb-5">
-                @foreach ($categories as $category)
-                    <li class="nav-item">
-                        <a class="nav-link {{ $loop->first ? 'active' : '' }}" data-bs-toggle="pill"
-                            href="#tab-{{ $category->id }}">
-                            {{ ucfirst($category->name) }}
-                        </a>
-                    </li>
-                @endforeach
-            </ul>
+            @if (isset($parentCategories) && $parentCategories->count())
+                @php
+                    $activeParent = $parentCategories->first()->id ?? null;
+                    $activeChildId =
+                        optional($parentCategories->first()->children->first())->id ??
+                        optional(($childCategories ?? collect())->first())->id;
+                @endphp
+                <div class="akg-newcard mb-4 p-3 text-center akg-cat-nav">
+                    <ul class="nav nav-pills justify-content-center mb-3 flex-wrap gap-2" id="prodParentNav">
+                        @foreach ($parentCategories as $parent)
+                            <li class="nav-item">
+                                <a class="nav-link {{ $activeParent === $parent->id ? 'active' : '' }}" href="#"
+                                    data-parent="{{ $parent->id }}">
+                                    {{ $parent->name_localized }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                    @foreach ($parentCategories as $parent)
+                        <ul class="nav nav-pills justify-content-center flex-wrap gap-2 prod-child {{ $activeParent === $parent->id ? '' : 'd-none' }}"
+                            id="prod-child-{{ $parent->id }}">
+                            @forelse($parent->children as $child)
+                                <li class="nav-item">
+                                    <a class="nav-link {{ $child->id === $activeChildId ? 'active' : '' }}"
+                                        data-bs-toggle="pill" href="#tab-{{ $child->id }}">
+                                        {{ $child->name_localized }}
+                                    </a>
+                                </li>
+                            @empty
+                                <li class="nav-item">
+                                    <span class="nav-link">{{ __('messages.products.all') }}</span>
+                                </li>
+                            @endforelse
+                        </ul>
+                    @endforeach
+                </div>
+            @endif
 
-            <!-- PRODUCTS -->
+            @php
+                $childCategories = $childCategories ?? collect();
+            @endphp
             <div class="tab-content">
-                @foreach ($categories as $category)
-                    <div id="tab-{{ $category->id }}" class="tab-pane fade {{ $loop->first ? 'show active' : '' }}">
+                @forelse ($childCategories as $child)
+                    @php
+                        $products = $productsByCategory[$child->id] ?? collect();
+                    @endphp
+                    <div id="tab-{{ $child->id }}"
+                        class="tab-pane fade {{ $child->id === ($activeChildId ?? null) ? 'show active' : '' }}">
                         <div class="row g-4 justify-content-center">
 
-                            @foreach ($productsByCategory[$category->id] as $product)
+                            @forelse ($products as $product)
                                 @php
-                                    $img = $product->image
-                                        ? asset('storage/' . $product->image)
-                                        : ($product->images->first()
-                                            ? asset('storage/' . $product->images->first()->image)
+                                    $resolvePath = function ($path) {
+                                        if (!$path) {
+                                            return null;
+                                        }
+                                        return str_starts_with($path, 'public/') || str_starts_with($path, 'assets/')
+                                            ? asset($path)
+                                            : asset('storage/' . $path);
+                                    };
+
+                                    $img =
+                                        $resolvePath($product->image) ??
+                                        ($product->images->first()
+                                            ? $resolvePath($product->images->first()->image)
                                             : asset('assets/img/default.jpg'));
                                 @endphp
 
                                 <div class="col-xl-3 col-lg-4 col-md-6">
                                     <div class="akg-product-card">
                                         @if ($loop->first)
-                                            <span class="akg-product-badge">New</span>
+                                            <span class="akg-product-badge">
+                                                {{ __('messages.products_misc.badge_new') }}
+                                            </span>
                                         @endif
 
                                         <div class="akg-product-img-box">
-                                            <img src="{{ $img }}" class="akg-product-img" alt="{{ $product->title }}"
-                                                loading="lazy">
+                                            <img src="{{ $img }}" class="akg-product-img"
+                                                alt="{{ $product->title }}" loading="lazy">
                                             <div class="akg-product-overlay">
                                                 <a href="{{ route('products.show', $product->id) }}"
                                                     class="btn-gold-small">
@@ -374,63 +1027,57 @@
                                         </div>
 
                                         <div class="akg-product-info text-center">
-                                            <h5 class="akg-product-title">{{ $product->title }}</h5>
-                                            <p class="akg-product-desc">{{ Str::limit($product->description, 55) }}</p>
-                                            <span class="akg-product-price">${{ $product->price }}</span>
+                                            <h5 class="akg-product-title">
+                                                {{ $product->title_localized }}
+                                            </h5>
+                                            <p class="akg-product-desc">
+                                                {{ Str::limit($product->description_localized, 55) }}
+                                            </p>
+                                            <span class="akg-product-price">
+                                                ${{ $product->price }}
+                                            </span>
                                         </div>
 
                                     </div>
                                 </div>
-                            @endforeach
+                            @empty
+                                <div class="col-12">
+                                    <div class="akg-card text-center py-4">
+                                        <p class="text-muted mb-0">
+                                            {{ __('messages.products.none') ?? 'No products available.' }}</p>
+                                    </div>
+                                </div>
+                            @endforelse
 
                         </div>
                     </div>
-                @endforeach
+                @empty
+                    <div class="akg-card text-center py-4">
+                        <p class="text-muted mb-0">{{ __('messages.products.none') ?? 'No products available.' }}</p>
+                    </div>
+                @endforelse
             </div>
 
         </div>
     </section>
 
-
     {{-- ================= TEAM ================= --}}
     <section id="team" class="container-xxl py-5">
         <div class="container akg-newcard">
 
-            <!-- TITLE -->
             <div class="text-center mb-5">
-                <h5 class="akg-section-label">{{ __('messages.home.team_label') }}</h5>
-                <h2 class="akg-section-head">{{ __('messages.home.team_title') }}</h2>
+                <h5 class="akg-section-label">
+                    {{ __('messages.home.team_label') }}
+                </h5>
+                <h2 class="akg-section-head">
+                    {{ __('messages.home.team_title') }}
+                </h2>
             </div>
-            @php
-                $team = [
-                    [
-                        'name' => 'John Smith',
-                        'job' => 'Master Carpenter',
-                        'photo' => asset('assets/img/pexels-mastercowley-1300402.jpg'),
-                    ],
-                    [
-                        'name' => 'Emily Johnson',
-                        'job' => 'Interior Designer',
-                        'photo' => asset('assets/img/pexels-mastercowley-1300402.jpg'),
-                    ],
-                    [
-                        'name' => 'Michael Brown',
-                        'job' => 'Construction Lead',
-                        'photo' => asset('assets/img/pexels-mastercowley-1300402.jpg'),
-                    ],
-                    [
-                        'name' => 'Sarah Davis',
-                        'job' => 'Project Manager',
-                        'photo' => asset('assets/img/pexels-brett-sayles-1073097.jpg'),
-                    ],
-                ];
-            @endphp
 
             <div class="row g-4">
                 @foreach ($team as $member)
                     <div class="col-lg-3 col-md-6">
                         <div class="akg-card">
-
                             <div class="akg-team-img-box">
                                 <img src="{{ $member['photo'] }}" class="akg-team-img" alt="{{ $member['name'] }}"
                                     loading="lazy">
@@ -440,7 +1087,6 @@
                                 <h5 class="akg-team-name">{{ $member['name'] }}</h5>
                                 <p class="akg-team-job">{{ $member['job'] }}</p>
                             </div>
-
                         </div>
                     </div>
                 @endforeach
@@ -449,151 +1095,6 @@
         </div>
     </section>
 
-
-    {{-- ================= TESTIMONIALS ================= --}}
-    <section id="testimonials" class="container-xxl py-5">
-        <div class="container akg-newcard text-center ">
-
-            <!-- Section Title -->
-            <h5 class="akg-section-label">{{ __('messages.home.testimonials_label') }}</h5>
-            <h2 class="akg-section-head mb-5">{{ __('messages.home.testimonials_title') }}</h2>
-            <p class="text-muted mb-4">Average rating: <span class="text-gold fw-bold">4.9 / 5</span></p>
-
-            <div class="row g-4 justify-content-center">
-
-                <!-- Testimonial 1 -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="akg-card text-center">
-                        <div class="akg-testimonial-icon">
-                            <i class="fa fa-quote-left"></i>
-                        </div>
-                        <div class="akg-testimonial-stars mb-2">
-                            <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i
-                                class="fa fa-star"></i><i class="fa fa-star-half-alt"></i>
-                        </div>
-
-                        <p class="akg-testimonial-text">
-                            “Amazing craftsmanship and outstanding service. They transformed our home beautifully.”
-                        </p>
-
-                        <div class="akg-testimonial-client mt-3">
-                            <img src="{{ asset('assets/img/clients/client1.jpg') }}" class="akg-client-img"
-                                alt="Client - Sarah Williams" loading="lazy">
-                            <h6 class="text-gold mt-2">Sarah Williams</h6>
-                            <span class="text-muted small">Home Owner</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Testimonial 2 -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="akg-card text-center">
-                        <div class="akg-testimonial-icon">
-                            <i class="fa fa-quote-left"></i>
-                        </div>
-                        <div class="akg-testimonial-stars mb-2">
-                            <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i
-                                class="fa fa-star"></i><i class="fa fa-star"></i>
-                        </div>
-
-                        <p class="akg-testimonial-text">
-                            “Professional, fast, and excellent quality. Highly recommended for carpentry and interior work.”
-                        </p>
-
-                        <div class="akg-testimonial-client mt-3">
-                            <img src="{{ asset('assets/img/clients/client2.jpg') }}" class="akg-client-img"
-                                alt="Client - Michael Anderson" loading="lazy">
-                            <h6 class="text-gold mt-2">Michael Anderson</h6>
-                            <span class="text-muted small">Business Owner</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Testimonial 3 -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="akg-card text-center">
-                        <div class="akg-testimonial-icon">
-                            <i class="fa fa-quote-left"></i>
-                        </div>
-                        <div class="akg-testimonial-stars mb-2">
-                            <i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i
-                                class="fa fa-star"></i><i class="fa fa-star-half-alt"></i>
-                        </div>
-
-                        <p class="akg-testimonial-text">
-                            “Their attention to detail is incredible. The interior design service was beyond expectations.”
-                        </p>
-
-                        <div class="akg-testimonial-client mt-3">
-                            <img src="{{ asset('assets/img/clients/client3.jpg') }}" class="akg-client-img"
-                                alt="Client - Layla Khoury" loading="lazy">
-                            <h6 class="text-gold mt-2">Layla Khoury</h6>
-                            <span class="text-muted small">Interior Client</span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </section>
-
-
-    {{-- ================= CONTACT ================= --}}
-
-    <section id="contact" class="container-xxl py-5">
-        <div class="container akg-newcard text-center">
-            <h2 class="akg-section-head">{{ __('messages.home.contact_title') }}</h2>
-            <p class="text-muted mb-3">{{ __('messages.home.contact_sub') }}</p>
-            <div class="row justify-content-center mb-4">
-                <div class="col-md-4">
-                    <a class="akg-quick-contact d-inline-flex align-items-center justify-content-center"
-                        href="tel:+971501234567">
-                        <i class="fa fa-phone me-2"></i> +971 50 123 4567
-                    </a>
-                </div>
-                <div class="col-md-4">
-                    <a class="akg-quick-contact d-inline-flex align-items-center justify-content-center"
-                        href="https://wa.me/971501234567" target="_blank" rel="noopener">
-                        <i class="fa fa-whatsapp me-2"></i> WhatsApp available
-                    </a>
-                </div>
-            </div>
-            <div class="akg-card p-4">
-
-                <form action="{{ route('contact.send') }}" method="POST" class="row g-3 mt-4">
-                    @csrf
-
-                    <div class="col-md-6">
-                        <input type="text" name="name" class="form-control akg-input" placeholder="Your Name"
-                            required>
-                    </div>
-
-                    <div class="col-md-6">
-                        <input type="email" name="email" class="form-control akg-input" placeholder="Your Email"
-                            required>
-                    </div>
-
-                    <div class="col-12">
-                        <textarea name="message" class="form-control akg-input" rows="5" placeholder="Your Message" required></textarea>
-                    </div>
-
-                    <!-- Google reCAPTCHA -->
-                    <div class="col-12 mt-3">
-                        <div class="g-recaptcha d-flex justify-content-center"
-                            data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}">
-                        </div>
-                    </div>
-
-                    <div class="col-12 mt-3">
-                        <button type="submit" class="btn btn-gold px-5 py-3">{{ __('messages.home.contact_send') }}</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </section>
-
-    <!-- reCAPTCHA Script -->
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -612,7 +1113,6 @@
             let allImages = [];
             let currentIndex = 0;
 
-            // Open project popup
             document.querySelectorAll('.view-project-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const title = btn.dataset.title;
@@ -644,21 +1144,17 @@
                 });
             });
 
-            // Lightbox
             function openLightbox(index) {
                 currentIndex = index;
                 lightboxImage.src = allImages[currentIndex];
-
-                // Ensure center positioning
                 lightbox.style.display = 'flex';
-                document.body.style.overflow = "hidden"; // Lock background scroll
+                document.body.style.overflow = "hidden";
             }
 
             function closeLightbox() {
                 lightbox.style.display = "none";
-                document.body.style.overflow = "auto"; // Restore scroll
+                document.body.style.overflow = "auto";
             }
-
 
             nextBtn.onclick = () => {
                 currentIndex = (currentIndex + 1) % allImages.length;
@@ -675,6 +1171,61 @@
             lightbox.onclick = (e) => {
                 if (e.target === lightbox) closeLightbox();
             };
+
+            // Rating stars in review modal
+            const ratingInput = document.getElementById('ratingInput');
+            const starButtons = document.querySelectorAll('.akg-star-btn');
+            starButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const val = btn.dataset.value;
+                    ratingInput.value = val;
+                    starButtons.forEach(s => s.classList.toggle('active', s.dataset.value <= val));
+                });
+            });
+
+            // Products parent/child nav sync
+            const parentLinks = document.querySelectorAll('#prodParentNav .nav-link');
+            parentLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const parentId = link.dataset.parent;
+
+                    parentLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+
+                    document.querySelectorAll('.prod-child').forEach(el => el.classList.add(
+                        'd-none'));
+                    const childRow = document.getElementById(`prod-child-${parentId}`);
+                    if (childRow) {
+                        childRow.classList.remove('d-none');
+                        const firstChild = childRow.querySelector('.nav-link');
+                        if (firstChild) firstChild.click();
+                    }
+                });
+            });
+
+            // Projects parent/child nav sync
+            const projParentLinks = document.querySelectorAll('#projParentNav .nav-link');
+            projParentLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const parentId = link.dataset.parent;
+
+                    projParentLinks.forEach(l => l.classList.remove('active'));
+                    link.classList.add('active');
+
+                    document.querySelectorAll('.proj-child').forEach(el => el.classList.add(
+                        'd-none'));
+                    const childRow = document.getElementById(`proj-child-${parentId}`);
+                    if (childRow) {
+                        childRow.classList.remove('d-none');
+                        const firstChild = childRow.querySelector('.nav-link');
+                        if (firstChild) firstChild.click();
+                    }
+                });
+            });
+
+            // Quick inquiry form: leave reCAPTCHA to handle submit; no client-side disabling
         });
     </script>
 @endsection

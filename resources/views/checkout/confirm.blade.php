@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Order Confirmation')
+@section('meta _description', 'Confirm your order with Ali Krecht Group. Review your luxury product details and complete your secure purchase.')
 
 @section('content')
     <div class=" akg-hero-img-box">
@@ -38,10 +39,10 @@
                 <table class="table table-dark table-striped align-middle">
                     <thead>
                         <tr>
-                            <th scope="col">Product</th>
-                            <th scope="col">Quantity</th>
-                            <th scope="col">Price</th>
-                            <th scope="col">Total</th>
+                            <th scope="col">{{ __('messages.checkout.table_product') }}</th>
+                            <th scope="col">{{ __('messages.checkout.table_qty') }}</th>
+                            <th scope="col">{{ __('messages.checkout.table_price') }}</th>
+                            <th scope="col">{{ __('messages.checkout.table_total') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -54,25 +55,42 @@
                             </tr>
                         @endforeach
                         <tr class="table-warning text-dark fw-bold">
-                            <td colspan="3" class="text-end">Total:</td>
+                            <td colspan="3" class="text-end">Subtotal:</td>
                             <td>${{ number_format($total, 2) }}</td>
+                        </tr>
+                        @if(!empty($applied))
+                            <tr class="table-warning text-dark fw-bold">
+                                <td colspan="3" class="text-end">Discount ({{ $applied['code'] }}):</td>
+                                <td>- ${{ number_format($discount, 2) }}</td>
+                            </tr>
+                        @endif
+                        <tr class="table-warning text-dark fw-bold">
+                            <td colspan="3" class="text-end">Total to pay:</td>
+                            <td>${{ number_format($totalAfter ?? $total, 2) }}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
             {{-- ✅ نموذج التأكيد النهائي --}}
-            <form method="POST" action="{{ route('checkout.process') }}">
+            <form method="POST" action="{{ route('checkout.process') }}" class="js-recaptcha">
                 @csrf
+                <input type="hidden" name="g-recaptcha-response">
                 @foreach ($data as $key => $value)
                     <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                 @endforeach
 
-                <input type="hidden" name="total" value="{{ $total }}">
+                <input type="hidden" name="total" value="{{ $totalAfter ?? $total }}">
 
                 <div class="d-flex justify-content-between mt-4 flex-wrap gap-2">
                     <a href="{{ route('checkout.index') }}" class="btn btn-outline-gold py-2 px-4">← {{ __('messages.checkout.edit') }}</a>
-                    <button type="submit" class="btn btn-gold text-dark fw-semibold py-2 px-5">{{ __('messages.checkout.place_order') }}</button>
+                    <button type="submit"
+                            class="btn btn-gold text-dark fw-semibold py-2 px-5"
+                            data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"
+                            data-size="invisible"
+                            data-badge="bottomright">
+                        {{ __('messages.checkout.place_order') }}
+                    </button>
                 </div>
             </form>
         </div>

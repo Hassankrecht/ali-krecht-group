@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Contact')
+@section('meta_description', 'Contact Ali Krecht Group for luxury carpentry, interior design, and bespoke woodwork services. Get in touch today!')
 
 @section('content')
     <div class=" akg-hero-img-box">
@@ -31,12 +32,12 @@
                     <div class="akg-card h-100">
                         <h5 class="text-gold mb-3">{{ __('messages.contact_page.quick_contacts') }}</h5>
                         <p class="mb-2"><i class="fa fa-phone me-2 text-gold"></i><a class="text-light"
-                                href="tel:+971501234567">+971 50 123 4567</a></p>
+                                href="tel:+971501234567">{{ __('messages.contact_page.phone_label') }}: +971 50 123 4567</a></p>
                         <p class="mb-2"><i class="fa fa-whatsapp me-2 text-gold"></i><a class="text-light"
-                                href="https://wa.me/971501234567" target="_blank" rel="noopener">WhatsApp</a></p>
+                                href="https://wa.me/971501234567" target="_blank" rel="noopener">{{ __('messages.contact_page.whatsapp_available') }}</a></p>
                         <p class="mb-2"><i class="fa fa-envelope-open me-2 text-gold"></i><a class="text-light"
                                 href="mailto:info@alikrechtgroup.com">info@alikrechtgroup.com</a></p>
-                        <p class="small text-muted mb-0">We keep your details private and never share them.</p>
+                        <p class="small text-muted mb-0">{{ __('messages.contact_page.privacy_note') }}</p>
 
                         <div class="mt-4">
                             <iframe class="rounded w-100" height="250"
@@ -64,8 +65,9 @@
                     <div class="akg-card p-4">
                         <h5 class="text-gold mb-3">{{ __('messages.contact_page.send_message') }}</h5>
 
-                        <form action="{{ route('contact.send') }}" method="POST" class="row g-3" id="contactForm">
+                        <form action="{{ route('contact.send') }}" method="POST" class="row g-3 js-recaptcha" id="contactForm">
                             @csrf
+                            <input type="hidden" name="g-recaptcha-response">
                             <div class="col-md-6">
                                 <input type="text" name="name" class="form-control akg-input" placeholder="Your Name"
                                     value="{{ old('name') }}" required>
@@ -82,17 +84,14 @@
                                 <textarea name="message" class="form-control akg-input" rows="5" placeholder="Your Message" required>{{ old('message') }}</textarea>
                             </div>
 
-                            <div class="col-12 mt-2">
-                                <div class="g-recaptcha d-flex justify-content-center"
-                                    data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}">
-                                </div>
-                                @error('captcha')
-                                    <span class="text-danger small">{{ $message }}</span>
-                                @enderror
-                            </div>
-
                             <div class="col-12 mt-3 d-flex flex-column gap-2">
-                                <button type="submit" class="btn btn-gold px-5 py-3" id="submitBtn">{{ __('messages.contact_page.send') }}</button>
+                                <button type="submit" class="btn btn-gold px-5 py-3"
+                                    data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"
+                                    data-size="invisible"
+                                    data-badge="bottomright"
+                                    id="submitBtn">
+                                    {{ __('messages.contact_page.send') }}
+                                </button>
                                 <span class="text-muted small">{{ __('messages.contact_page.intro') }}</span>
                             </div>
                         </form>
@@ -102,16 +101,41 @@
         </div>
     </div>
 
-    <!-- reCAPTCHA Script -->
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('contactForm');
             const submitBtn = document.getElementById('submitBtn');
+            let widgetId = null;
+
+            const ensureWidget = () => {
+                if (widgetId !== null) return widgetId;
+                if (typeof grecaptcha === 'undefined') return null;
+                widgetId = grecaptcha.render(submitBtn, {
+                    sitekey: submitBtn.dataset.sitekey,
+                    size: submitBtn.dataset.size || 'invisible',
+                    badge: submitBtn.dataset.badge || 'bottomright',
+                    callback: onSubmitRecaptcha,
+                    'error-callback': onRecaptchaError,
+                });
+                return widgetId;
+            };
+
             if (form && submitBtn) {
-                form.addEventListener('submit', () => {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    if (!form.checkValidity()) {
+                        form.reportValidity();
+                        return;
+                    }
+                    const id = ensureWidget();
+                    if (id === null) {
+                        form.submit();
+                        return;
+                    }
+                    window.__recaptchaActiveForm = form;
                     submitBtn.disabled = true;
                     submitBtn.textContent = 'Sending...';
+                    grecaptcha.execute(id);
                 });
             }
         });

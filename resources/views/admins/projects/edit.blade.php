@@ -67,18 +67,54 @@
                                 <input type="date" name="date" class="form-control" value="{{ $project->date }}">
                             </div>
 
+                            {{-- Categories --}}
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Categories</label>
+                                <select name="categories[]" class="form-select" multiple>
+                                    @foreach($categories as $cat)
+                                        <optgroup label="{{ $cat->name }}">
+                                            @foreach($cat->children as $child)
+                                                <option value="{{ $child->id }}" {{ $project->categories->pluck('id')->contains($child->id) ? 'selected' : '' }}>
+                                                    {{ $child->name }}
+                                                </option>
+                                            @endforeach
+                                        @endforeach
+                                    </optgroup>
+                                </select>
+                                <small class="text-muted">اختر فئة أو أكثر للمشروع.</small>
+                            </div>
+
                         </div>
 
                         {{-- RIGHT SIDE --}}
                         <div class="col-lg-6">
 
-                            {{-- Description --}}
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Description</label>
-                                <textarea name="description" rows="6" class="form-control">{{ $project->description }}</textarea>
-                            </div>
-
+                        {{-- Description --}}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Description</label>
+                            <textarea name="description" rows="6" class="form-control">{{ $project->description }}</textarea>
                         </div>
+
+                        {{-- Translations --}}
+                        <div class="akg-newcard p-3">
+                            <h6 class="text-warning fw-bold mb-2">Translations</h6>
+                            <div class="row g-3">
+                                @foreach(config('app.supported_locales', []) as $locale)
+                                    @continue($locale === config('app.locale'))
+                                    @php $t = $project->translations->firstWhere('locale', $locale); @endphp
+                                    <div class="col-md-6">
+                                        <label class="form-label">Title ({{ strtoupper($locale) }})</label>
+                                        <input type="text" name="translations[{{ $locale }}][title]" class="form-control" value="{{ old('translations.'.$locale.'.title', $t->title ?? '') }}">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Description ({{ strtoupper($locale) }})</label>
+                                        <textarea name="translations[{{ $locale }}][description]" rows="2" class="form-control">{{ old('translations.'.$locale.'.description', $t->description ?? '') }}</textarea>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                    </div>
 
                     </div>
 
@@ -91,7 +127,16 @@
                             {{-- preview --}}
                             <div>
                                 @if ($project->main_image)
-                                    <img src="{{ asset('storage/' . $project->main_image) }}"
+                                    @php
+                                        $imgPath = $project->main_image;
+                                        if (str_contains($imgPath, 'storage/public/assets/')) {
+                                            $imgPath = str_replace('storage/public/', '', $imgPath);
+                                        }
+                                        $mainImg = (str_starts_with($imgPath, 'public/') || str_starts_with($imgPath, 'assets/'))
+                                            ? asset($imgPath)
+                                            : asset('storage/' . $imgPath);
+                                    @endphp
+                                    <img src="{{ $mainImg }}"
                                          class="img-thumbnail shadow-sm mb-2"
                                          style="max-width: 220px; max-height: 160px; object-fit: cover;">
                                 @else
@@ -152,7 +197,16 @@
                     @forelse ($project->images as $image)
                         <div class="position-relative">
 
-                            <img src="{{ asset('storage/' . $image->image_path) }}"
+                            @php
+                                $gPath = $image->image_path;
+                                if (str_contains($gPath, 'storage/public/assets/')) {
+                                    $gPath = str_replace('storage/public/', '', $gPath);
+                                }
+                                $gImg = (str_starts_with($gPath, 'public/') || str_starts_with($gPath, 'assets/'))
+                                    ? asset($gPath)
+                                    : asset('storage/' . $gPath);
+                            @endphp
+                            <img src="{{ $gImg }}"
                                  style="width:140px; height:100px; object-fit:cover;"
                                  class="rounded shadow-sm">
 

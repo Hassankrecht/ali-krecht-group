@@ -1,10 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Projects')
+@section('title', __('messages.projects_page.hero_title'))
+@section('meta_description', 'Discover our portfolio of luxury carpentry and interior design projects completed by Ali Krecht Group in the UAE.')
 
 @section('content')
     <div class=" akg-hero-img-box">
-        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 11_59_33 AM.png') }}" alt="Projects hero"
+        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 11_59_33 AM.png') }}" alt="{{ __('messages.projects_page.hero_title') }}"
             class="akg-hero-img" loading="lazy">
 
 
@@ -24,29 +25,100 @@
             <h2 class="akg-section-head mb-2">{{ __('messages.projects_page.section_title') }}</h2>
             <p class="text-muted mb-4">{{ __('messages.projects_page.section_sub') }}</p>
 
+            @if(isset($categories) && $categories->count())
+                @php
+                    $activeParent = $categories->first()->id ?? null;
+                    $activeChildSlug = null;
+                    foreach ($categories as $parent) {
+                        if ($parent->slug === ($categorySlug ?? null)) {
+                            $activeParent = $parent->id;
+                            $activeChildSlug = null;
+                            break;
+                        }
+                        if ($parent->children->contains(fn($c) => $c->slug === ($categorySlug ?? null))) {
+                            $activeParent = $parent->id;
+                            $activeChildSlug = $categorySlug;
+                            break;
+                        }
+                    }
+                @endphp
+                <div class="akg-newcard mb-4 p-3 text-center akg-cat-nav">
+                    <ul class="nav nav-pills justify-content-center mb-3 flex-wrap gap-2" id="parentNav">
+                        @foreach($categories as $parent)
+                            <li class="nav-item">
+                                <a class="nav-link {{ $activeParent === $parent->id ? 'active' : '' }}" href="#"
+                                   data-parent="{{ $parent->id }}"
+                                   onclick="event.preventDefault(); document.querySelectorAll('.child-group').forEach(el => el.classList.add('d-none')); document.getElementById('child-{{ $parent->id }}').classList.remove('d-none'); document.querySelectorAll('#parentNav .nav-link').forEach(l=>l.classList.remove('active')); this.classList.add('active');">
+                                    {{ $parent->name_localized }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+                    @foreach($categories as $parent)
+                        <div id="child-{{ $parent->id }}" class="child-group {{ $activeParent === $parent->id ? '' : 'd-none' }}">
+                            <ul class="nav nav-pills justify-content-center flex-wrap gap-2">
+                                <li class="nav-item">
+                                    <a class="nav-link {{ ($categorySlug ?? null) === $parent->slug ? 'active' : '' }}"
+                                       href="{{ route('projects.index', ['category' => $parent->slug]) }}">
+                                        {{ __('All') ?? 'All' }}
+                                    </a>
+                                </li>
+                                @foreach($parent->children as $child)
+                                    <li class="nav-item">
+                                        <a class="nav-link {{ ($categorySlug ?? '') === $child->slug ? 'active' : '' }}"
+                                           href="{{ route('projects.index', ['category' => $child->slug]) }}">
+                                            {{ $child->name_localized }}
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
             <div class="row g-4">
                 @forelse($projects as $project)
                     <div class="col-lg-4 col-md-6">
                         <div class="akg-project-card h-100">
 
                             <!-- IMAGE -->
-                            <img src="{{ $project->main_image_url }}" class="akg-project-img"
+                            @php
+                                $resolvePath = function ($path) {
+                                    if (!$path) return null;
+                                    // تصحيح المسارات القديمة من storage/public/assets إلى assets
+                                    if (str_contains($path, 'storage/public/assets/')) {
+                                        $path = str_replace('storage/public/', '', $path);
+                                    }
+                                    return (str_starts_with($path, 'public/') || str_starts_with($path, 'assets/'))
+                                        ? asset($path)
+                                        : asset('storage/' . $path);
+                                };
+                                $mainImg = $resolvePath($project->main_image ?? null) ?? ($project->main_image_url ?? asset('assets/img/default.jpg'));
+                                $gallery = collect($project->gallery_urls ?? [])
+                                    ->filter()
+                                    ->values();
+                                if ($gallery->isEmpty()) {
+                                    $gallery = $project->images->pluck('image_path')->map(fn($p) => $resolvePath($p))->filter()->values();
+                                }
+                            @endphp
+                            <img src="{{ $mainImg }}" class="akg-project-img"
                                 alt="{{ $project->title }}" loading="lazy">
 
                             <!-- CONTENT -->
                             <div class="text-center mt-3 px-3 pb-3">
-                                <h5 class="text-gold fw-bold">{{ $project->title }}</h5>
+                                <h5 class="text-gold fw-bold">{{ $project->title_localized }}</h5>
 
                                 <p class="text-muted small">
-                                    {{ Str::limit($project->description, 90) }}
+                                    {{ Str::limit($project->description_localized, 90) }}
                                 </p>
 
                                 <button class="btn btn-gold-small view-project-btn" data-id="{{ $project->id }}"
-                                    data-title="{{ e($project->title) }}"
-                                    data-description="{{ e($project->description) }}"
-                                    data-image="{{ $project->main_image_url }}"
+                                    data-title="{{ e($project->title_localized) }}"
+                                    data-description="{{ e($project->description_localized) }}"
+                                    data-image="{{ $mainImg }}"
                                     data-url="{{ route('projects.show', $project->id) }}"
-                                    data-gallery='@json($project->gallery_urls)'>
+                                    data-gallery='@json($gallery)'>
                                     <i class="bi bi-eye me-2"></i> {{ __('messages.projects_page.view_details') }}
                                 </button>
                             </div>
@@ -55,41 +127,12 @@
                     </div>
 
                 @empty
-                    <p class="text-center text-light">No projects available.</p>
+                    <p class="text-center text-light">{{ __('messages.projects.no_projects') }}</p>
                 @endforelse
             </div>
 
-            <div class="row g-3 mt-4 text-center">
-                <div class="col-6 col-md-3">
-                    <div class="akg-card">
-                        <span class="akg-trust-number">15+</span>
-                        <span class="akg-trust-label">Years Mastery</span>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="akg-card">
-                        <span class="akg-trust-number">50+</span>
-                        <span class="akg-trust-label">Turnkey Projects</span>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="akg-card">
-                        <span class="akg-trust-number">24/7</span>
-                        <span class="akg-trust-label">Client Support</span>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="akg-card">
-                        <span class="akg-trust-number">QA</span>
-                        <span class="akg-trust-label">European Standards</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="text-center mt-4">
-                <a href="{{ route('contact') }}" class="btn btn-gold px-4 py-2 me-2">{{ __('messages.projects_page.cta_consult') }}</a>
-                <a href="https://wa.me/971501234567" class="btn btn-outline-gold px-4 py-2" target="_blank"
-                    rel="noopener">{{ __('messages.projects_page.cta_whatsapp') }}</a>
+            <div class="mt-4">
+                {{ $projects->links() }}
             </div>
         </div>
     </div>
@@ -111,8 +154,8 @@
                 </div>
 
                 <div class="modal-footer border-0 justify-content-between">
-                    <button class="btn btn-outline-gold" data-bs-dismiss="modal">Close</button>
-                    <a id="fullProjectLink" href="#" class="btn btn-gold">Full Project</a>
+                    <button class="btn btn-outline-gold" data-bs-dismiss="modal">{{ __('messages.projects.close') }}</button>
+                    <a id="fullProjectLink" href="#" class="btn btn-gold">{{ __('messages.projects.full_project') }}</a>
                 </div>
 
             </div>

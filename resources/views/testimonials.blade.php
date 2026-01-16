@@ -1,10 +1,11 @@
 @extends('layouts.app')
 
 @section('title', __('messages.home.testimonials_title') ?? 'Testimonials')
+@section('meta_description', 'Read client testimonials and reviews for Ali Krecht Group. See what our customers say about our luxury carpentry and design services.')
 
 @section('content')
     <div class="akg-hero-img-box position-relative">
-        <img src="{{ asset('assets/img/services/hero.jpg') }}" class="akg-hero-img" alt="Testimonials" loading="lazy">
+        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_12_34 PM.png') }}" class="akg-hero-img" alt="Testimonials" loading="lazy">
         <div class="akg-hero-overlay"></div>
         <div class="container text-center hero-content">
             <h1 class="akg-hero-title text-gold mb-2">{{ __('messages.home.testimonials_title') ?? 'Testimonials' }}</h1>

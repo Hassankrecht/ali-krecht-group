@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\WelcomeCouponAssigner;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use App\Rules\Recaptcha;
 
 class RegisterController extends Controller
 {
@@ -48,10 +51,17 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
+        $siteKey = env('RECAPTCHA_SITE_KEY');
+        $secret  = env('RECAPTCHA_SECRET') ?: env('RECAPTCHA_SECRET_KEY');
+        $recaptchaRule = ($siteKey && $secret)
+            ? ['required', new Recaptcha]
+            : ['nullable'];
+
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'g-recaptcha-response' => $recaptchaRule,
         ]);
     }
 
@@ -68,5 +78,13 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
+    }
+
+    /**
+     * بعد التسجيل الناجح (وهو يقوم بتسجيل الدخول تلقائياً)، اربط كوبون الترحيب إن وجد.
+     */
+    protected function registered(Request $request, $user)
+    {
+        app(WelcomeCouponAssigner::class)->assign($user->id);
     }
 }

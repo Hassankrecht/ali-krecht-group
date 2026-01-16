@@ -12,7 +12,13 @@ class Review extends Model
     protected $fillable = [
         'name',
         'profession',
+        'rating',
         'photo',
         'review',
+        'is_approved',
+    ];
+
+    protected $casts = [
+        'is_approved' => 'boolean',
     ];
 }

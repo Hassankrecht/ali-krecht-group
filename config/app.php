@@ -83,10 +83,10 @@ return [
     |
     */
 
-    'locale' => 'en',
+    'locale' => env('APP_LOCALE', 'ar'),
 
     // Supported locales for language switcher
-    'supported_locales' => ['en', 'ar', 'pt'],
+    'supported_locales' => ['ar', 'en', 'pt'],
 
     /*
     |--------------------------------------------------------------------------
@@ -99,7 +99,7 @@ return [
     |
     */
 
-    'fallback_locale' => 'en',
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'ar'),
 
     /*
     |--------------------------------------------------------------------------
@@ -171,6 +171,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\ViewComposerServiceProvider::class,
     ])->toArray(),
 
     /*

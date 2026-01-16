@@ -60,11 +60,6 @@ class WelcomeCouponAssigner
             $code = strtoupper(Str::random(8));
         } while (Coupon::where('code', $code)->exists());
 
-        $startAt = $coupon->starts_at ? Carbon::parse($coupon->starts_at) : $now;
-        $expireAt = $coupon->expiry_days
-            ? $startAt->copy()->addDays($coupon->expiry_days)
-            : ($coupon->expiration_date ? Carbon::parse($coupon->expiration_date) : null);
-
         Coupon::create([
             'user_id'         => $userId,
             'template_id'     => $coupon->id,
@@ -75,8 +70,8 @@ class WelcomeCouponAssigner
             'used_count'      => 0,
             'min_total'       => $coupon->min_total,
             'generated_for'   => 'welcome_auto',
-            'starts_at'       => $startAt,
-            'expiration_date' => $expireAt,
+            'starts_at'       => $coupon->starts_at ?: $now,
+            'expiration_date' => $coupon->expiry_days ? Carbon::now()->addDays($coupon->expiry_days) : $coupon->expiration_date,
             'expiry_days'     => $coupon->expiry_days,
             'status'          => true,
         ]);
