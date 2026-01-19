@@ -1,8 +1,6 @@
-use App\Http\Controllers\SitemapController;
-// Sitemap.xml
-Route::get('/sitemap.xml', [SitemapController::class, 'index']);
 <?php
 
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\HomeController;
@@ -26,6 +24,9 @@ use App\Http\Controllers\PageEventController;
 use App\Http\Controllers\CouponController;
 use App\Models\Admin\Admin;
 use App\Http\Controllers\Admin\Reports\OrderReportController;
+
+// Sitemap.xml
+Route::get('/sitemap.xml', [SitemapController::class, 'index']);
 
 /*
 |--------------------------------------------------------------------------
