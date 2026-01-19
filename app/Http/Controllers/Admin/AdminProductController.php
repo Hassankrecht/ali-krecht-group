@@ -287,7 +287,7 @@ class AdminProductController extends Controller
 
     private function storeAssetTo(string $folder, UploadedFile $file): string
     {
-        // نحفظ داخل public/assets/<folder> حتى يكون الرابط متاحًا عبر asset()
+        // نحفظ داخل assets/<folder> حتى يكون الرابط متاحًا عبر asset()
         $dir = public_path("assets/{$folder}");
         if (!is_dir($dir)) {
             mkdir($dir, 0755, true);
@@ -295,8 +295,8 @@ class AdminProductController extends Controller
         $name = $file->hashName();
         $file->move($dir, $name);
 
-        // نخزن المسار كما سيُستخدم في asset()
-        return "public/assets/{$folder}/{$name}";
+        // نخزن المسار بشكل موحد assets/...
+        return "assets/{$folder}/{$name}";
     }
 
     private function deleteAsset(?string $path): void

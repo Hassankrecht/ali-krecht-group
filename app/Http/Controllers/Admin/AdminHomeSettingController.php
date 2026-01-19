@@ -215,16 +215,13 @@ class AdminHomeSettingController extends Controller
 
     private function storeToAssetsHome(UploadedFile $file): string
     {
-        // احفظ مباشرة تحت public/assets/home (على الخادم = htdocs/public/assets/home)
-        // حتى يكون المسار النهائي الذي نُعيده متطابقًا مع مكان الحفظ
         $dir = public_path('assets/home');
         if (!is_dir($dir)) {
             mkdir($dir, 0755, true);
         }
         $name = $file->hashName();
         $file->move($dir, $name);
-        // أضف "public/" لأن الملفات تحفظ تحت htdocs/public/assets/...
-        return 'public/assets/home/' . $name;
+        return 'assets/home/' . $name;
     }
 
     /**

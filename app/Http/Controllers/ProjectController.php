@@ -55,7 +55,7 @@ class ProjectController extends Controller
                 $resolvePath = function (?string $path) {
                     if (!$path) return asset('assets/img/default.jpg');
                     if (str_contains($path, 'storage/public/assets/')) {
-                        $path = str_replace('storage/', '', $path);
+                        $path = str_replace('storage/public/', '', $path);
                     }
                     if (str_starts_with($path, 'assets/') || str_starts_with($path, 'public/')) {
                         $candidate = public_path(str_starts_with($path, 'public/') ? substr($path, strlen('public/')) : $path);

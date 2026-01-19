@@ -20,6 +20,7 @@ class ProjectCategoryController extends Controller
             'translations' => 'nullable|array',
         ]);
 
+        $data['order'] = $data['order'] ?? 0;
         $data['slug'] = $data['slug'] ?? Str::slug($data['name']);
         $category = ProjectCategory::create($data);
 

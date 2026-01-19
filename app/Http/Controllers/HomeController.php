@@ -35,9 +35,9 @@ class HomeController extends Controller
                 return $default ?: asset('assets/img/default.jpg');
             }
 
-            // تصحيح المسارات القديمة storage/public/assets/... إلى public/assets/...
+            // تصحيح المسارات القديمة storage/public/assets/... إلى assets/...
             if (str_contains($path, 'storage/public/assets/')) {
-                $path = str_replace('storage/', '', $path);
+                $path = str_replace('storage/public/', '', $path);
             }
 
             // إذا كان المسار يبدأ بـ assets/ أو public/ استخدمه مباشرة
@@ -253,8 +253,8 @@ class HomeController extends Controller
             }
             $name = $request->file('photo')->hashName();
             $request->file('photo')->move($dir, $name);
-            // نخزن المسار كما يظهر للمتصفح
-            $data['photo'] = "public/assets/reviews/{$name}";
+            // نخزن المسار بشكل موحد assets/...
+            $data['photo'] = "assets/reviews/{$name}";
         }
 
         // Keep new submissions pending until an admin approves

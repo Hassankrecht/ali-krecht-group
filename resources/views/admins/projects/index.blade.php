@@ -139,7 +139,6 @@
                     }
                 @endphp
 
-                @if($categories->count())
                 <div class="akg-newcard mb-4 p-3">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="text-gold fw-bold mb-0">Project Categories</h5>
@@ -148,6 +147,8 @@
                             <button class="btn btn-outline-gold btn-sm" data-bs-toggle="modal" data-bs-target="#addChildModal">Child Category</button>
                         </div>
                     </div>
+
+                    @if($categories->count())
 
                     {{-- Parents nav --}}
                     <div class="parent-nav-box">
@@ -232,8 +233,10 @@
                             </ul>
                         </div>
                     @endforeach
+                    @else
+                        <div class="alert alert-info mb-0">No categories yet. Add a parent category first.</div>
+                    @endif
                 </div>
-                @endif
 
                 {{-- Modals add/edit categories --}}
                 <div class="modal fade" id="addParentModal" tabindex="-1">

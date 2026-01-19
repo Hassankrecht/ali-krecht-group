@@ -21,6 +21,18 @@
                     <div class="alert alert-success fw-semibold">{{ session('success') }}</div>
                 @endif
 
+                {{-- ERRORS --}}
+                @if ($errors->any())
+                    <div class="alert alert-danger border-0 shadow-sm">
+                        <strong>Whoops!</strong> Fix the issue below:
+                        <ul class="mb-0 mt-2">
+                            @foreach ($errors->all() as $error)
+                                <li>• {{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 {{-- ======================= UPDATE PROJECT FORM ======================= --}}
                 <form action="{{ route('admin.projects.update', $project->id) }}" method="POST"
                       enctype="multipart/form-data">

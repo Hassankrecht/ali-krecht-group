@@ -55,17 +55,19 @@
                         <div class="col-md-6">
                             <label class="form-label text-warning fw-semibold">Categories</label>
                             <select name="categories[]" class="form-select bg-transparent text-light border-warning" multiple>
-                                @foreach($categories as $cat)
-                                    <optgroup label="{{ $cat->name }}">
-                                        @foreach($cat->children as $child)
-                                            <option value="{{ $child->id }}" {{ collect(old('categories', []))->contains($child->id) ? 'selected' : '' }}>
-                                                {{ $child->name }}
-                                            </option>
-                                        @endforeach
-                                    </optgroup>
+                                @php
+                                    $parents = $categories->whereNull('parent_id');
+                                @endphp
+                                @foreach($parents as $cat)
+                                    <option disabled>— {{ $cat->name }} —</option>
+                                    @foreach($cat->children->where('parent_id', $cat->id)->unique('id') as $child)
+                                        <option value="{{ $child->id }}" {{ collect(old('categories', []))->contains($child->id) ? 'selected' : '' }}>
+                                            &nbsp;&nbsp;{{ $child->name }}
+                                        </option>
+                                    @endforeach
                                 @endforeach
                             </select>
-                            <small class="text-muted">Select one or more categories (hold CTRL/CMD).</small>
+                            <small class="text-muted">Select one or more child categories (hold CTRL/CMD).</small>
                         </div>
 
                         {{-- DESCRIPTION --}}

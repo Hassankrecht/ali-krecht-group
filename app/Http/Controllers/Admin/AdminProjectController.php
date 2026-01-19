@@ -9,6 +9,8 @@ use App\Models\ProjectCategory;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class AdminProjectController extends Controller
 {
@@ -60,7 +62,7 @@ class AdminProjectController extends Controller
         $totalProjects = (clone $projectsQuery)->count();
         $statusCounts  = (clone $projectsQuery)
             ->reorder()
-            ->select('projects.status', \DB::raw('COUNT(*) as total'))
+            ->select('projects.status', DB::raw('COUNT(*) as total'))
             ->groupBy('projects.status')
             ->pluck('total','projects.status');
 
@@ -96,8 +98,8 @@ class AdminProjectController extends Controller
             'location'    => 'nullable|string|max:255',
             'date'        => 'nullable|date',
             'status'      => 'required|integer|in:1,2,3,4', // <== هنا أرقام فقط
-            'main_image'  => 'nullable|image|mimes:jpg,png,jpeg|max:4096',
-            'gallery.*'   => 'nullable|image|mimes:jpg,png,jpeg|max:4096',
+            'main_image'  => 'nullable|image|mimes:jpg,png,jpeg,webp|max:10000',
+            'gallery.*'   => 'nullable|image|mimes:jpg,png,jpeg,webp|max:10000',
             'categories'  => 'nullable|array',
             'categories.*'=> 'exists:project_categories,id',
             'translations'=> 'nullable|array',
@@ -167,8 +169,8 @@ class AdminProjectController extends Controller
             // ❗ أهم نقطة — status لازم يكون رقم
             'status'      => 'required|integer|in:1,2,3,4',
 
-            'main_image'  => 'nullable|image|mimes:jpg,png,jpeg|max:4096',
-            'gallery.*'   => 'nullable|image|mimes:jpg,png,jpeg|max:4096',
+            'main_image'  => 'nullable|image|mimes:jpg,png,jpeg,webp|max:10000',
+            'gallery.*'   => 'nullable|image|mimes:jpg,png,jpeg,webp|max:10000',
             'categories'  => 'nullable|array',
             'categories.*'=> 'exists:project_categories,id',
             'translations'=> 'nullable|array',
@@ -273,7 +275,7 @@ class AdminProjectController extends Controller
         ]);
 
         if (empty($data['slug'])) {
-            $data['slug'] = \Str::slug($data['name']);
+            $data['slug'] = Str::slug($data['name']);
         }
 
         ProjectCategory::create($data);
@@ -291,7 +293,7 @@ class AdminProjectController extends Controller
         ]);
 
         if (empty($data['slug'])) {
-            $data['slug'] = \Str::slug($data['name']);
+            $data['slug'] = Str::slug($data['name']);
         }
 
         $category->update($data);
@@ -309,7 +311,7 @@ class AdminProjectController extends Controller
     public function addImages(Request $request, Project $project)
     {
         $request->validate([
-            'gallery.*' => 'image|mimes:jpg,png,jpeg|max:4096'
+            'gallery.*' => 'image|mimes:jpg,png,jpeg,webp|max:10000'
         ]);
 
         if ($request->hasFile('gallery')) {
@@ -335,9 +337,8 @@ class AdminProjectController extends Controller
         }
         $name = $file->hashName();
         $file->move($dir, $name);
-        // نخزن المسار كما يراه المتصفح (داخل htdocs/public/assets)
-        // نحتفظ بـ "public/assets/..." لأن المستخدم يريد نفس البنية في قاعدة البيانات
-        return "public/assets/{$folder}/{$name}";
+        // نخزن المسار كما يراه المتصفح داخل assets/...
+        return "assets/{$folder}/{$name}";
     }
 
     private function deleteAsset(?string $path): void

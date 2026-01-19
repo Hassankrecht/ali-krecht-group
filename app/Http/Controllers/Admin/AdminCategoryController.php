@@ -11,7 +11,9 @@ class AdminCategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::orderBy('id','desc')->get();
+        $categories = Category::with(['translations', 'parent.translations'])
+            ->orderBy('id', 'desc')
+            ->get();
         return view('admins.categories.index', compact('categories'));
     }
 

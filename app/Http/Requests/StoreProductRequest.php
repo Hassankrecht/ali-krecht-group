@@ -18,8 +18,8 @@ class StoreProductRequest extends FormRequest
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
             'price'       => 'required|numeric',
-            'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
-            'gallery.*'   => 'nullable|image|mimes:jpg,jpeg,png,webp|max:4096',
+            'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10000',
+            'gallery.*'   => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10000',
             'translations.*.title' => 'nullable|string|max:255',
             'translations.*.description' => 'nullable|string',
         ];

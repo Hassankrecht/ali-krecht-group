@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-
-use Intervention\Image\Facades\Image;
+use Illuminate\Filesystem\FilesystemAdapter;
+use Intervention\Image\Laravel\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
@@ -21,16 +21,18 @@ class ImageProcessingService
         $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
 
         // Store original
-        $stored = Storage::disk($this->disk)->putFileAs($path, $file, $filename);
+        /** @var FilesystemAdapter $disk */
+        $disk = Storage::disk($this->disk);
+        $stored = $disk->putFileAs($path, $file, $filename);
 
         // Process image
         if (isset($options['resize'])) {
-            $this->resize(Storage::disk($this->disk)->path($stored), $options['resize']);
+            $this->resize($disk->path($stored), $options['resize']);
         }
 
         // Optimize
         if (isset($options['optimize']) && $options['optimize']) {
-            $this->optimize(Storage::disk($this->disk)->path($stored));
+            $this->optimize($disk->path($stored));
         }
 
         return $stored;

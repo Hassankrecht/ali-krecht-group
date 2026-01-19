@@ -26,10 +26,16 @@
                         <label class="form-label fw-semibold">Category</label>
                         <select name="category_id" class="form-select" required>
                             <option value="">Select Category</option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->name }}
-                                </option>
+                            @php
+                                $parents = $categories->whereNull('parent_id');
+                            @endphp
+                            @foreach ($parents as $parent)
+                                <option disabled>— {{ $parent->name }} —</option>
+                                @foreach ($parent->children->where('parent_id', $parent->id)->unique('id') as $child)
+                                    <option value="{{ $child->id }}" {{ old('category_id') == $child->id ? 'selected' : '' }}>
+                                        &nbsp;&nbsp;{{ $child->name }}
+                                    </option>
+                                @endforeach
                             @endforeach
                         </select>
                     </div>
