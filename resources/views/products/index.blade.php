@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Products')
-@section('meta_description', 'Browse our exclusive collection of luxury wood products, custom furniture, and interior solutions by Ali Krecht Group.')
+@section('title', __('messages.products.hero_title'))
+@section('meta_description', __('messages.meta.products_description'))
 
 @section('content')
     <!-- Hero Section -->
     <div class=" akg-hero-img-box">
-        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_10_16 PM.png') }}" alt="Luxury products hero"
+        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_10_16 PM.png') }}" alt="{{ __('messages.products.hero_title') }}"
             class="akg-hero-img" loading="lazy">
 
 
@@ -14,9 +14,9 @@
         <div class="container text-center hero-content">
             <h1 class="akg-hero-title text-gold mb-3">{{ __('messages.products.hero_title') }}</h1>
 
-            <ol class="breadcrumb justify-content-center text-uppercase">
-                <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                <li class="breadcrumb-item text-light active">Products</li>
+            <ol class="breadcrumb justify-content-center text-uppercase {{ app()->getLocale() === 'ar' ? 'flex-row-reverse' : '' }}">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('messages.nav.home') }}</a></li>
+                <li class="breadcrumb-item text-light active">{{ __('messages.nav.products') }}</li>
             </ol>
         </div>
     </div>
@@ -100,7 +100,7 @@
                             <h5 class="text-gold fw-bold">{{ $item->title_localized }}</h5>
 
                             <p class="small text-muted mb-1">
-                                Category: {{ $item->category->name_localized ?? '—' }}
+                                {{ __('messages.products.category_label') }}: {{ $item->category->name_localized ?? __('messages.common.na') }}
                             </p>
 
                             <p class="fw-bold text-gold">${{ number_format($item->price, 2) }}</p>

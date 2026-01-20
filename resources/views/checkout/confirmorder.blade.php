@@ -1,70 +1,81 @@
 @extends('layouts.app')
 
-@section('title', 'Confirm Order')
-@section('meta_description', 'Review and confirm your order for luxury products and services from Ali Krecht Group. Secure checkout process.')
+@section('title', __('messages.checkout.confirm_title'))
+@section('meta_description', __('messages.meta.checkout_confirm_description'))
 
 @section('content')
     <div class=" akg-hero-img-box">
-        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_17_11 PM.png') }}" alt="Order confirmation"
+        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_17_11 PM.png') }}" alt="{{ __('messages.checkout.confirm_title') }}"
              class="akg-hero-img" loading="lazy">
 
         <div class="container text-center hero-content">
-            <h1 class="akg-hero-title text-gold mb-3">Order Confirmation</h1>
+            <h1 class="akg-hero-title text-gold mb-3">{{ __('messages.checkout.confirm_title') }}</h1>
 
-            <ol class="breadcrumb justify-content-center text-uppercase">
-                <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                <li class="breadcrumb-item text-light active">Order Confirmation</li>
+            <ol class="breadcrumb justify-content-center text-uppercase {{ app()->getLocale() === 'ar' ? 'flex-row-reverse' : '' }}">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('messages.nav.home') }}</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('cart.index') }}">{{ __('messages.nav.cart') }}</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('checkout.index') }}">{{ __('messages.checkout.section_label') }}</a></li>
+                <li class="breadcrumb-item text-light active">{{ __('messages.checkout.confirm_title') }}</li>
             </ol>
         </div>
     </div>
 
     <div class="container-xxl py-5">
         <div class="container akg-newcard">
-            <h5 class="akg-section-label">Review</h5>
-            <h2 class="akg-section-head mb-4">Please confirm your details</h2>
+            <h5 class="akg-section-label">{{ __('messages.checkout.confirm_label') }}</h5>
+            <h2 class="akg-section-head mb-4">{{ __('messages.checkout.confirm_head') }}</h2>
 
             {{-- Customer info --}}
             <div class="mb-4">
-                <h6 class="text-gold mb-3">Customer info</h6>
-                <p><strong>Name:</strong> {{ $data['name'] ?? '—' }}</p>
-                <p><strong>Email:</strong> {{ $data['email'] ?? '—' }}</p>
-                <p><strong>Phone:</strong> {{ $data['phone_number'] ?? '—' }}</p>
-                <p><strong>Address:</strong> {{ $data['address'] ?? '—' }}, {{ $data['town'] ?? '' }}, {{ $data['country'] ?? '' }} - {{ $data['zipcode'] ?? '' }}</p>
+                <h6 class="text-gold mb-3">{{ __('messages.checkout.customer_info') }}</h6>
+                <p><strong>{{ __('messages.checkout.name_label') }}:</strong> {{ $data['name'] ?? '—' }}</p>
+                <p><strong>{{ __('messages.checkout.email_label') }}:</strong> {{ $data['email'] ?? '—' }}</p>
+                <p><strong>{{ __('messages.checkout.phone_label') }}:</strong> {{ $data['phone_number'] ?? '—' }}</p>
+                <p><strong>{{ __('messages.checkout.address_label') }}:</strong> {{ $data['address'] ?? '—' }}, {{ $data['town'] ?? '' }}, {{ $data['country'] ?? '' }} - {{ $data['zipcode'] ?? '' }}</p>
             </div>
 
             {{-- Order items --}}
             <div class="mb-4">
-                <h6 class="text-gold mb-3">Order summary</h6>
+                <h6 class="text-gold mb-3">{{ __('messages.checkout.order_summary') }}</h6>
                 <table class="table table-dark table-striped align-middle">
                     <thead>
                     <tr>
-                        <th scope="col">Product</th>
-                        <th scope="col">Qty</th>
-                        <th scope="col">Price</th>
-                        <th scope="col">Total</th>
+                        <th scope="col">{{ __('messages.cart.table_product') }}</th>
+                        <th scope="col">{{ __('messages.cart.table_qty') }}</th>
+                        <th scope="col">{{ __('messages.cart.table_price') }}</th>
+                        <th scope="col">{{ __('messages.cart.table_total') }}</th>
                     </tr>
                     </thead>
                     <tbody>
                     @foreach ($cartItems as $item)
+                        @php
+                            $itemTitle = $item['title_localized'] ?? $item['title'] ?? $item['name'] ?? '—';
+                            if (app()->getLocale() === 'ar' && empty($item['title_localized'])) {
+                                $productModel = \App\Models\Product::find($item['product_id'] ?? null);
+                                if ($productModel && $productModel->title_localized) {
+                                    $itemTitle = $productModel->title_localized;
+                                }
+                            }
+                        @endphp
                         <tr>
-                            <td>{{ $item['title'] ?? $item['name'] }}</td>
+                            <td>{{ $itemTitle }}</td>
                             <td>{{ $item['quantity'] }}</td>
                             <td>${{ number_format($item['price'], 2) }}</td>
                             <td>${{ number_format($item['price'] * $item['quantity'], 2) }}</td>
                         </tr>
                     @endforeach
                     <tr class="table-warning text-dark fw-bold">
-                        <td colspan="3" class="text-end">Subtotal:</td>
+                        <td colspan="3" class="text-end">{{ __('messages.cart.subtotal') }}:</td>
                         <td>${{ number_format($total, 2) }}</td>
                     </tr>
                     @if(!empty($applied))
                         <tr class="table-warning text-dark fw-bold">
-                            <td colspan="3" class="text-end">Discount ({{ $applied['code'] }}):</td>
+                            <td colspan="3" class="text-end">{{ __('messages.cart.discount') }} ({{ $applied['code'] }}):</td>
                             <td>- ${{ number_format($discount, 2) }}</td>
                         </tr>
                     @endif
                     <tr class="table-warning text-dark fw-bold">
-                        <td colspan="3" class="text-end">Total to pay:</td>
+                        <td colspan="3" class="text-end">{{ __('messages.checkout.total_to_pay') }}:</td>
                         <td>${{ number_format($totalAfter ?? $total, 2) }}</td>
                     </tr>
                     </tbody>
@@ -72,10 +83,10 @@
             </div>
 
             <div class="mb-4">
-                <h6 class="text-gold mb-2">Payment</h6>
-                <p class="text-muted mb-1">Payment method: WiShe Money</p>
-                <h6 class="text-gold mb-2">Delivery</h6>
-                <p class="text-muted mb-0">Delivery fees/details will be arranged by phone or email after confirmation.</p>
+                <h6 class="text-gold mb-2">{{ __('messages.checkout.payment') }}</h6>
+                <p class="text-muted mb-1">{{ __('messages.checkout.payment_method') }}: {{ __('messages.checkout.payment_method_value') }}</p>
+                <h6 class="text-gold mb-2">{{ __('messages.checkout.delivery') }}</h6>
+                <p class="text-muted mb-0">{{ __('messages.checkout.delivery_note') }}</p>
             </div>
 
             {{-- Final confirm --}}
@@ -90,13 +101,13 @@
                 <input type="hidden" name="total" value="{{ $totalAfter ?? $total }}">
 
                 <div class="d-flex justify-content-between mt-4 flex-wrap gap-2">
-                    <a href="{{ route('checkout.index') }}" class="btn btn-outline-gold py-2 px-4">← Edit info</a>
+                    <a href="{{ route('checkout.index') }}" class="btn btn-outline-gold py-2 px-4">{{ __('messages.checkout.edit_info') }}</a>
                     <button type="submit"
                             class="btn btn-gold text-dark fw-semibold py-2 px-5"
                             data-sitekey="{{ env('RECAPTCHA_SITE_KEY') }}"
                             data-size="invisible"
                             data-badge="bottomright">
-                        Confirm your order
+                        {{ __('messages.checkout.confirm_submit') }}
                     </button>
                 </div>
             </form>

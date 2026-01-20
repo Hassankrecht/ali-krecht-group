@@ -1,14 +1,18 @@
 @extends('layouts.app')
 
-@section('title', 'Gallery')
-@section('meta_description', 'Browse our gallery of completed luxury carpentry and interior design projects by Ali Krecht Group.')
+@section('title', __('messages.nav.gallery') ?? 'Gallery')
+@section('meta_description', __('messages.gallery.meta_description'))
 
 @section('content')
     <div class="akg-hero-img-box position-relative">
-        <img src="{{ asset('assets/img/services/hero.jpg') }}" class="akg-hero-img" alt="Gallery" loading="lazy">
+        <img src="{{ asset('assets/img/services/hero.jpg') }}" class="akg-hero-img" alt="{{ __('messages.nav.gallery') }}" loading="lazy">
         <div class="akg-hero-overlay"></div>
         <div class="container text-center hero-content">
             <h1 class="akg-hero-title text-gold mb-2">{{ __('messages.nav.gallery') ?? 'Gallery' }}</h1>
+            <ol class="breadcrumb justify-content-center text-uppercase {{ app()->getLocale() === 'ar' ? 'flex-row-reverse' : '' }}">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('messages.nav.home') }}</a></li>
+                <li class="breadcrumb-item text-light active">{{ __('messages.nav.gallery') ?? 'Gallery' }}</li>
+            </ol>
             <p class="text-light small">{{ __('messages.home.projects_sub') ?? 'Our work snapshots' }}</p>
         </div>
     </div>
@@ -64,7 +68,7 @@
                                 @empty
                                     <div class="col-12">
                                         <div class="akg-card text-center py-4">
-                                            <p class="text-muted mb-0">{{ __('messages.projects.no_projects') ?? 'No images available.' }}</p>
+                                            <p class="text-muted mb-0">{{ __('messages.gallery.none') }}</p>
                                         </div>
                                     </div>
                                 @endforelse

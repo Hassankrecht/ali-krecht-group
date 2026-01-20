@@ -7,6 +7,7 @@ use App\Http\Requests\StoreCheckoutRequest;
 use App\Models\Checkout;
 use App\Models\CheckoutItem;
 use App\Models\User;
+use App\Models\Cart;
 use App\Mail\OrderPlacedMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
@@ -65,6 +66,23 @@ class CheckoutController extends Controller
     public function index()
     {
         $cartItems = session('cart', []);
+        if (empty($cartItems) && Auth::check()) {
+            $cartItems = Cart::with('product')
+                ->where('user_id', Auth::id())
+                ->get()
+                ->map(function ($item) {
+                    $product = $item->product;
+                    return [
+                        'product_id' => $item->product_id,
+                        'title' => optional($product)->title,
+                        'title_localized' => optional($product)->title_localized,
+                        'price' => $item->price ?? (optional($product)->price ?? 0),
+                        'quantity' => $item->quantity ?? 1,
+                        'image' => optional($product)->image,
+                    ];
+                })
+                ->toArray();
+        }
         $total = collect($cartItems)->sum(fn($item) => $item['price'] * $item['quantity']);
         $applied = session('coupon');
         $discount = $applied['discount'] ?? 0;
@@ -99,6 +117,23 @@ class CheckoutController extends Controller
         }
 
         $cartItems = session('cart', []);
+        if (empty($cartItems) && Auth::check()) {
+            $cartItems = Cart::with('product')
+                ->where('user_id', Auth::id())
+                ->get()
+                ->map(function ($item) {
+                    $product = $item->product;
+                    return [
+                        'product_id' => $item->product_id,
+                        'title' => optional($product)->title,
+                        'title_localized' => optional($product)->title_localized,
+                        'price' => $item->price ?? (optional($product)->price ?? 0),
+                        'quantity' => $item->quantity ?? 1,
+                        'image' => optional($product)->image,
+                    ];
+                })
+                ->toArray();
+        }
         if (empty($cartItems)) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
@@ -122,6 +157,23 @@ class CheckoutController extends Controller
         // Validation is now handled by StoreCheckoutRequest
 
         $cartItems = session('cart', []);
+        if (empty($cartItems) && Auth::check()) {
+            $cartItems = Cart::with('product')
+                ->where('user_id', Auth::id())
+                ->get()
+                ->map(function ($item) {
+                    $product = $item->product;
+                    return [
+                        'product_id' => $item->product_id,
+                        'title' => optional($product)->title,
+                        'title_localized' => optional($product)->title_localized,
+                        'price' => $item->price ?? (optional($product)->price ?? 0),
+                        'quantity' => $item->quantity ?? 1,
+                        'image' => optional($product)->image,
+                    ];
+                })
+                ->toArray();
+        }
         $applied = session('coupon');
         if (empty($cartItems)) {
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');

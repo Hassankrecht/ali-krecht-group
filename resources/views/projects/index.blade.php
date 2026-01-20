@@ -11,11 +11,11 @@
 
 
         <div class="container text-center hero-content">
-            <h1 class="akg-hero-title text-gold mb-3">Our Projects</h1>
+            <h1 class="akg-hero-title text-gold mb-3">{{ __('messages.projects_page.hero_title') }}</h1>
 
-            <ol class="breadcrumb justify-content-center text-uppercase">
-                <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                <li class="breadcrumb-item text-light active">Projects</li>
+            <ol class="breadcrumb justify-content-center text-uppercase {{ app()->getLocale() === 'ar' ? 'flex-row-reverse' : '' }}">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('messages.nav.home') }}</a></li>
+                <li class="breadcrumb-item text-light active">{{ __('messages.nav.projects') }}</li>
             </ol>
         </div>
     </div>
@@ -155,7 +155,6 @@
 
                 <div class="modal-footer border-0 justify-content-between">
                     <button class="btn btn-outline-gold" data-bs-dismiss="modal">{{ __('messages.projects.close') }}</button>
-                    <a id="fullProjectLink" href="#" class="btn btn-gold">{{ __('messages.projects.full_project') }}</a>
                 </div>
 
             </div>
@@ -169,7 +168,6 @@
             const modal = new bootstrap.Modal(document.getElementById('projectModal'));
             const modalTitle = document.getElementById('projectTitle');
             const modalDesc = document.getElementById('projectDescription');
-            const modalLink = document.getElementById('fullProjectLink');
             const galleryContainer = document.getElementById('lightboxGallery');
 
             // Lightbox overlay element
@@ -199,12 +197,8 @@
                     const desc = this.dataset.description;
                     const mainImage = this.dataset.image;
                     const gallery = JSON.parse(this.dataset.gallery || '[]');
-                    const projectId = this.dataset.id || '';
-                    const projectUrl = this.dataset.url || `/projects/${projectId}`;
-
                     modalTitle.textContent = title;
                     modalDesc.textContent = desc;
-                    modalLink.href = projectUrl;
                     galleryContainer.innerHTML = '';
 
                     // Combine main image + gallery
@@ -213,7 +207,7 @@
                     if (!allImages.length) {
                         const empty = document.createElement('p');
                         empty.classList.add('text-muted', 'small', 'w-100', 'text-center');
-                        empty.textContent = 'No gallery images available.';
+                        empty.textContent = @json(__('messages.projects.no_gallery'));
                         galleryContainer.appendChild(empty);
                     } else {
                         allImages.forEach((src, index) => {

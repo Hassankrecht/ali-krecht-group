@@ -35,7 +35,7 @@ class CartController extends Controller
         $product = Product::findOrFail($id);
         $cart = session()->get('cart', []);
 
-        $name = $product->title ?? 'Unnamed Product';
+        $name = $product->title_localized ?? $product->title ?? 'Unnamed Product';
         $imagePath = $product->image ?? null;
 
         if (isset($cart[$id])) {
@@ -43,7 +43,8 @@ class CartController extends Controller
         } else {
             $cart[$id] = [
                 'product_id' => $product->id,
-                'title'      => $name,
+                'title'      => $product->title ?? $name,
+                'title_localized' => $name,
                 'price'      => $product->price ?? 0,
                 'quantity'   => 1,
                 'image'      => $imagePath,

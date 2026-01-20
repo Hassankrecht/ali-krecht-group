@@ -1,20 +1,20 @@
 @extends('layouts.app')
 
-@section('title', $product->title . ' | ' . __('messages.products.hero_title'))
-@section('meta_description', 'View details and features of ' . $product->title . ' from Ali Krecht Group. Luxury woodwork and custom furniture in the UAE.')
+@section('title', ($product->title_localized ?? $product->title) . ' | ' . __('messages.products.hero_title'))
+@section('meta_description', __('messages.meta.product_show_description', ['product' => $product->title_localized ?? $product->title]))
 
 @section('content')
     <div class=" akg-hero-img-box">
-        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_10_16 PM.png') }}" alt="Product detail"
+        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_10_16 PM.png') }}" alt="{{ __('messages.product_show.breadcrumb') }}"
             class="akg-hero-img" loading="lazy">
 
         <div class="container text-center hero-content">
             <h1 class="akg-hero-title text-gold mb-3">{{ __('messages.product_show.breadcrumb') }}</h1>
 
-            <ol class="breadcrumb justify-content-center text-uppercase">
-                <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('products.index') }}">Products</a></li>
-                <li class="breadcrumb-item text-light active">{{ $product->title }}</li>
+            <ol class="breadcrumb justify-content-center text-uppercase {{ app()->getLocale() === 'ar' ? 'flex-row-reverse' : '' }}">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('messages.nav.home') }}</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('products.index') }}">{{ __('messages.nav.products') }}</a></li>
+                <li class="breadcrumb-item text-light active">{{ $product->title_localized ?? $product->title }}</li>
             </ol>
         </div>
     </div>
@@ -86,13 +86,13 @@
 
                 <ul class="list-group mb-4">
                     <li class="list-group-item bg-dark text-light border-secondary">
-                        <strong>Category:</strong> {{ $product->category->name_localized ?? 'N/A' }}
+                        <strong>{{ __('messages.product_show.category_label') }}:</strong> {{ $product->category->name_localized ?? __('messages.common.na') }}
                     </li>
                     <li class="list-group-item bg-dark text-light border-secondary">
-                        <strong>SKU:</strong> {{ $product->id }}
+                        <strong>{{ __('messages.product_show.sku_label') }}:</strong> {{ $product->id }}
                     </li>
                     <li class="list-group-item bg-dark text-light border-secondary">
-                        <strong>Price:</strong> ${{ number_format($product->price, 2) }}
+                        <strong>{{ __('messages.product_show.price_label') }}:</strong> ${{ number_format($product->price, 2) }}
                     </li>
                 </ul>
 
@@ -100,17 +100,17 @@
                 <h4 class="text-gold fw-bold mb-3">{{ __('messages.product_show.features') }}</h4>
 
                 <ul class="text-light mb-4">
-                    <li>✔ Premium materials & finish</li>
-                    <li>✔ Custom sizing available</li>
-                    <li>✔ Durable construction</li>
-                    <li>✔ Dedicated after-sales support</li>
+                    <li>✔ {{ __('messages.product_show.feature_1') }}</li>
+                    <li>✔ {{ __('messages.product_show.feature_2') }}</li>
+                    <li>✔ {{ __('messages.product_show.feature_3') }}</li>
+                    <li>✔ {{ __('messages.product_show.feature_4') }}</li>
                 </ul>
 
                 {{-- SUITABLE FOR --}}
                 <h4 class="text-gold fw-bold mb-3">{{ __('messages.product_show.best_for') }}</h4>
 
                 <p class="text-muted">
-                    Ideal for luxury interiors, bespoke installations, and high-end residential or commercial projects.
+                    {{ __('messages.product_show.best_for_desc') }}
                 </p>
 
             </div>

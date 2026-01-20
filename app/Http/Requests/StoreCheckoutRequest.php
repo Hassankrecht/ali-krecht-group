@@ -11,7 +11,7 @@ class StoreCheckoutRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check();
+        return true;
     }
 
     /**
@@ -21,15 +21,19 @@ class StoreCheckoutRequest extends FormRequest
      */
     public function rules(): array
     {
+        $isGuest = !auth()->check();
+
         return [
-            'address' => 'required|string|max:255',
-            'city' => 'required|string|max:100',
-            'postal_code' => 'required|string|max:20',
+            'name' => $isGuest ? 'required|string|max:255' : 'nullable|string|max:255',
+            'email' => $isGuest ? 'required|email|max:255' : 'nullable|email|max:255',
+            'phone_number' => 'required|string|max:20',
+            'town' => 'required|string|max:100',
             'country' => 'required|string|max:100',
-            'phone' => 'required|string|max:20',
-            'coupon_code' => 'nullable|string|max:50|exists:coupons,code',
-            'shipping_method' => 'required|in:standard,express,overnight',
-            'payment_method' => 'required|in:card,bank,paypal,crypto',
+            'zipcode' => 'required|string|max:20',
+            'address' => 'required|string|max:255',
+            'create_account' => 'nullable|boolean',
+            'password' => 'nullable|string|min:6|confirmed',
+            'g-recaptcha-response' => 'nullable|string',
         ];
     }
 
@@ -39,13 +43,15 @@ class StoreCheckoutRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'address.required' => 'Please provide a delivery address',
-            'city.required' => 'Please select a city',
-            'postal_code.required' => 'Postal code is required',
+            'name.required' => 'Please provide your name',
+            'email.required' => 'Please provide your email address',
+            'email.email' => 'Please provide a valid email address',
+            'phone_number.required' => 'Phone number is required',
+            'town.required' => 'Please provide your city',
             'country.required' => 'Please select a country',
-            'phone.required' => 'Phone number is required',
-            'shipping_method.required' => 'Please select a shipping method',
-            'payment_method.required' => 'Please select a payment method',
+            'zipcode.required' => 'Zip code is required',
+            'address.required' => 'Please provide a delivery address',
+            'password.confirmed' => 'Password confirmation does not match',
         ];
     }
 }

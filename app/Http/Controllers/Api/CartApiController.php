@@ -25,7 +25,8 @@ class CartApiController extends Controller
         $product = Product::find($request->product_id);
         $cart[$product->id] = [
             'product_id' => $product->id,
-            'title' => $product->title,
+            'title' => $product->title ?? $product->title_localized,
+            'title_localized' => $product->title_localized ?? $product->title,
             'price' => $product->price,
             'quantity' => $request->quantity,
         ];

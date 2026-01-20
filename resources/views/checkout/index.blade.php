@@ -1,16 +1,21 @@
 @extends('layouts.app')
 
-@section('title', 'Checkout')
-@section('meta_description', 'Securely complete your purchase of luxury wood products and interior solutions from Ali Krecht Group.')
+@section('title', __('messages.checkout.hero_title'))
+@section('meta_description', __('messages.meta.checkout_description'))
 
 @section('content')
     <div class=" akg-hero-img-box">
-        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_17_11 PM.png') }}" alt="Checkout"
+        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_17_11 PM.png') }}" alt="{{ __('messages.checkout.hero_title') }}"
             class="akg-hero-img" loading="lazy">
 
         <div class="container text-center hero-content">
             <h1 class="akg-hero-title text-gold mb-3">{{ __('messages.checkout.hero_title') }}</h1>
             <p class="text-light">{{ __('messages.checkout.hero_sub') }}</p>
+            <ol class="breadcrumb justify-content-center text-uppercase {{ app()->getLocale() === 'ar' ? 'flex-row-reverse' : '' }}">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('messages.nav.home') }}</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('cart.index') }}">{{ __('messages.nav.cart') }}</a></li>
+                <li class="breadcrumb-item text-light active">{{ __('messages.checkout.section_label') }}</li>
+            </ol>
         </div>
     </div>
 
@@ -46,7 +51,7 @@
                 {{-- ✅ إذا المستخدم مسجل دخول --}}
                 @if (Auth::check())
                     <div class="alert alert-success mb-4">
-                        Logged in as <strong>{{ Auth::user()->name }}</strong> ({{ Auth::user()->email }})
+                        {{ __('messages.checkout.logged_in_as') }} <strong>{{ Auth::user()->name }}</strong> ({{ Auth::user()->email }})
                     </div>
                     <input type="hidden" name="name" value="{{ old('name', $prefill['name'] ?? Auth::user()->name) }}">
                     <input type="hidden" name="email" value="{{ old('email', $prefill['email'] ?? Auth::user()->email) }}">
@@ -57,17 +62,17 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-floating">
-                            <input type="text" name="name" class="form-control akg-input" id="name"
-                                    placeholder="Your Name" value="{{ old('name', $prefill['name'] ?? '') }}" required>
-                            <label for="name">Your Name</label>
+                                <input type="text" name="name" class="form-control akg-input" id="name"
+                                    placeholder="{{ __('messages.forms.name') }}" value="{{ old('name', $prefill['name'] ?? '') }}" required>
+                                <label for="name">{{ __('messages.forms.name') }}</label>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="form-floating">
                             <input type="email" name="email" class="form-control akg-input" id="email"
-                                    placeholder="Your Email" value="{{ old('email', $prefill['email'] ?? '') }}" required>
-                            <label for="email">Your Email</label>
+                                    placeholder="{{ __('messages.forms.email') }}" value="{{ old('email', $prefill['email'] ?? '') }}" required>
+                                <label for="email">{{ __('messages.forms.email') }}</label>
                         </div>
                     </div>
                     </div>
@@ -79,27 +84,27 @@
                         <div class="form-check mb-2">
                             <input class="form-check-input" type="checkbox" value="1" id="createAccount" name="create_account">
                             <label class="form-check-label text-light" for="createAccount">
-                            {{ __('messages.checkout.account_option') }} (for new emails only)
+                            {{ __('messages.checkout.account_option') }} ({{ __('messages.checkout.for_new_emails_only') }})
                             </label>
                         </div>
                         <div id="accountFields" class="row g-3 mt-1 d-none">
                             <div class="col-md-6">
                                 <div class="form-floating">
                                     <input type="password" name="password" class="form-control akg-input" id="password"
-                                        placeholder="Password">
-                                    <label for="password">Password</label>
+                                        placeholder="{{ __('messages.forms.password') }}">
+                                    <label for="password">{{ __('messages.forms.password') }}</label>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
                                     <input type="password" name="password_confirmation" class="form-control akg-input"
-                                        id="password_confirmation" placeholder="Confirm Password">
-                                    <label for="password_confirmation">Confirm Password</label>
+                                        id="password_confirmation" placeholder="{{ __('messages.forms.password_confirm') }}">
+                                    <label for="password_confirmation">{{ __('messages.forms.password_confirm') }}</label>
                                 </div>
                             </div>
                         </div>
                         <div id="loginNotice" class="alert alert-warning mt-2 py-2 small d-none mb-0">
-                            This email is registered. Please enter your password to continue.
+                            {{ __('messages.checkout.email_registered_notice') }}
                         </div>
                     </div>
                 @endif

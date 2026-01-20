@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', __('messages.services_page.hero_title'))
-@section('meta_description', 'Explore our range of luxury carpentry, interior design, and bespoke woodwork services for homes and businesses in the UAE.')
+@section('meta_description', __('messages.meta.services_description'))
 
 @section('content')
 
@@ -13,7 +13,7 @@
 
         <div class="container text-center hero-content">
             <h1 class="akg-hero-title text-gold mb-3">{{ __('messages.services_page.hero_title') }}</h1>
-            <ol class="breadcrumb justify-content-center text-uppercase">
+            <ol class="breadcrumb justify-content-center text-uppercase {{ app()->getLocale() === 'ar' ? 'flex-row-reverse' : '' }}">
                 <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('messages.nav.home') }}</a></li>
                 <li class="breadcrumb-item text-light active">{{ __('messages.nav.services') }}</li>
             </ol>

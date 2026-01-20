@@ -19,6 +19,17 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
+    /**
+     * Attempt to log the user into the application with remember support.
+     */
+    protected function attemptLogin(Request $request)
+    {
+        return $this->guard()->attempt(
+            $this->credentials($request),
+            $request->boolean('remember')
+        );
+    }
+
     // ✅ بعد نجاح تسجيل الدخول
     protected function authenticated(Request $request, $user)
     {

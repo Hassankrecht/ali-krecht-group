@@ -17,6 +17,20 @@ $app = new Illuminate\Foundation\Application(
 
 /*
 |--------------------------------------------------------------------------
+| Override Public Path on Server
+|--------------------------------------------------------------------------
+|
+| On cPanel shared hosting, web root is /public_html not /public.
+| Set it immediately after creating the application instance.
+|
+*/
+
+if (file_exists(dirname(__DIR__) . '/../public_html')) {
+    $app->usePublicPath(realpath(dirname(__DIR__) . '/../public_html'));
+}
+
+/*
+|--------------------------------------------------------------------------
 | Bind Important Interfaces
 |--------------------------------------------------------------------------
 |

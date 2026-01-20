@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Our Work Process')
-@section('meta_description', 'Learn about our step-by-step process for delivering luxury carpentry and interior design projects at Ali Krecht Group.')
+@section('title', __('messages.process.title'))
+@section('meta_description', __('messages.process.meta_description'))
 
 @php
     $lang = app()->getLocale();
@@ -93,12 +93,16 @@
 
 @section('content')
     <div class="akg-hero-img-box position-relative">
-        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_12_34 PM.png') }}" class="akg-hero-img" alt="Process" loading="lazy">
+        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_12_34 PM.png') }}" class="akg-hero-img" alt="{{ __('messages.process.title') }}" loading="lazy">
         <div class="akg-hero-overlay"></div>
         <div class="container text-center hero-content">
             <h1 class="akg-hero-title text-gold mb-2">
                 {{ $t('Our Work Process – From Idea to Handover', 'عملية العمل – من الفكرة إلى التسليم', 'Nosso Processo – Da Ideia à Entrega') }}
             </h1>
+            <ol class="breadcrumb justify-content-center text-uppercase {{ app()->getLocale() === 'ar' ? 'flex-row-reverse' : '' }}">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('messages.nav.home') }}</a></li>
+                <li class="breadcrumb-item text-light active">{{ __('messages.nav.process') }}</li>
+            </ol>
             <p class="text-light small">
                 {{ $t('Clear stages for premium results.', 'مراحل واضحة لنتائج فاخرة.', 'Etapas claras para resultados premium.') }}
             </p>

@@ -1,25 +1,20 @@
 @extends('layouts.app')
 
 @section('title', __('messages.nav.pricing') ?? 'Pricing')
-@section('meta_description', 'See transparent pricing for all Ali Krecht Group luxury carpentry and interior design services in the UAE.')
+@section('meta_description', __('messages.pricing.meta_description'))
 
 @php
     $lang = app()->getLocale();
     $services = $services ?? collect();
     $activeSlug = optional($services->first())['slug'] ?? null;
     $ctaText = __('messages.services_page.cta');
-    if ($ctaText === 'messages.services_page.cta') {
-        $ctaText = $lang === 'ar' ? 'احجز استشارة' : 'Book Consultation';
-    }
-    $quoteText = $lang === 'ar' ? 'اطلب عرض سعر' : 'Request Quote';
-    $disclaimer = $lang === 'ar'
-        ? 'الأسعار تقديرية وتتغير حسب المساحة، المواد، والتفاصيل. يتم تقديم عرض سعر نهائي بعد زيارة موقع وقياسات دقيقة.'
-        : 'Pricing is indicative and varies by scope, materials, and complexity. Final quote after site visit and measurements.';
+    $quoteText = __('messages.pricing.request_quote');
+    $disclaimer = __('messages.pricing.disclaimer');
     $whyPricing = [
-        $lang === 'ar' ? 'المساحة وحجم العمل' : 'Scope & area',
-        $lang === 'ar' ? 'المواد والتشطيبات' : 'Materials & finishes',
-        $lang === 'ar' ? 'التفاصيل والتفصيل' : 'Detailing & customization',
-        $lang === 'ar' ? 'الجدول الزمني والموقع' : 'Timeline & site access',
+        __('messages.pricing.factors.scope'),
+        __('messages.pricing.factors.materials'),
+        __('messages.pricing.factors.detailing'),
+        __('messages.pricing.factors.timeline'),
     ];
 @endphp
 
@@ -57,12 +52,16 @@
     @endpush
 
     <div class="akg-hero-img-box position-relative">
-        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_12_34 PM.png') }}" class="akg-hero-img" alt="Pricing" loading="lazy">
+        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_12_34 PM.png') }}" class="akg-hero-img" alt="{{ __('messages.nav.pricing') }}" loading="lazy">
         <div class="akg-hero-overlay"></div>
         <div class="container text-center hero-content">
             <h1 class="akg-hero-title text-gold mb-2">
-                {{ __('messages.nav.pricing') ?? 'Pricing & Estimates' }}
+                {{ __('messages.pricing.title') }}
             </h1>
+            <ol class="breadcrumb justify-content-center text-uppercase {{ app()->getLocale() === 'ar' ? 'flex-row-reverse' : '' }}">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('messages.nav.home') }}</a></li>
+                <li class="breadcrumb-item text-light active">{{ __('messages.nav.pricing') }}</li>
+            </ol>
             <p class="text-light small">{{ $disclaimer }}</p>
         </div>
     </div>
@@ -70,7 +69,7 @@
     <section class="container-xxl py-5">
         <div class="container akg-newcard">
             <div class="text-center mb-4">
-                <h2 class="akg-section-head">{{ __('messages.services_page.offer_head') ?? 'Services & Estimates' }}</h2>
+                <h2 class="akg-section-head">{{ __('messages.pricing.section_head') }}</h2>
                 <p class="text-muted small">{{ $disclaimer }}</p>
                 <div class="d-flex justify-content-center gap-2 mt-3 flex-wrap">
                     <a href="{{ route('contact') }}" class="btn btn-gold px-4">{{ $ctaText }}</a>
@@ -79,7 +78,7 @@
             </div>
 
             <div class="akg-newcard mb-4 p-3 text-center akg-cat-nav pricing-nav">
-                <div class="pricing-chip mb-2">{{ $lang === 'ar' ? 'اختر الخدمة' : 'Choose a service' }}</div>
+                <div class="pricing-chip mb-2">{{ __('messages.pricing.choose_service') }}</div>
                 <ul class="nav nav-pills justify-content-center flex-wrap gap-2" id="pricingNav">
                     @foreach($services as $service)
                         <li class="nav-item">
@@ -100,14 +99,14 @@
                         <div class="akg-card p-4 mb-4 pricing-summary">
                             <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center">
                                 <div class="mb-3 mb-lg-0">
-                                    <div class="pricing-chip mb-2"><i class="fa fa-tags me-1"></i> {{ $lang === 'ar' ? 'عرض سريع' : 'Quick Estimate' }}</div>
+                                    <div class="pricing-chip mb-2"><i class="fa fa-tags me-1"></i> {{ __('messages.pricing.quick_estimate') }}</div>
                                     <h4 class="text-gold mb-2">{{ $service['title'] }}</h4>
                                     <p class="text-muted mb-1">{{ $service['highlight'] }}</p>
-                                    <small class="text-muted">{{ $lang === 'ar' ? 'السعر النهائي بعد المعاينة' : 'Final quote after site visit' }}</small>
+                                    <small class="text-muted">{{ __('messages.pricing.final_quote_after_site') }}</small>
                                 </div>
                                 <div class="text-lg-end">
                                     <p class="text-gold fw-bold mb-1">
-                                        {{ $lang === 'ar' ? 'من — حسب المواد والتفاصيل' : 'From — depends on materials & scope' }}
+                                        {{ __('messages.pricing.from_depends') }}
                                     </p>
                                     <div class="d-flex gap-2 justify-content-end">
                                         <a href="{{ route('contact') }}" class="btn btn-gold px-3">{{ $quoteText }}</a>

@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Order Placed')
-@section('meta_description', 'Thank you for your order! Your luxury product from Ali Krecht Group is being processed. View your order details here.')
+@section('title', __('messages.checkout.thankyou_title'))
+@section('meta_description', __('messages.meta.checkout_thankyou_description'))
 
 @section('content')
   
     <div class=" akg-hero-img-box">
-        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 08_48_50 AM.png') }}" alt="Order placed"
+        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 08_48_50 AM.png') }}" alt="{{ __('messages.checkout.thankyou_title') }}"
             class="akg-hero-img" loading="lazy">
 
         <div class="container text-center hero-content" style="padding-top: 220px;">
@@ -19,24 +19,33 @@
         <div class="container akg-newcard">
             <div class="akg-card p-4">
                 <h5 class="akg-section-label">{{ __('messages.checkout.order_summary') }}</h5>
-                <h2 class="akg-section-head mb-3">Order #{{ $order->id }}</h2>
-                <p><strong>Name:</strong> {{ $order->name }}</p>
-                <p><strong>Email:</strong> {{ $order->email }}</p>
-                <p><strong>Total:</strong> ${{ number_format($order->total_price, 2) }}</p>
+                <h2 class="akg-section-head mb-3">{{ __('messages.checkout.order_number', ['id' => $order->id]) }}</h2>
+                <p><strong>{{ __('messages.checkout.name_label') }}:</strong> {{ $order->name }}</p>
+                <p><strong>{{ __('messages.checkout.email_label') }}:</strong> {{ $order->email }}</p>
+                <p><strong>{{ __('messages.checkout.total_label') }}:</strong> ${{ number_format($order->total_price, 2) }}</p>
 
                 <table class="table table-dark table-striped mt-4">
                     <thead class="table-warning text-dark">
                         <tr>
-                            <th>{{ __('messages.checkout.table_product') }}</th>
-                            <th>{{ __('messages.checkout.table_qty') }}</th>
-                            <th>{{ __('messages.checkout.table_price') }}</th>
-                            <th>{{ __('messages.checkout.table_total') }}</th>
+                            <th>{{ __('messages.cart.table_product') }}</th>
+                            <th>{{ __('messages.cart.table_qty') }}</th>
+                            <th>{{ __('messages.cart.table_price') }}</th>
+                            <th>{{ __('messages.cart.table_total') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($order->items as $item)
+                            @php
+                                $itemName = $item->name;
+                                if (app()->getLocale() === 'ar' && $item->product_id) {
+                                    $productModel = \App\Models\Product::find($item->product_id);
+                                    if ($productModel && $productModel->title_localized) {
+                                        $itemName = $productModel->title_localized;
+                                    }
+                                }
+                            @endphp
                             <tr>
-                                <td>{{ $item->name }}</td>
+                                <td>{{ $itemName }}</td>
                                 <td>{{ $item->quantity }}</td>
                                 <td>${{ number_format($item->price, 2) }}</td>
                                 <td>${{ number_format($item->total_price, 2) }}</td>

@@ -15,7 +15,7 @@
         <div class="container text-center hero-content">
             <h1 class="akg-hero-title text-gold mb-3">{{ __('messages.about_page.hero_title') }}</h1>
 
-            <ol class="breadcrumb justify-content-center text-uppercase">
+            <ol class="breadcrumb justify-content-center text-uppercase {{ app()->getLocale() === 'ar' ? 'flex-row-reverse' : '' }}">
                 <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('messages.nav.home') }}</a></li>
                 <li class="breadcrumb-item text-light active">{{ __('messages.about_page.breadcrumb') }}</li>
             </ol>

@@ -118,9 +118,10 @@ Route::middleware('cart.hasProducts')->group(function () {
     Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.process');
     Route::post('/checkout/confirm', [CheckoutController::class, 'confirm'])->name('checkout.confirm');
     Route::get('/checkout/check-email', [CheckoutController::class, 'checkEmail'])->name('checkout.checkEmail');
-    Route::get('/checkout/thank-you/{order}', [CheckoutController::class, 'thankYou'])->name('checkout.thankyou');
-    Route::get('/checkout/invoice/{order}', [CheckoutController::class, 'downloadInvoice'])->name('checkout.invoice');
 });
+
+Route::get('/checkout/thank-you/{order}', [CheckoutController::class, 'thankYou'])->name('checkout.thankyou');
+Route::get('/checkout/invoice/{order}', [CheckoutController::class, 'downloadInvoice'])->name('checkout.invoice');
 
 /*
 |--------------------------------------------------------------------------

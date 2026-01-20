@@ -1,14 +1,48 @@
 @extends('layouts.app')
 
 @section('title', __('messages.home.testimonials_title') ?? 'Testimonials')
-@section('meta_description', 'Read client testimonials and reviews for Ali Krecht Group. See what our customers say about our luxury carpentry and design services.')
+@section('meta_description', __('messages.testimonials.meta_description'))
 
 @section('content')
+    <style>
+        .akg-rating-stars {
+            gap: 6px;
+        }
+
+        .akg-star-btn {
+            border: 0;
+            background: transparent;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s ease;
+        }
+
+        .akg-star-btn .fa {
+            color: #7c8799 !important;
+            font-size: 22px;
+            transition: color 0.15s ease;
+        }
+
+        .akg-star-btn:hover {
+            transform: translateY(-1px) scale(1.05);
+        }
+
+        .akg-star-btn.active .fa,
+        .akg-star-btn.active i {
+            color: #d4af37 !important;
+        }
+    </style>
     <div class="akg-hero-img-box position-relative">
-        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_12_34 PM.png') }}" class="akg-hero-img" alt="Testimonials" loading="lazy">
+        <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_12_34 PM.png') }}" class="akg-hero-img" alt="{{ __('messages.home.testimonials_title') }}" loading="lazy">
         <div class="akg-hero-overlay"></div>
         <div class="container text-center hero-content">
             <h1 class="akg-hero-title text-gold mb-2">{{ __('messages.home.testimonials_title') ?? 'Testimonials' }}</h1>
+            <ol class="breadcrumb justify-content-center text-uppercase {{ app()->getLocale() === 'ar' ? 'flex-row-reverse' : '' }}">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('messages.nav.home') }}</a></li>
+                <li class="breadcrumb-item text-light active">{{ __('messages.nav.testimonials') }}</li>
+            </ol>
             <p class="text-light small">
                 {{ __('messages.home.rating_text') ?? 'Average rating' }}:
                 <span class="fw-bold text-gold">{{ $reviewsCount ? number_format($reviewsAvg,1) : '—' }} / 5</span>
@@ -62,7 +96,7 @@
                 @empty
                     <div class="col-12">
                         <div class="akg-card text-center py-4">
-                            <p class="text-muted mb-0">{{ __('messages.projects.no_projects') ?? 'No testimonials available.' }}</p>
+                            <p class="text-muted mb-0">{{ __('messages.testimonials.none') }}</p>
                         </div>
                     </div>
                 @endforelse
@@ -103,7 +137,7 @@
                         <label class="form-label small text-muted">{{ __('messages.home.testimonial_form.rating') }} *</label>
                         <div class="d-flex align-items-center gap-2 akg-rating-stars">
                             @for ($i = 1; $i <= 5; $i++)
-                                <button type="button" class="akg-star-btn" data-value="{{ $i }}">
+                                <button type="button" class="akg-star-btn" data-value="{{ $i }}" aria-label="{{ $i }}">
                                     <i class="fa fa-star"></i>
                                 </button>
                             @endfor
@@ -133,20 +167,32 @@
         </div>
     </section>
 
-    @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const ratingInput = document.getElementById('ratingInput');
             const starButtons = document.querySelectorAll('.akg-star-btn');
+            const setStars = (val) => {
+                starButtons.forEach(s => {
+                    const isActive = Number(s.dataset.value) <= Number(val);
+                    s.classList.toggle('active', isActive);
+                    const icon = s.querySelector('i');
+                    if (icon) {
+                        icon.style.color = isActive ? '#d4af37' : '#7c8799';
+                    }
+                });
+            };
+
+            if (ratingInput) {
+                setStars(ratingInput.value || 5);
+            }
+
             starButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
                     const val = btn.dataset.value;
                     ratingInput.value = val;
-                    starButtons.forEach(s => s.classList.toggle('active', s.dataset.value <= val));
+                    setStars(val);
                 });
             });
-            starButtons.forEach(s => s.classList.toggle('active', s.dataset.value <= ratingInput.value));
         });
     </script>
-    @endpush
 @endsection

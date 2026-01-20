@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Contact')
-@section('meta_description', 'Contact Ali Krecht Group for luxury carpentry, interior design, and bespoke woodwork services. Get in touch today!')
+@section('meta_description', __('messages.meta.contact_description'))
 
 @section('content')
     <div class=" akg-hero-img-box">
@@ -11,9 +11,9 @@
         <div class="container text-center hero-content">
             <h1 class="akg-hero-title text-gold mb-3">{{ __('messages.contact_page.hero_title') }}</h1>
 
-            <ol class="breadcrumb justify-content-center text-uppercase">
-                <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                <li class="breadcrumb-item text-light active">Contact</li>
+            <ol class="breadcrumb justify-content-center text-uppercase {{ app()->getLocale() === 'ar' ? 'flex-row-reverse' : '' }}">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('messages.nav.home') }}</a></li>
+                <li class="breadcrumb-item text-light active">{{ __('messages.nav.contact') }}</li>
             </ol>
         </div>
     </div>
@@ -32,11 +32,11 @@
                     <div class="akg-card h-100">
                         <h5 class="text-gold mb-3">{{ __('messages.contact_page.quick_contacts') }}</h5>
                         <p class="mb-2"><i class="fa fa-phone me-2 text-gold"></i><a class="text-light"
-                                href="tel:+971501234567">{{ __('messages.contact_page.phone_label') }}: +971 50 123 4567</a></p>
-                        <p class="mb-2"><i class="fa fa-whatsapp me-2 text-gold"></i><a class="text-light"
-                                href="https://wa.me/971501234567" target="_blank" rel="noopener">{{ __('messages.contact_page.whatsapp_available') }}</a></p>
+                            href="tel:+96178768725">{{ __('messages.contact_page.phone_label') }}: +961 78768725</a></p>
+                        <p class="mb-2"><i class="fab fa-whatsapp me-2 text-gold"></i><a class="text-light"
+                            href="https://wa.me/96178768725" target="_blank" rel="noopener">{{ __('messages.contact_page.whatsapp_available') }}</a></p>
                         <p class="mb-2"><i class="fa fa-envelope-open me-2 text-gold"></i><a class="text-light"
-                                href="mailto:info@alikrechtgroup.com">info@alikrechtgroup.com</a></p>
+                            href="mailto:alikrechtgroup@gmail.com">alikrechtgroup@gmail.com</a></p>
                         <p class="small text-muted mb-0">{{ __('messages.contact_page.privacy_note') }}</p>
 
                         <div class="mt-4">

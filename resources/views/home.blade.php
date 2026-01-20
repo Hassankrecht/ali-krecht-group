@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('meta_description', 'Ali Krecht Group: Luxury carpentry, interior design, and bespoke woodwork in the UAE. Discover our services and projects.')
+@section('meta_description', __('messages.meta.home_description'))
 @section('content')
     @php
         $hs = $homeSettings ?? null;
@@ -223,7 +223,7 @@
             </div>
             <div class="text-center mt-4">
                 <a href="{{ route('services') }}" class="btn btn-gold px-4 py-2">
-                    All Services
+                    {{ __('messages.services_page.all_services') }}
                 </a>
             </div>
         </div>
@@ -346,9 +346,6 @@
             {{-- BUTTON --}}
             @php
                 $allServicesText = __('messages.services_page.all_services');
-                if ($allServicesText === 'messages.services_page.all_services') {
-                    $allServicesText = app()->getLocale() === 'ar' ? 'كل الخدمات' : 'All Services';
-                }
             @endphp
             <div class="text-center mt-4">
                 <a href="{{ route('services') }}" class="btn btn-gold px-4 py-2">
@@ -549,8 +546,7 @@
                 </div>
 
                 <div class="modal-footer border-0 justify-content-between">
-                    <button class="btn btn-outline-gold" data-bs-dismiss="modal">Close</button>
-                    <a id="fullProjectLink" href="#" class="btn btn-gold">Full Project</a>
+                    <button class="btn btn-outline-gold" data-bs-dismiss="modal">{{ __('messages.projects.close') }}</button>
                 </div>
 
             </div>
@@ -791,7 +787,70 @@
     </section>
 
     <!-- Review Modal -->
-    <div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+    <style>
+        .review-modal .modal-content {
+            background: #0b1118;
+            border: 1px solid rgba(212, 175, 55, 0.6);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+        }
+
+        .review-modal .form-control,
+        .review-modal .form-control:focus,
+        .review-modal textarea,
+        .review-modal textarea:focus {
+            background: #0f172a;
+            color: #f8fafc;
+            border-color: rgba(212, 175, 55, 0.45);
+            box-shadow: none;
+        }
+
+        .review-modal .form-control::placeholder,
+        .review-modal textarea::placeholder {
+            color: #94a3b8;
+        }
+
+        .review-modal .form-label {
+            color: #e2e8f0;
+        }
+
+        .review-modal .text-muted {
+            color: #a3b1c6 !important;
+        }
+
+        .review-modal .btn-close {
+            filter: invert(1);
+        }
+
+        .akg-rating-stars {
+            gap: 6px;
+        }
+
+        .akg-star-btn {
+            border: 0;
+            background: transparent;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s ease;
+        }
+
+        .akg-star-btn .fa {
+            color: #7c8799 !important;
+            font-size: 22px;
+            transition: color 0.15s ease;
+        }
+
+        .akg-star-btn:hover {
+            transform: translateY(-1px) scale(1.05);
+        }
+
+        .akg-star-btn.active .fa,
+        .akg-star-btn.active i {
+            color: #d4af37 !important;
+        }
+    </style>
+    <div class="modal fade review-modal" id="reviewModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content bg-dark-soft text-light">
                 <div class="modal-header border-0">
@@ -818,7 +877,7 @@
                                 *</label>
                             <div class="d-flex align-items-center gap-2 akg-rating-stars">
                                 @for ($i = 1; $i <= 5; $i++)
-                                    <button type="button" class="akg-star-btn" data-value="{{ $i }}">
+                                    <button type="button" class="akg-star-btn" data-value="{{ $i }}" aria-label="{{ $i }}">
                                         <i class="fa fa-star"></i>
                                     </button>
                                 @endfor
@@ -879,14 +938,14 @@
             <div class="row justify-content-center mb-4">
                 <div class="col-md-4">
                     <a class="akg-quick-contact d-inline-flex align-items-center justify-content-center"
-                        href="tel:+96176082394">
-                        <i class="fa fa-phone me-2"></i> +971 50 123 4567
+                        href="tel:+96178768725">
+                        <i class="fa fa-phone me-2"></i> +961 78768725
                     </a>
                 </div>
                 <div class="col-md-4">
                     <a class="akg-quick-contact d-inline-flex align-items-center justify-content-center"
-                        href="https://wa.me/+9613682782" target="_blank" rel="noopener">
-                        <i class="fa fa-whatsapp me-2"></i> WhatsApp available
+                        href="https://wa.me/96178768725" target="_blank" rel="noopener">
+                        <i class="fab fa-whatsapp me-2"></i> WhatsApp available
                     </a>
                 </div>
             </div>
@@ -1101,7 +1160,6 @@
             const modal = new bootstrap.Modal(document.getElementById('projectModal'));
             const modalTitle = document.getElementById('projectTitle');
             const modalDesc = document.getElementById('projectDescription');
-            const modalLink = document.getElementById('fullProjectLink');
             const galleryBox = document.getElementById('lightboxGallery');
 
             const lightbox = document.getElementById('lightboxOverlay');
@@ -1119,11 +1177,8 @@
                     const desc = btn.dataset.description;
                     const image = btn.dataset.image;
                     const gallery = JSON.parse(btn.dataset.gallery || '[]');
-                    const id = btn.dataset.id;
-
                     modalTitle.textContent = title;
                     modalDesc.textContent = desc;
-                    modalLink.href = `/projects/${id}`;
 
                     galleryBox.innerHTML = "";
 
@@ -1175,11 +1230,26 @@
             // Rating stars in review modal
             const ratingInput = document.getElementById('ratingInput');
             const starButtons = document.querySelectorAll('.akg-star-btn');
+            const setStars = (val) => {
+                starButtons.forEach(s => {
+                    const isActive = Number(s.dataset.value) <= Number(val);
+                    s.classList.toggle('active', isActive);
+                    const icon = s.querySelector('i');
+                    if (icon) {
+                        icon.style.color = isActive ? '#d4af37' : '#7c8799';
+                    }
+                });
+            };
+
+            if (ratingInput) {
+                setStars(ratingInput.value || 5);
+            }
+
             starButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
                     const val = btn.dataset.value;
                     ratingInput.value = val;
-                    starButtons.forEach(s => s.classList.toggle('active', s.dataset.value <= val));
+                    setStars(val);
                 });
             });
 

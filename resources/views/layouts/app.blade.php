@@ -84,6 +84,14 @@
         }
     </style>
     @endif
+    @if(app()->getLocale() !== 'ar')
+    <style>
+        .akg-nav-tight {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+    </style>
+    @endif
     {{-- $theme is now provided by the view composer. --}}
     @if ($theme)
         <style>
@@ -161,7 +169,7 @@
             <a class="navbar-brand d-flex align-items-center flex-shrink-0 me-lg-4" href="{{ url('/') }}">
                 <img src="{{ asset('assets/img/ChatGPT Image Nov 16, 2025, 09_51_06 AM.png') }}" alt="Logo"
                     class="akg-logo">
-                <span class="akg-brand-text ms-2">Ali Krecht Group</span>
+                <span class="akg-brand-text ms-2">{{ config('app.name', 'Ali Krecht Group') }}</span>
             </a>
 
             <!-- Mobile Toggle -->
@@ -171,7 +179,7 @@
 
             <!-- Menu -->
             <div class="collapse navbar-collapse" id="akgNav">
-                <ul class="navbar-nav align-items-lg-center gap-lg-1 small {{ app()->getLocale() === 'ar' ? 'flex-row-reverse' : 'ms-auto' }}">
+                <ul class="navbar-nav align-items-lg-center {{ app()->getLocale() === 'ar' ? 'gap-lg-1 flex-row-reverse' : 'gap-lg-0 ms-auto' }} small">
                     @php
                         $processText = __('messages.nav.process');
                         if ($processText === 'messages.nav.process') {
@@ -221,7 +229,7 @@
                                 <a class="nav-link px-2" href="{{ route($item['data']['route']) }}" {!! $item['data']['extra'] ?? '' !!}>{{ $item['data']['label'] }}</a>
                             </li>
                         @elseif ($item['type'] === 'cart')
-                            <li class="nav-item dropdown mx-lg-1">
+                            <li class="nav-item dropdown mx-lg-1 akg-nav-tight">
                                 <a class="nav-link dropdown-toggle text-gold" href="#" data-bs-toggle="dropdown">
                                     <i class="fa fa-shopping-cart me-1"></i>
                                     {{ __('messages.nav.cart') }}
@@ -229,23 +237,23 @@
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end akg-dropdown">
                                     <li class="d-flex justify-content-between">
-                                        <span>Items:</span> <span class="fw-bold cart-count">{{ $cartCount }}</span>
+                                        <span>{{ __('messages.cart.dropdown_items') }}:</span> <span class="fw-bold cart-count">{{ $cartCount }}</span>
                                     </li>
                                     <li class="d-flex justify-content-between mt-2">
-                                        <span>Total:</span> <span class="fw-bold cart-total">${{ number_format($cartTotal, 2) }}</span>
+                                        <span>{{ __('messages.cart.dropdown_total') }}:</span> <span class="fw-bold cart-total">${{ number_format($cartTotal, 2) }}</span>
                                     </li>
                                     <li>
                                         <hr class="dropdown-divider">
                                     </li>
                                     <li>
                                         <a href="{{ route('cart.index') }}" class="btn btn-gold w-100 fw-semibold">
-                                            View Cart
+                                            {{ __('messages.cart.view_cart') }}
                                         </a>
                                     </li>
                                 </ul>
                             </li>
                         @elseif ($item['type'] === 'auth')
-                            <li class="nav-item dropdown ms-lg-1">
+                            <li class="nav-item dropdown ms-lg-1 akg-nav-tight">
                                 <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" data-bs-toggle="dropdown">
                                     <i class="fa fa-user-circle me-1"></i>
                                     @auth {{ Str::limit(Auth::user()->name, 10) }} @endauth
@@ -255,7 +263,7 @@
                                         <li><a href="{{ route('login') }}" class="dropdown-item">{{ __('messages.nav.login') }}</a></li>
                                         <li><a href="{{ route('register') }}" class="dropdown-item">{{ __('messages.nav.register') }}</a></li>
                                     @else
-                                        <li><a href="{{ route('dashboard') }}" class="dropdown-item">Dashboard</a></li>
+                                        <li><a href="{{ route('dashboard') }}" class="dropdown-item">{{ __('messages.nav.dashboard') }}</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li>
                                             <form action="{{ route('logout') }}" method="POST">@csrf
@@ -268,7 +276,7 @@
                                 </ul>
                             </li>
                         @elseif ($item['type'] === 'lang')
-                            <li class="nav-item dropdown ms-lg-1">
+                            <li class="nav-item dropdown ms-lg-1 akg-nav-tight">
                                 <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                                     {{ strtoupper(app()->getLocale()) }}
                                 </a>
@@ -300,13 +308,13 @@
         <div class="container py-4">
             <p class="mb-2">© {{ date('Y') }} Ali Krecht Group. {{ __('messages.footer.all_rights') }}</p>
             <div class="akg-footer-menu mb-3">
-                <a href="{{ route('home') }}">Home</a> |
-                <a href="{{ route('about') }}">About</a> |
-                <a href="{{ route('services') }}">Services</a> |
+                <a href="{{ route('home') }}">{{ __('messages.nav.home') }}</a> |
+                <a href="{{ route('about') }}">{{ __('messages.nav.about') }}</a> |
+                <a href="{{ route('services') }}">{{ __('messages.nav.services') }}</a> |
                 <a href="{{ route('process') }}">{{ $processText }}</a> |
-                <a href="{{ route('products.index') }}">Products</a> |
-                <a href="{{ route('projects.index') }}">Projects</a> |
-                <a href="{{ route('contact') }}">Contact</a>
+                <a href="{{ route('products.index') }}">{{ __('messages.nav.products') }}</a> |
+                <a href="{{ route('projects.index') }}">{{ __('messages.nav.projects') }}</a> |
+                <a href="{{ route('contact') }}">{{ __('messages.nav.contact') }}</a>
             </div>
             <div class="akg-footer-social d-flex justify-content-center gap-3">
                 <a class="btn btn-outline-gold btn-sm rounded-circle" href="https://www.facebook.com" target="_blank"

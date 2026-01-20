@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', '403 - Forbidden')
-@section('meta_description', 'Access denied. You do not have permission to view this page. Return to Ali Krecht Group home or contact support.')
+@section('title', __('messages.errors.403.title'))
+@section('meta_description', __('messages.errors.403.meta_description'))
 
 @section('content')
 <div class="error-container min-vh-100 d-flex align-items-center justify-content-center bg-light">
@@ -10,27 +10,27 @@
             <div class="col-md-8 mx-auto">
                 <div class="error-content p-5">
                     <h1 class="display-1 fw-bold text-warning mb-3">403</h1>
-                    <h2 class="fs-3 mb-3">Access Forbidden</h2>
+                    <h2 class="fs-3 mb-3">{{ __('messages.errors.403.heading') }}</h2>
                     <p class="fs-5 text-muted mb-4">
-                        You don't have permission to access this resource. 
+                        {{ __('messages.errors.403.message') }}
                         @auth
-                            If you believe this is an error, please contact support.
+                            {{ __('messages.errors.403.contact_support') }}
                         @else
-                            Please <a href="{{ route('login') }}">log in</a> to continue.
+                            {!! __('messages.errors.403.login_prompt', ['login' => route('login')]) !!}
                         @endauth
                     </p>
                     
                     <div class="error-actions">
                         <a href="{{ route('home') }}" class="btn btn-primary btn-lg me-2">
-                            <i class="fas fa-home"></i> Back to Home
+                            <i class="fas fa-home"></i> {{ __('messages.errors.403.back_home') }}
                         </a>
                         @guest
                             <a href="{{ route('login') }}" class="btn btn-outline-primary btn-lg">
-                                <i class="fas fa-sign-in-alt"></i> Login
+                                <i class="fas fa-sign-in-alt"></i> {{ __('messages.errors.403.login') }}
                             </a>
                         @else
                             <a href="{{ route('products.index') }}" class="btn btn-outline-primary btn-lg">
-                                <i class="fas fa-shopping-bag"></i> Browse
+                                <i class="fas fa-shopping-bag"></i> {{ __('messages.errors.403.browse') }}
                             </a>
                         @endguest
                     </div>
@@ -38,7 +38,7 @@
                     <div class="mt-5 pt-5 border-top">
                         <p class="text-muted">
                             <small>
-                                Have questions? <a href="{{ route('contact') }}">Contact us</a>
+                                {!! __('messages.errors.403.contact_us', ['contact' => route('contact')]) !!}
                             </small>
                         </p>
                     </div>

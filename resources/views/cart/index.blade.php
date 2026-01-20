@@ -7,15 +7,15 @@
 {{-- ========================================================= --}}
 
 <div class=" akg-hero-img-box">
-    <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_17_11 PM.png') }}" alt="Your Cart" class="akg-hero-img"
+    <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_17_11 PM.png') }}" alt="{{ __('messages.cart.hero_title') }}" class="akg-hero-img"
         loading="lazy">
 
     <div class="container text-center hero-content">
         <h1 class="akg-hero-title text-gold mb-3">{{ __('messages.cart.hero_title') }}</h1>
 
-        <ol class="breadcrumb justify-content-center text-uppercase">
-            <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-            <li class="breadcrumb-item text-light active">Cart</li>
+        <ol class="breadcrumb justify-content-center text-uppercase {{ app()->getLocale() === 'ar' ? 'flex-row-reverse' : '' }}">
+            <li class="breadcrumb-item"><a href="{{ route('home') }}">{{ __('messages.nav.home') }}</a></li>
+            <li class="breadcrumb-item text-light active">{{ __('messages.nav.cart') }}</li>
         </ol>
     </div>
 </div>
@@ -62,13 +62,13 @@
         <div class="table-responsive rounded-4 shadow-lg mb-4">
             <table class="table table-dark table-hover align-middle mb-0">
                 <thead class="table-dark">
-                    <tr class="text-center text-gold">
-                        <th>{{ __('messages.cart.table_image') }}</th>
-                        <th>{{ __('messages.cart.table_product') }}</th>
-                        <th width="180">{{ __('messages.cart.table_qty') }}</th>
-                        <th>{{ __('messages.cart.table_price') }}</th>
-                        <th>{{ __('messages.cart.table_total') }}</th>
-                        <th>{{ __('messages.cart.table_remove') }}</th>
+                    <tr class="text-gold">
+                        <th class="text-center">{{ __('messages.cart.table_image') }}</th>
+                        <th class="text-start">{{ __('messages.cart.table_product') }}</th>
+                        <th class="text-center" width="180">{{ __('messages.cart.table_qty') }}</th>
+                        <th class="text-center">{{ __('messages.cart.table_price') }}</th>
+                        <th class="text-center">{{ __('messages.cart.table_total') }}</th>
+                        <th class="text-center">{{ __('messages.cart.table_remove') }}</th>
                     </tr>
                 </thead>
 
@@ -77,7 +77,13 @@
 
                     @foreach ($cartItems as $id => $item)
                         @php
-                            $title = $item['title'] ?? ($item['name'] ?? '—');
+                            $title = $item['title_localized'] ?? $item['title'] ?? ($item['name'] ?? '—');
+                            if (app()->getLocale() === 'ar' && empty($item['title_localized'])) {
+                                $productModel = \App\Models\Product::find($item['product_id'] ?? $id);
+                                if ($productModel && $productModel->title_localized) {
+                                    $title = $productModel->title_localized;
+                                }
+                            }
                             $imgPath = $item['image'] ?? null;
                             $price = $item['price'] ?? 0;
                             $qty = $item['quantity'] ?? 0;
@@ -102,7 +108,7 @@
                             </td>
 
                             {{-- TITLE --}}
-                            <td class="fw-semibold">{{ $title }}</td>
+                            <td class="fw-semibold text-start">{{ $title }}</td>
 
                             {{-- QUANTITY --}}
                             <td class="text-center">
@@ -118,10 +124,10 @@
                             </td>
 
                             {{-- PRICE --}}
-                            <td>${{ number_format($item['price'], 2) }}</td>
+                            <td class="text-center">${{ number_format($item['price'], 2) }}</td>
 
                             {{-- ITEM TOTAL --}}
-                            <td class="fw-bold text-gold item-total" data-id="{{ $id }}">${{ number_format($itemTotal, 2) }}</td>
+                            <td class="fw-bold text-gold text-center item-total" data-id="{{ $id }}">${{ number_format($itemTotal, 2) }}</td>
 
                             {{-- REMOVE --}}
                             <td class="text-center">
@@ -145,31 +151,31 @@
                 <form class="mb-3" method="POST" action="{{ route('coupon.apply') }}">
                     @csrf
                     <div class="input-group">
-                        <input type="text" name="code" class="form-control" placeholder="Coupon code" required>
-                        <button class="btn btn-outline-gold">Apply</button>
+                        <input type="text" name="code" class="form-control" placeholder="{{ __('messages.cart.coupon_code') }}" required>
+                        <button class="btn btn-outline-gold">{{ __('messages.cart.apply_coupon') }}</button>
                     </div>
                 </form>
             @else
-                <div class="alert alert-info small">Please log in to use coupons.</div>
+                <div class="alert alert-info small">{{ __('messages.cart.login_to_use_coupons') }}</div>
             @endauth
             @if(!empty($appliedCoupon))
                 <div class="d-flex justify-content-between text-success mb-2">
-                    <span>Coupon {{ $appliedCoupon['code'] }}</span>
+                    <span>{{ __('messages.cart.coupon_applied', ['code' => $appliedCoupon['code']]) }}</span>
                     <span>- ${{ number_format($discount, 2) }}</span>
                 </div>
                 <form method="POST" action="{{ route('coupon.remove') }}" class="mb-2">
                     @csrf
-                    <button class="btn btn-sm btn-outline-danger">Remove coupon</button>
+                    <button class="btn btn-sm btn-outline-danger">{{ __('messages.cart.remove_coupon') }}</button>
                 </form>
             @endif
 
             <div class="d-flex justify-content-between mb-2">
-                <span>Subtotal:</span>
+                <span>{{ __('messages.cart.subtotal') }}:</span>
                 <span class="gold-text fw-bold" id="grandTotal">${{ number_format($subtotal ?? $grandTotal, 2) }}</span>
             </div>
             @if(!empty($appliedCoupon))
                 <div class="d-flex justify-content-between mb-2">
-                    <span>Discount:</span>
+                    <span>{{ __('messages.cart.discount') }}:</span>
                     <span class="text-success fw-bold" id="discountAmount">- ${{ number_format($discount, 2) }}</span>
                 </div>
             @endif
@@ -177,7 +183,7 @@
             <hr>
 
             <div class="d-flex justify-content-between fs-4 mb-3">
-                <span class="fw-bold">Total:</span>
+                <span class="fw-bold">{{ __('messages.cart.total') }}:</span>
                 <span class="gold-text fw-bold" id="totalAfter">${{ number_format($totalAfter ?? $grandTotal, 2) }}</span>
             </div>
 
