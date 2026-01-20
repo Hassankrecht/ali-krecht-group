@@ -326,7 +326,7 @@
                                                     @csrf
                                                     @method('PUT')
                                                     <input type="hidden" name="status" value="{{ $coupon->status ? 0 : 1 }}">
-                                                    <button class="dropdown-item">
+                                                    <button type="submit" class="dropdown-item">
                                                         {{ $coupon->status ? 'Deactivate' : 'Activate' }}
                                                     </button>
                                                 </form>
@@ -346,7 +346,7 @@
                                                 <form method="POST" action="{{ route('admin.coupons.destroy', $coupon) }}" onsubmit="return confirm('Delete this coupon?')">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button class="dropdown-item text-danger">Delete</button>
+                                                    <button type="submit" class="dropdown-item text-danger">Delete</button>
                                                 </form>
                                             </li>
                                         </ul>

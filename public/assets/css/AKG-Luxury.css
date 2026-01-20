@@ -228,20 +228,21 @@ img {
     position: relative;
     color: #dcdcdc !important;
     font-weight: 500;
-    padding: 0.65rem 0.75rem !important;
+    padding: 0.55rem 0.7rem !important;
     font-size: 0.92rem;
     transition: var(--transition);
 }
 
 /* Slightly tighter nav spacing for Portuguese to accommodate longer words */
 html[lang="pt"] .akg-navbar .nav-link {
-    padding: 0.58rem 0.68rem !important;
+    padding: 0.5rem 0.62rem !important;
     font-size: 0.9rem;
 }
 
 /* Prevent Arabic nav labels from wrapping to two lines */
 html[lang="ar"] .akg-navbar .nav-link {
     white-space: nowrap;
+    text-align: right;
     font-size: 0.9rem;
 }
 
@@ -1245,6 +1246,9 @@ html[dir="rtl"] .akg-navbar .navbar-collapse {
 html[dir="rtl"] .akg-navbar .navbar-nav.akg-nav-rtl {
     flex-direction: row-reverse;
     text-align: right;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.4rem;
 }
 html[dir="rtl"] .akg-navbar .navbar-nav.akg-nav-rtl .nav-item {
     text-align: right;
