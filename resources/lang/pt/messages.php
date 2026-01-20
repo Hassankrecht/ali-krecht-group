@@ -129,6 +129,7 @@ return [
         'no_products' => 'Nenhum produto encontrado',
         'no_products_hint' => 'Confira outra categoria ou veja nossos projetos.',
         'see_all_projects' => 'Ver projetos',
+        'none' => 'Nenhum produto disponível.',
     ],
     'product_show' => [
         'breadcrumb' => 'Detalhes do produto',

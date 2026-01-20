@@ -129,6 +129,7 @@ return [
         'no_products' => 'No products found',
         'no_products_hint' => 'Please check another category or visit our projects.',
         'see_all_projects' => 'View Projects',
+        'none' => 'No products available.',
     ],
     'product_show' => [
         'breadcrumb' => 'Product Details',

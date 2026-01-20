@@ -132,6 +132,7 @@ return [
         'no_products' => 'لا توجد منتجات',
         'no_products_hint' => 'جرّب فئة أخرى أو شاهد مشاريعنا.',
         'see_all_projects' => 'عرض المشاريع',
+        'none' => 'لا توجد منتجات متاحة.',
     ],
     'product_show' => [
         'breadcrumb' => 'تفاصيل المنتج',
