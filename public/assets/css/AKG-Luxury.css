@@ -233,6 +233,12 @@ img {
     transition: var(--transition);
 }
 
+/* Tighter padding when using akg-nav-tight (non-AR UL) */
+.akg-nav-tight .nav-link {
+    padding: 0.5rem 0.62rem !important;
+    font-size: 0.9rem;
+}
+
 /* Slightly tighter nav spacing for Portuguese to accommodate longer words */
 html[lang="pt"] .akg-navbar .nav-link {
     padding: 0.5rem 0.62rem !important;
@@ -244,6 +250,9 @@ html[lang="ar"] .akg-navbar .nav-link {
     white-space: nowrap;
     text-align: right;
     font-size: 0.9rem;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Gold Underline Animation */
@@ -1181,8 +1190,8 @@ html[lang="ar"] .akg-navbar .nav-link {
         border-radius: 12px;
         box-shadow: 0 8px 18px rgba(0,0,0,0.25);
     }
-    .coupon-fab { left: 12px; }
-    .promo-toggle { left: 56px; }
+    .coupon-fab { left: 12px; right: auto; }
+    .promo-toggle { left: 56px; right: auto; }
     .promo-toggle::before {
         content: '⚡';
         font-size: 15px;
@@ -1198,18 +1207,23 @@ html[lang="ar"] .akg-navbar .nav-link {
         color: #000;
     }
 
-    /* Keep deals/coupon buttons same as English on small screens for AR/PT */
+    /* Keep deals/coupon buttons same position on small screens for all locales */
     html[lang="ar"] .coupon-fab,
     html[lang="ar"] .promo-toggle,
     html[lang="pt"] .coupon-fab,
     html[lang="pt"] .promo-toggle {
         left: auto;
+    }
+    html[lang="ar"] .coupon-fab,
+    html[lang="pt"] .coupon-fab {
+        left: 12px;
         right: auto;
     }
-    html[lang="ar"] .coupon-fab { left: 12px; }
-    html[lang="ar"] .promo-toggle { left: 56px; }
-    html[lang="pt"] .coupon-fab { left: 12px; }
-    html[lang="pt"] .promo-toggle { left: 56px; }
+    html[lang="ar"] .promo-toggle,
+    html[lang="pt"] .promo-toggle {
+        left: 56px;
+        right: auto;
+    }
 
     /* Collapse menu pinned to the right under the toggler */
     .akg-navbar .navbar-collapse {
@@ -1252,6 +1266,15 @@ html[dir="rtl"] .akg-navbar .navbar-nav.akg-nav-rtl {
 }
 html[dir="rtl"] .akg-navbar .navbar-nav.akg-nav-rtl .nav-item {
     text-align: right;
+}
+
+/* Laptop/tablet widths: tighten nav spacing to prevent wrapping */
+@media (max-width: 1200px) {
+    .akg-navbar .nav-link { padding: 0.48rem 0.6rem !important; }
+    .akg-nav-tight .nav-link { padding: 0.45rem 0.55rem !important; }
+    html[lang="pt"] .akg-navbar .nav-link { padding: 0.44rem 0.54rem !important; }
+    .akg-navbar .navbar-nav { gap: 0.25rem; }
+    html[dir="rtl"] .akg-navbar .navbar-nav.akg-nav-rtl { gap: 0.3rem; }
 }
 
 /* Slightly tighten nav link padding on tablets/phones to avoid wrapping in longer locales */
