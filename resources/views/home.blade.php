@@ -188,7 +188,7 @@
             <div class="row g-3 text-center">
                 <div class="col-6 col-lg-3">
                     <div class="akg-card text-center">
-                        <span class="akg-trust-number">15+</span>
+                        <span class="akg-trust-number">35+</span>
                         <span class="akg-trust-label">
                             {{ __('messages.home.trust_years') }}
                         </span>
@@ -642,7 +642,7 @@
                     <div class="row g-4 mb-4">
                         <div class="col-sm-6">
                             <div class="experience-box">
-                                <h1 class="experience-number">15</h1>
+                                <h1 class="experience-number">35</h1>
                                 <div class="ps-3">
                                     <p class="mb-0 small text-muted">
                                         {{ __('messages.home.about.experience_years') }}
