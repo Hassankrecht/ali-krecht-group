@@ -18,9 +18,9 @@ class RedirectIfAuthenticatedCustom
     public function handle($request, Closure $next, $guard = null)
     {
         if (Auth::guard($guard)->check()) {
-            // Redirect user or admin to their dashboard if already logged in
+            // Redirect user or admin to their own area if already logged in
             if ($guard === 'admin') {
-                return redirect()->route('dashboard'); // Change to your admin dashboard route if different
+                return redirect()->route('admin.dashboard');
             }
             return redirect('/');
         }

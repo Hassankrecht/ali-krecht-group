@@ -166,7 +166,7 @@
 
             <!-- Menu -->
             <div class="collapse navbar-collapse" id="akgNav">
-                <ul class="navbar-nav align-items-lg-center gap-lg-1 ms-auto small">
+                <ul class="navbar-nav align-items-lg-center gap-lg-1 ms-auto small {{ app()->getLocale() === 'ar' ? 'akg-nav-rtl' : '' }}">
                     @php
                         $processText = __('messages.nav.process');
                         if ($processText === 'messages.nav.process') {

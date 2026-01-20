@@ -131,7 +131,7 @@ Route::get('/checkout/invoice/{order}', [CheckoutController::class, 'downloadInv
 Route::prefix('admin')->name('admin.')->group(function () {
 
     // 🔐 صفحة تسجيل الدخول الخاصة بالمدير
-    Route::middleware('guest.custom')->group(function () {
+    Route::middleware('guest.custom:admin')->group(function () {
         Route::get('login', [AuthController::class, 'showLoginForm'])->name('login');
         Route::post('login', [AuthController::class, 'login'])->name('login.submit');
     });

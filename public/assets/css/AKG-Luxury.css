@@ -130,6 +130,7 @@ img {
 .akg-navbar .navbar-nav {
     margin-inline-start: auto;
     margin-left: auto;
+    gap: 0rem;
 }
 
 /* iPad Air/Pro (tablet) – shift Deals button 150px from right */
@@ -139,16 +140,17 @@ img {
         top: 10px !important;
         right: 150px !important;
         left: auto !important;
-        z-index: 1300;
+    /* This rule will be reinserted under mobile media query */
+    /* html[lang="ar"] .akg-navbar .navbar-nav {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.35rem;
     }
-    /* Center logo + text on iPad */
-    .akg-navbar .navbar-brand {
-        position: absolute !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        margin: 0 !important;
-        display: inline-flex;
-        align-items: center;
+    html[lang="ar"] .akg-navbar .nav-item,
+    html[lang="ar"] .akg-navbar .nav-link {
+        width: 100%;
+        text-align: right;
+    } */
         gap: 8px;
     }
     .akg-brand-text {
@@ -226,9 +228,21 @@ img {
     position: relative;
     color: #dcdcdc !important;
     font-weight: 500;
-    padding: 0.85rem 1.1rem !important;
+    padding: 0.65rem 0.75rem !important;
     font-size: 0.92rem;
     transition: var(--transition);
+}
+
+/* Slightly tighter nav spacing for Portuguese to accommodate longer words */
+html[lang="pt"] .akg-navbar .nav-link {
+    padding: 0.58rem 0.68rem !important;
+    font-size: 0.9rem;
+}
+
+/* Prevent Arabic nav labels from wrapping to two lines */
+html[lang="ar"] .akg-navbar .nav-link {
+    white-space: nowrap;
+    font-size: 0.9rem;
 }
 
 /* Gold Underline Animation */
@@ -1160,9 +1174,9 @@ img {
         width: 38px;
         height: 38px;
         padding: 8px;
-        font-size: 0 !important;
+        font-size: 0 !important; /* hide text label */
         line-height: 0 !important;
-        text-indent: -9999px;
+        text-indent: -9999px; /* hide text label */
         border-radius: 12px;
         box-shadow: 0 8px 18px rgba(0,0,0,0.25);
     }
@@ -1173,8 +1187,28 @@ img {
         font-size: 15px;
         line-height: 1;
         text-indent: 0;
-        color: #0f172a;
+        color: #000;
     }
+    .coupon-fab::before {
+        content: '⚡';
+        font-size: 15px;
+        line-height: 1;
+        text-indent: 0;
+        color: #000;
+    }
+
+    /* Keep deals/coupon buttons same as English on small screens for AR/PT */
+    html[lang="ar"] .coupon-fab,
+    html[lang="ar"] .promo-toggle,
+    html[lang="pt"] .coupon-fab,
+    html[lang="pt"] .promo-toggle {
+        left: auto;
+        right: auto;
+    }
+    html[lang="ar"] .coupon-fab { left: 12px; }
+    html[lang="ar"] .promo-toggle { left: 56px; }
+    html[lang="pt"] .coupon-fab { left: 12px; }
+    html[lang="pt"] .promo-toggle { left: 56px; }
 
     /* Collapse menu pinned to the right under the toggler */
     .akg-navbar .navbar-collapse {
@@ -1189,6 +1223,18 @@ img {
         z-index: 1200;
     }
     .akg-navbar .navbar-nav { margin-left: 0; }
+
+    /* Arabic mobile: stack items vertically in the burger menu */
+    html[lang="ar"] .akg-navbar .navbar-nav.akg-nav-rtl {
+        flex-direction: column !important;
+        align-items: flex-end;
+        gap: 0.35rem;
+    }
+    html[lang="ar"] .akg-navbar .navbar-nav.akg-nav-rtl .nav-item,
+    html[lang="ar"] .akg-navbar .navbar-nav.akg-nav-rtl .nav-link {
+        width: 100%;
+        text-align: right;
+    }
 }
 
 /* RTL tweaks: keep collapse on the right and align nav to end */
@@ -1196,10 +1242,18 @@ html[dir="rtl"] .akg-navbar .navbar-collapse {
     right: 0;
     left: auto;
 }
+html[dir="rtl"] .akg-navbar .navbar-nav.akg-nav-rtl {
+    flex-direction: row-reverse;
+    text-align: right;
+}
+html[dir="rtl"] .akg-navbar .navbar-nav.akg-nav-rtl .nav-item {
+    text-align: right;
+}
 
 /* Slightly tighten nav link padding on tablets/phones to avoid wrapping in longer locales */
 @media (max-width: 992px) {
-    .akg-navbar .nav-link { padding: 0.75rem 0.9rem !important; }
+    .akg-navbar .nav-link { padding: 0.5rem 0.65rem !important; }
+    html[lang="pt"] .akg-navbar .nav-link { padding: 0.45rem 0.6rem !important; }
 }
 
 /* Ensure hero text aligns from the logical start in all languages */
