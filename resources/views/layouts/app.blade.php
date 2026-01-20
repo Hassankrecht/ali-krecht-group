@@ -63,7 +63,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
     <!-- ===================== THE MAIN MERGED THEME FILE ===================== -->
-    <link href="{{ asset('assets/css/AKG-Luxury.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/css/AKG-Luxury.css') }}?v=20260120a" rel="stylesheet">
     @if(app()->getLocale() === 'ar')
     <style>
         /* RTL dropdown alignment */
