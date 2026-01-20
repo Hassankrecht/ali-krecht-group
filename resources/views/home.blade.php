@@ -101,8 +101,8 @@
             </div>
         @endif
 
-        <div class="position-absolute text-light"
-            style="top: {{ $heroContentPosY ?? 20 }}%; left: {{ $heroContentPosX ?? 10 }}%; max-width:60%; z-index:3; padding:0;">
+        <div class="akg-hero-content position-absolute text-light"
+            style="top: {{ $heroContentPosY ?? 20 }}%; inset-inline-start: {{ $heroContentPosX ?? 10 }}%; max-width:60%; z-index:3; padding:0; text-align:start;">
 
             @if ($showTitle)
                 <h1 class="akg-hero-title mb-3"
@@ -1076,7 +1076,7 @@
 
                                         <div class="akg-product-img-box">
                                             <img src="{{ $img }}" class="akg-product-img"
-                                                alt="{{ $product->title }}" loading="lazy">
+                                                alt="{{ $product->title_localized ?? $product->title }}" loading="lazy">
                                             <div class="akg-product-overlay">
                                                 <a href="{{ route('products.show', $product->id) }}"
                                                     class="btn-gold-small">
@@ -1102,8 +1102,7 @@
                             @empty
                                 <div class="col-12">
                                     <div class="akg-card text-center py-4">
-                                        <p class="text-muted mb-0">
-                                            {{ __('messages.products.none') ?? 'No products available.' }}</p>
+                                        <p class="text-muted mb-0">{{ __('messages.products.none') }}</p>
                                     </div>
                                 </div>
                             @endforelse
@@ -1112,7 +1111,7 @@
                     </div>
                 @empty
                     <div class="akg-card text-center py-4">
-                        <p class="text-muted mb-0">{{ __('messages.products.none') ?? 'No products available.' }}</p>
+                        <p class="text-muted mb-0">{{ __('messages.products.none') }}</p>
                     </div>
                 @endforelse
             </div>

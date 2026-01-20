@@ -126,8 +126,9 @@ img {
     pointer-events: none;
 }
 
-/* Align nav items to the right on desktop */
+/* Align nav items to the right on desktop (logical start for RTL/LTR) */
 .akg-navbar .navbar-nav {
+    margin-inline-start: auto;
     margin-left: auto;
 }
 
@@ -1188,6 +1189,22 @@ img {
         z-index: 1200;
     }
     .akg-navbar .navbar-nav { margin-left: 0; }
+}
+
+/* RTL tweaks: keep collapse on the right and align nav to end */
+html[dir="rtl"] .akg-navbar .navbar-collapse {
+    right: 0;
+    left: auto;
+}
+
+/* Slightly tighten nav link padding on tablets/phones to avoid wrapping in longer locales */
+@media (max-width: 992px) {
+    .akg-navbar .nav-link { padding: 0.75rem 0.9rem !important; }
+}
+
+/* Ensure hero text aligns from the logical start in all languages */
+.akg-hero-content {
+    text-align: start;
 }
 
 /* Desktop/Laptop: remove icons from coupon/deals buttons */

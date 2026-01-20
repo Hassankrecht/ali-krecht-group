@@ -36,8 +36,8 @@
                 "areaServed": "AE"
             }],
             "sameAs": [
-                "https://www.facebook.com/alikrechtgroup",
-                "https://www.instagram.com/alikrechtgroup"
+                "https://www.facebook.com/people/Ali-Krecht-Group/61586371040723/",
+                "https://www.instagram.com/krechtgroup/"
             ]
         }
         </script>
@@ -66,22 +66,9 @@
     <link href="{{ asset('assets/css/AKG-Luxury.css') }}" rel="stylesheet">
     @if(app()->getLocale() === 'ar')
     <style>
-        /* RTL Navbar adjustments */
-        .navbar-nav.flex-row-reverse {
-            flex-direction: row-reverse !important;
-        }
-        .navbar-nav.flex-row-reverse .dropdown-menu {
-            right: auto;
-            left: 0;
-            text-align: right;
-        }
-        .navbar-nav.flex-row-reverse .nav-item {
-            text-align: right;
-        }
-        .navbar-nav.flex-row-reverse .dropdown-menu-end {
-            right: auto !important;
-            left: 0 !important;
-        }
+        /* RTL dropdown alignment */
+        html[dir="rtl"] .navbar-nav .dropdown-menu { text-align: right; }
+        html[dir="rtl"] .navbar-nav .dropdown-menu-end { left: 0 !important; right: auto !important; }
     </style>
     @endif
     @if(app()->getLocale() !== 'ar')
@@ -179,7 +166,7 @@
 
             <!-- Menu -->
             <div class="collapse navbar-collapse" id="akgNav">
-                <ul class="navbar-nav align-items-lg-center {{ app()->getLocale() === 'ar' ? 'gap-lg-1 flex-row-reverse' : 'gap-lg-0 ms-auto' }} small">
+                <ul class="navbar-nav align-items-lg-center gap-lg-1 ms-auto small">
                     @php
                         $processText = __('messages.nav.process');
                         if ($processText === 'messages.nav.process') {
@@ -307,6 +294,7 @@
     <footer class="akg-footer text-center">
         <div class="container py-4">
             <p class="mb-2">© {{ date('Y') }} Ali Krecht Group. {{ __('messages.footer.all_rights') }}</p>
+            <div class="mb-3"><small class="text-muted">Developed by Hassan Krecht</small></div>
             <div class="akg-footer-menu mb-3">
                 <a href="{{ route('home') }}">{{ __('messages.nav.home') }}</a> |
                 <a href="{{ route('about') }}">{{ __('messages.nav.about') }}</a> |
@@ -317,19 +305,19 @@
                 <a href="{{ route('contact') }}">{{ __('messages.nav.contact') }}</a>
             </div>
             <div class="akg-footer-social d-flex justify-content-center gap-3">
-                <a class="btn btn-outline-gold btn-sm rounded-circle" href="https://www.facebook.com" target="_blank"
+                <a class="btn btn-outline-gold btn-sm rounded-circle" href="https://www.facebook.com/people/Ali-Krecht-Group/61586371040723/" target="_blank"
                     rel="noopener" aria-label="Facebook">
                     <i class="fab fa-facebook-f"></i>
                 </a>
-                <a class="btn btn-outline-gold btn-sm rounded-circle" href="https://www.instagram.com"
+                <a class="btn btn-outline-gold btn-sm rounded-circle" href="https://www.instagram.com/krechtgroup/"
                     target="_blank" rel="noopener" aria-label="Instagram">
                     <i class="fab fa-instagram"></i>
                 </a>
-                <a class="btn btn-outline-gold btn-sm rounded-circle" href="https://www.linkedin.com" target="_blank"
-                    rel="noopener" aria-label="LinkedIn">
-                    <i class="fab fa-linkedin-in"></i>
+                <a class="btn btn-outline-gold btn-sm rounded-circle" href="https://www.tiktok.com/@alikrechtgroup" target="_blank"
+                    rel="noopener" aria-label="TikTok">
+                    <i class="fab fa-tiktok"></i>
                 </a>
-                <a class="btn btn-outline-gold btn-sm rounded-circle" href="https://wa.me/420775215858"
+                <a class="btn btn-outline-gold btn-sm rounded-circle" href="https://wa.me/96178768725"
                     target="_blank" rel="noopener" aria-label="WhatsApp">
                     <i class="fab fa-whatsapp"></i>
                 </a>
