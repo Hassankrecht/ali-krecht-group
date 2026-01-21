@@ -87,7 +87,7 @@
                     <div class="row g-3 mt-4">
                         <div class="col-sm-6 col-lg-3">
                             <div class="akg-card text-center">
-                        <span class="akg-trust-number">15+</span>
+                        <span class="akg-trust-number">35+</span>
                         <span class="akg-trust-label">{{ __('messages.about_page.trust_years') }}</span>
                     </div>
                 </div>

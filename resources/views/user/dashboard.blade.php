@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'My Dashboard')
-@section('meta_description', 'Access your Ali Krecht Group dashboard to manage orders, profile, and view your project history securely.')
+@section('title', __('messages.dashboard.title'))
+@section('meta_description', __('messages.dashboard.meta_description'))
 
 @section('content')
     <div class="container py-5" style="margin-top: 82px">
@@ -17,32 +17,32 @@
         @endpush
 
         <div class="mb-3 d-flex gap-2">
-            <a href="{{ route('dashboard') }}" class="btn btn-gold text-dark">My Coupons</a>
-            <a href="{{ route('dashboard.orders') }}" class="btn btn-outline-gold">My Orders</a>
-            <a href="{{ route('dashboard.profile') }}" class="btn btn-outline-gold">Profile</a>
+            <a href="{{ route('dashboard') }}" class="btn btn-gold text-dark">{{ __('messages.dashboard.my_coupons') }}</a>
+            <a href="{{ route('dashboard.orders') }}" class="btn btn-outline-gold">{{ __('messages.dashboard.my_orders') }}</a>
+            <a href="{{ route('dashboard.profile') }}" class="btn btn-outline-gold">{{ __('messages.dashboard.profile') }}</a>
         </div>
 
         <div class="akg-card p-4 mb-4 user-card">
-            <h4 class="text-gold mb-2">Welcome, {{ auth()->user()->name ?? 'User' }}</h4>
-            <p class="text-muted mb-0">Here are your available coupons.</p>
+            <h4 class="text-gold mb-2">{{ __('messages.dashboard.welcome', ['name' => auth()->user()->name ?? __('messages.dashboard.user')]) }}</h4>
+            <p class="text-muted mb-0">{{ __('messages.dashboard.coupons_desc') }}</p>
         </div>
 
         <div class="akg-card p-4 user-card">
             @if($coupons->isEmpty())
-                <p class="text-muted mb-0">No coupons assigned yet.</p>
+                <p class="text-muted mb-0">{{ __('messages.dashboard.no_coupons') }}</p>
             @else
                 <div class="table-responsive">
                     <table class="table table-dark table-hover align-middle mb-0">
                         <thead>
                         <tr>
-                            <th>Code</th>
-                            <th>Type</th>
-                            <th>Value</th>
-                            <th>Usage</th>
-                            <th>Min Total</th>
-                            <th>Starts</th>
-                            <th>Expires</th>
-                            <th>Status</th>
+                            <th>{{ __('messages.dashboard.code') }}</th>
+                            <th>{{ __('messages.dashboard.type') }}</th>
+                            <th>{{ __('messages.dashboard.value') }}</th>
+                            <th>{{ __('messages.dashboard.usage') }}</th>
+                            <th>{{ __('messages.dashboard.min_total') }}</th>
+                            <th>{{ __('messages.dashboard.starts') }}</th>
+                            <th>{{ __('messages.dashboard.expires') }}</th>
+                            <th>{{ __('messages.dashboard.status') }}</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -63,13 +63,13 @@
                                 <td>{{ $c->expiration_date ? \Carbon\Carbon::parse($c->expiration_date)->format('Y-m-d') : '—' }}</td>
                                 <td>
                                     @if($active)
-                                        <span class="badge bg-success">Active</span>
+                                        <span class="badge bg-success">{{ __('messages.dashboard.active') }}</span>
                                     @elseif($isExpired)
-                                        <span class="badge bg-secondary">Expired</span>
+                                        <span class="badge bg-secondary">{{ __('messages.dashboard.expired') }}</span>
                                     @elseif($isUsedOut)
-                                        <span class="badge bg-secondary">Used</span>
+                                        <span class="badge bg-secondary">{{ __('messages.dashboard.used') }}</span>
                                     @else
-                                        <span class="badge bg-secondary">Inactive</span>
+                                        <span class="badge bg-secondary">{{ __('messages.dashboard.inactive') }}</span>
                                     @endif
                                 </td>
                             </tr>
