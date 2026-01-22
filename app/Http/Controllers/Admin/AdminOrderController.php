@@ -123,7 +123,7 @@ class AdminOrderController extends Controller
 
         $orders = (clone $ordersQuery)
             ->paginate(15)
-            ->withQueryString();
+            ->appends(request()->query());
 
         // إعادة ضبط الترتيب لتجنب only_full_group_by في التجميعات
         $aggQuery = (clone $ordersQuery);

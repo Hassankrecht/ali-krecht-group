@@ -3,28 +3,30 @@
 @section('content')
     <div class="container py-5">
 
-        <div class="card shadow-lg border-warning">
-
-            {{-- HEADER --}}
-            <div class="card-header bg-dark text-warning fw-bold d-flex justify-content-between align-items-center">
-                ✏️ Edit Project — {{ $project->title }}
-
-                <a href="{{ route('admin.projects.index') }}" class="btn btn-secondary btn-sm">
-                    ⬅ Back to Projects
-                </a>
+        {{-- HEADER --}}
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold" style="color: #c7954b;">
+                    ✏️ Edit Project
+                </h3>
+                <p class="text-muted small mb-0">{{ $project->title }}</p>
             </div>
+            <a href="{{ route('admin.projects.index') }}" class="btn btn-outline-gold fw-semibold px-4">
+                ← Back
+            </a>
+        </div>
 
-            <div class="card-body bg-light">
+        <div class="card card-dark">
 
                 {{-- SUCCESS MESSAGE --}}
                 @if (session('success'))
-                    <div class="alert alert-success fw-semibold">{{ session('success') }}</div>
+                    <div class="alert alert-success border-0 shadow-sm fw-semibold">{{ session('success') }}</div>
                 @endif
 
                 {{-- ERRORS --}}
                 @if ($errors->any())
                     <div class="alert alert-danger border-0 shadow-sm">
-                        <strong>Whoops!</strong> Fix the issue below:
+                        <strong>Whoops!</strong> Fix the issues below:
                         <ul class="mb-0 mt-2">
                             @foreach ($errors->all() as $error)
                                 <li>• {{ $error }}</li>
@@ -81,19 +83,30 @@
 
                             {{-- Categories --}}
                             <div class="mb-3">
-                                <label class="form-label fw-semibold">Categories</label>
-                                <select name="categories[]" class="form-select" multiple>
-                                    @foreach($categories as $cat)
-                                        <optgroup label="{{ $cat->name }}">
-                                            @foreach($cat->children as $child)
-                                                <option value="{{ $child->id }}" {{ $project->categories->pluck('id')->contains($child->id) ? 'selected' : '' }}>
-                                                    {{ $child->name }}
-                                                </option>
+                                <div class="card border mb-2" style="background: #f8f9fa;">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h6 class="mb-0 fw-bold" style="color: #c7954b;">Project Categories</h6>
+                                            <div class="d-flex gap-2">
+                                                <button type="button" class="btn btn-gold btn-sm" data-bs-toggle="modal" data-bs-target="#addParentCatModal">+ Parent</button>
+                                                <button type="button" class="btn btn-outline-gold btn-sm" data-bs-toggle="modal" data-bs-target="#addChildCatModal">+ Child</button>
+                                            </div>
+                                        </div>
+                                        <label class="form-label fw-semibold">Select Categories</label>
+                                        <select name="categories[]" class="form-select" multiple size="5">
+                                            @php $parents = $categories->whereNull('parent_id'); @endphp
+                                            @foreach($parents as $cat)
+                                                <option disabled style="font-weight: bold;">— {{ $cat->name }} —</option>
+                                                @foreach($cat->children as $child)
+                                                    <option value="{{ $child->id }}" {{ $project->categories->pluck('id')->contains($child->id) ? 'selected' : '' }}>
+                                                        &nbsp;&nbsp;{{ $child->name }}
+                                                    </option>
+                                                @endforeach
                                             @endforeach
-                                        @endforeach
-                                    </optgroup>
-                                </select>
-                                <small class="text-muted">اختر فئة أو أكثر للمشروع.</small>
+                                        </select>
+                                        <small class="text-muted">Hold CTRL/CMD to select multiple categories.</small>
+                                    </div>
+                                </div>
                             </div>
 
                         </div>
@@ -108,21 +121,23 @@
                         </div>
 
                         {{-- Translations --}}
-                        <div class="akg-newcard p-3">
-                            <h6 class="text-warning fw-bold mb-2">Translations</h6>
+                        <div class="card border" style="background: #f8f9fa;">
+                            <div class="card-body">
+                            <h6 class="fw-bold mb-3" style="color: #c7954b;">Translations</h6>
                             <div class="row g-3">
                                 @foreach(config('app.supported_locales', []) as $locale)
                                     @continue($locale === config('app.locale'))
                                     @php $t = $project->translations->firstWhere('locale', $locale); @endphp
                                     <div class="col-md-6">
-                                        <label class="form-label">Title ({{ strtoupper($locale) }})</label>
+                                        <label class="form-label fw-semibold">Title ({{ strtoupper($locale) }})</label>
                                         <input type="text" name="translations[{{ $locale }}][title]" class="form-control" value="{{ old('translations.'.$locale.'.title', $t->title ?? '') }}">
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label">Description ({{ strtoupper($locale) }})</label>
+                                        <label class="form-label fw-semibold">Description ({{ strtoupper($locale) }})</label>
                                         <textarea name="translations[{{ $locale }}][description]" rows="2" class="form-control">{{ old('translations.'.$locale.'.description', $t->description ?? '') }}</textarea>
                                     </div>
                                 @endforeach
+                            </div>
                             </div>
                         </div>
 
@@ -169,12 +184,12 @@
 
                     {{-- UPDATE BUTTONS --}}
                     <div class="d-flex gap-3 mt-4">
-                        <button type="submit" class="btn btn-warning fw-semibold px-4">
+                        <button type="submit" class="btn btn-gold fw-semibold px-4">
                             🔄 Update Project
                         </button>
 
-                        <a href="{{ route('admin.projects.index') }}" class="btn btn-secondary px-4">
-                            ❌ Cancel Edit
+                        <a href="{{ route('admin.projects.index') }}" class="btn btn-outline-dark px-4">
+                            Cancel
                         </a>
                     </div>
 
@@ -263,3 +278,158 @@
         </div>
     </div>
 @endsection
+
+@push('modals')
+{{-- ADD PARENT CATEGORY MODAL --}}
+<div class="modal fade" id="addParentCatModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Parent Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small">Parent categories will be available in the category dropdown.</p>
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <input type="text" id="parentCatName" class="form-control" placeholder="e.g., Carpentry">
+                </div>
+                <div class="row g-2">
+                    @foreach(config('app.supported_locales', []) as $locale)
+                        @continue($locale === config('app.locale'))
+                        <div class="col-md-6">
+                            <label class="form-label">Name ({{ strtoupper($locale) }})</label>
+                            <input type="text" id="parentCatName_{{ $locale }}" class="form-control">
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-gold" onclick="saveParentCategory()">Save Category</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- ADD CHILD CATEGORY MODAL --}}
+<div class="modal fade" id="addChildCatModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Child Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Parent Category</label>
+                    <select id="childCatParent" class="form-select">
+                        <option value="">Select Parent</option>
+                        @php $parents = $categories->whereNull('parent_id'); @endphp
+                        @foreach($parents as $parent)
+                            <option value="{{ $parent->id }}">{{ $parent->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <input type="text" id="childCatName" class="form-control" placeholder="e.g., Doors">
+                </div>
+                <div class="row g-2">
+                    @foreach(config('app.supported_locales', []) as $locale)
+                        @continue($locale === config('app.locale'))
+                        <div class="col-md-6">
+                            <label class="form-label">Name ({{ strtoupper($locale) }})</label>
+                            <input type="text" id="childCatName_{{ $locale }}" class="form-control">
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-gold" onclick="saveChildCategory()">Save Category</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endpush
+
+@push('scripts')
+<script>
+function saveParentCategory() {
+    const name = document.getElementById('parentCatName').value;
+    if (!name) {
+        alert('Please enter category name');
+        return;
+    }
+    
+    const translations = {};
+    @foreach(config('app.supported_locales', []) as $locale)
+        @continue($locale === config('app.locale'))
+        translations['{{ $locale }}'] = {
+            name: document.getElementById('parentCatName_{{ $locale }}').value || name
+        };
+    @endforeach
+    
+    fetch('{{ route('admin.projects.categories.store') }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ name, translations })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + (data.message || 'Failed to save category'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to save category');
+    });
+}
+
+function saveChildCategory() {
+    const parentId = document.getElementById('childCatParent').value;
+    const name = document.getElementById('childCatName').value;
+    
+    if (!parentId || !name) {
+        alert('Please select parent and enter category name');
+        return;
+    }
+    
+    const translations = {};
+    @foreach(config('app.supported_locales', []) as $locale)
+        @continue($locale === config('app.locale'))
+        translations['{{ $locale }}'] = {
+            name: document.getElementById('childCatName_{{ $locale }}').value || name
+        };
+    @endforeach
+    
+    fetch('{{ route('admin.projects.categories.store') }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ name, parent_id: parentId, translations })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + (data.message || 'Failed to save category'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to save category');
+    });
+}
+</script>
+@endpush

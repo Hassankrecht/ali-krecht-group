@@ -114,7 +114,7 @@ class AdminIncomeController extends Controller
         $ordersQuery = (clone $baseQuery)->orderByDesc('created_at');
         $orders = (clone $ordersQuery)
             ->paginate(20)
-            ->withQueryString();
+            ->appends(request()->query());
         $rawOrders = $ordersQuery->get();
         $subtotalAll = $ordersQuery->sum(DB::raw('COALESCE(total_before_discount, total_price + discount_amount)'));
 
@@ -229,10 +229,10 @@ class AdminIncomeController extends Controller
         }
 
         $growthRevenue = $prevSummary->revenue > 0
-            ? (($net - $prevSummary->revenue) / $prevSummary->revenue) * 100
+            ? (($net - (float)$prevSummary->revenue) / (float)$prevSummary->revenue) * 100
             : null;
         $growthOrders = $prevSummary->orders > 0
-            ? (($ordersCount - $prevSummary->orders) / $prevSummary->orders) * 100
+            ? (((int)$ordersCount - (int)$prevSummary->orders) / (int)$prevSummary->orders) * 100
             : null;
 
         $paymentPie = collect();
