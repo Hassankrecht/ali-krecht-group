@@ -45,7 +45,12 @@ class DashboardController extends Controller
         $revenueWithoutCoupon = (clone $ordersQueryRange)->whereNull('coupon_id')->sum('total_price');
         $discountTotal = (clone $ordersQueryRange)->sum('discount_amount');
         $refundTotal   = (clone $ordersQueryRange)->sum('refund_amount');
-        $netRevenue    = (clone $ordersQueryRange)->sum('total_price');
+        
+        // Net Revenue: ONLY PAID ORDERS (paid/completed status)
+        $netRevenue = Checkout::whereBetween('created_at', [$startDate, $endDate])
+            ->whereIn(DB::raw("LOWER(status)"), ['paid', 'completed'])
+            ->sum('total_price');
+        
         $registeredCount = (clone $ordersQueryRange)->whereNotNull('user_id')->where('user_id','>',0)->count();
         $guestCount      = (clone $ordersQueryRange)->whereNull('user_id')->orWhere('user_id',0)->count();
         $aov = $ordersRange ? $netRevenue / $ordersRange : 0;

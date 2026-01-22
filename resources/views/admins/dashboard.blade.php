@@ -2,6 +2,7 @@
 @extends('layouts.admin')
 
 @section('content')
+<div class="container py-4">
 <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
     <h5 class="mb-0 text-gold d-flex align-items-center gap-2">
         <i class="bi bi-speedometer2"></i> Analytics Dashboard
@@ -51,7 +52,7 @@
                 <div>
                     <div class="text-muted small">Net revenue</div>
                     <div class="fs-4 fw-bold text-gold">${{ number_format($netRevenue ?? 0, 2) }}</div>
-                    <div class="small text-muted">Discounts ${{ number_format($discountTotal ?? 0,2) }} · Refunds ${{ number_format($refundTotal ?? 0,2) }}</div>
+                    <div class="small text-muted">Paid orders only</div>
                 </div>
             </div>
         </div>
@@ -212,8 +213,7 @@
         @endforeach
     </ul>
 </div>
-@endif
-@endsection
+@endif</div>@endsection
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -283,3 +283,4 @@ function setSeries(key) {
 setSeries('visits');
 </script>
 @endpush
+

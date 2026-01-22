@@ -198,6 +198,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Orders
         Route::resource('orders', AdminOrderController::class)->only(['index','show','update','destroy']);
         Route::post('orders/{order}/refund', [AdminOrderController::class, 'refund'])->name('orders.refund');
+        Route::get('orders-export', [AdminOrderController::class, 'export'])->name('orders.export');
+        Route::post('orders-bulk-update', [AdminOrderController::class, 'bulkUpdate'])->name('orders.bulk-update');
+        Route::post('orders-bulk-delete', [AdminOrderController::class, 'bulkDelete'])->name('orders.bulk-delete');
         Route::get('home-settings', [AdminHomeSettingController::class, 'edit'])->name('home.settings.edit');
         Route::post('home-settings', [AdminHomeSettingController::class, 'update'])->name('home.settings.update');
         Route::get('income', [AdminIncomeController::class, 'index'])->name('income.index');

@@ -52,23 +52,14 @@ class AdminIncomeController extends Controller
             }
         }
 
-        $status = $request->input('status'); // payment status
         // ignore payment method (single method cash)
         $method = null;
-        // treat "null" string as no filter
-        if ($status === 'null') {
-            $status = null;
-        }
         $hasPaymentMethod = false;
 
-        // استخدم الفاصل الزمني الكامل لتفادي مشاكل التقريب إلى التاريخ فقط
+        // **PAID ORDERS ONLY** - Filter for paid/completed orders only
         $baseQuery = DB::table('checkouts')
-            ->whereBetween('created_at', [$from, $to]);
-
-        if ($status) {
-            $baseQuery->where('status', $status);
-        }
-        // payment method not used
+            ->whereBetween('created_at', [$from, $to])
+            ->whereIn(DB::raw("LOWER(status)"), ['paid', 'completed']);
 
         $summary = (clone $baseQuery)
             ->selectRaw('COALESCE(SUM(total_price),0) as revenue_after_discount')
@@ -91,24 +82,29 @@ class AdminIncomeController extends Controller
         $totals = (clone $baseQuery)
             ->selectRaw('COALESCE(SUM(total_price),0) as revenue')->selectRaw('COUNT(*) as orders')->first();
 
-        $byStatus = (clone $baseQuery)
-            ->select('status', DB::raw('COUNT(*) as orders'), DB::raw('COALESCE(SUM(total_price),0) as revenue'))
-            ->groupBy('status')
-            ->get();
+        // For paid orders, no need to group by status since we only show paid orders
+        // Remove byStatus calculation
 
-        $chartData = (clone $baseQuery)
+        // Daily breakdown: revenue and orders with vs without discounts
+        $chartBreakdown = (clone $baseQuery)
             ->selectRaw('date(created_at) as day')
-            ->selectRaw('COALESCE(SUM(total_price),0) as revenue')
+            ->selectRaw("COALESCE(SUM(CASE WHEN coupon_id IS NOT NULL THEN total_price ELSE 0 END),0) as revenue_with_disc")
+            ->selectRaw("COALESCE(SUM(CASE WHEN coupon_id IS NULL THEN total_price ELSE 0 END),0) as revenue_without_disc")
+            ->selectRaw("SUM(CASE WHEN coupon_id IS NOT NULL THEN 1 ELSE 0 END) as orders_with_disc")
+            ->selectRaw("SUM(CASE WHEN coupon_id IS NULL THEN 1 ELSE 0 END) as orders_without_disc")
             ->groupBy(DB::raw('date(created_at)'))
             ->orderBy('day')
             ->get();
 
-        $chartOrders = (clone $baseQuery)
-            ->selectRaw('date(created_at) as day')
-            ->selectRaw('COUNT(*) as orders')
-            ->groupBy(DB::raw('date(created_at)'))
-            ->orderBy('day')
-            ->get();
+        $chartLabels = $chartBreakdown->pluck('day');
+        $chartRevenueWithDiscount = $chartBreakdown->pluck('revenue_with_disc');
+        $chartRevenueWithoutDiscount = $chartBreakdown->pluck('revenue_without_disc');
+        $chartOrdersWithDiscount = $chartBreakdown->pluck('orders_with_disc');
+        $chartOrdersWithoutDiscount = $chartBreakdown->pluck('orders_without_disc');
+        $chartRevenue = $chartRevenueWithDiscount->zip($chartRevenueWithoutDiscount)
+            ->map(fn ($pair) => (float) ($pair[0] + $pair[1]));
+        $chartOrders = $chartOrdersWithDiscount->zip($chartOrdersWithoutDiscount)
+            ->map(fn ($pair) => (int) ($pair[0] + $pair[1]));
 
         $recent = (clone $baseQuery)
             ->orderByDesc('created_at')
@@ -131,7 +127,7 @@ class AdminIncomeController extends Controller
         $sumBefore = (clone $baseQuery)->sum('total_before_discount');
         $hasPaidAt = Schema::hasColumn('checkouts', 'paid_at');
 
-        // Gross: مجموع قبل الخصم إن وُجد لكل صف، وإلا (total_price + discount_amount) للصف
+        // **PAID ORDERS - Gross Revenue** = Sum before discount
         $gross = (clone $baseQuery)->selectRaw("
             COALESCE(SUM(
                 CASE
@@ -141,128 +137,136 @@ class AdminIncomeController extends Controller
             ),0) as gross_calc
         ")->value('gross_calc');
 
-        // Refunds: فقط للطلبات المدفوعة والمُلغاة/المُعادة
-        $refundQuery = (clone $baseQuery)
-            ->whereIn(DB::raw("LOWER(status)"), ['cancelled', 'canceled', 'refunded']);
-        if ($hasPaidAt) {
-            $refundQuery->whereNotNull('paid_at');
-        }
-        $refunds = $refundQuery->selectRaw("
-            COALESCE(SUM(
-                CASE
-                    WHEN refund_amount IS NOT NULL AND refund_amount > 0 THEN refund_amount
-                    ELSE total_price
-                END
-            ),0) as refund_sum
-        ")->value('refund_sum');
+        // **PAID ORDERS - Net Revenue** = Sum after discount (total_price)
+        $net = (clone $baseQuery)->sum('total_price');
 
-        $discounts = $sumDiscount;
-        $net = $gross - $discounts - $refunds;
-        $avgOrderValue = $summary->orders_count > 0 ? $net / $summary->orders_count : 0;
+        // **Total Discounts** (on paid orders)
+        $discounts = (clone $baseQuery)->sum('discount_amount');
+
+        // **Refunds** (on paid orders only)
+        $refunds = (clone $baseQuery)
+            ->whereIn(DB::raw("LOWER(status)"), ['refunded'])
+            ->selectRaw("
+                COALESCE(SUM(
+                    CASE
+                        WHEN refund_amount IS NOT NULL AND refund_amount > 0 THEN refund_amount
+                        ELSE total_price
+                    END
+                ),0) as refund_sum
+            ")->value('refund_sum');
+
+        // **Gross Revenue with Discount** = Sum of paid orders WITH coupons (before discount)
+        $grossWithDiscount = (clone $baseQuery)
+            ->whereNotNull('coupon_id')
+            ->selectRaw("
+                COALESCE(SUM(
+                    CASE
+                        WHEN total_before_discount IS NOT NULL AND total_before_discount > 0 THEN total_before_discount
+                        ELSE total_price + discount_amount
+                    END
+                ),0) as gross_calc
+            ")->value('gross_calc');
+
+        // **Net Revenue with Discount** = Sum of paid orders WITH coupons (after discount)
+        $netWithDiscount = (clone $baseQuery)->whereNotNull('coupon_id')->sum('total_price');
+        $ordersWithDiscount = (clone $baseQuery)->whereNotNull('coupon_id')->count();
+
+        // **Revenue without Discount** = Sum of paid orders WITHOUT coupons
+        $revenueWithoutDiscount = (clone $baseQuery)->whereNull('coupon_id')->sum('total_price');
+        $ordersWithoutDiscount = (clone $baseQuery)->whereNull('coupon_id')->count();
+
+        // **Orders Paid Count**
+        $ordersCount = (clone $baseQuery)->count();
+
+        // **Metrics**
+        $avgOrderValue = $ordersCount > 0 ? $net / $ordersCount : 0;
         $avgDailyRevenue = $net / $daysInRange;
-        $avgDailyOrders = $summary->orders_count / $daysInRange;
+        $avgDailyOrders = $ordersCount / $daysInRange;
 
-        // Revenue with/without coupon
-        $revenueWithCoupon = (clone $baseQuery)->whereNotNull('coupon_id')->sum('total_price');
-        $revenueWithoutCoupon = (clone $baseQuery)->whereNull('coupon_id')->sum('total_price');
-        $ordersWithCoupon = (clone $baseQuery)->whereNotNull('coupon_id')->count();
-        $ordersWithoutCoupon = (clone $baseQuery)->whereNull('coupon_id')->count();
-
-        // Growth vs previous same length
+        // Growth vs previous same length (for paid orders)
         $prevFrom = (clone $from)->subDays($daysInRange);
         $prevTo = (clone $from)->subDay();
         $prevQuery = DB::table('checkouts')
-            ->whereBetween('created_at', [$prevFrom, $prevTo]);
-        if ($status) $prevQuery->where('status', $status);
-        if ($method && $hasPaymentMethod) $prevQuery->where('payment_method', $method);
+            ->whereBetween('created_at', [$prevFrom, $prevTo])
+            ->whereIn(DB::raw("LOWER(status)"), ['paid', 'completed']);
         $prevSummary = (clone $prevQuery)
             ->selectRaw('COALESCE(SUM(total_price),0) as revenue')
             ->selectRaw('COUNT(*) as orders')
             ->first();
-        $growthRevenue = $prevSummary->revenue > 0
-            ? (($gross - $prevSummary->revenue) / $prevSummary->revenue) * 100
-            : null;
-        $growthOrders = $prevSummary->orders > 0
-            ? (($summary->orders_count - $prevSummary->orders) / $prevSummary->orders) * 100
-            : null;
 
-        // في حال لم تُرجع الاستعلامات بيانات (أو عمود غير موجود)، استخدم تجميع PHP كاحتياط
-        if ($chartData->isEmpty() && $rawOrders->count()) {
-            $phpGroup = $rawOrders->groupBy(function ($item) {
-                return Carbon::parse($item->created_at)->toDateString();
-            })->map(function ($items, $day) {
-                return [
-                    'day' => $day,
-                    'revenue' => $items->sum('total_price'),
-                    'orders' => $items->count(),
-                ];
-            })->values();
-            $chartData = $phpGroup->map(fn($row) => (object)['day' => $row['day'], 'revenue' => $row['revenue']]);
-            $chartOrders = $phpGroup->map(fn($row) => (object)['day' => $row['day'], 'orders' => $row['orders']]);
+        // Fallback: if no SQL grouping, do it in PHP:
+        if ($chartLabels->isEmpty()) {
+            $rawOrders = (clone $baseQuery)->get();
+            $grouped = [];
+            foreach ($rawOrders as $o) {
+                $day = Carbon::parse($o->created_at)->format('Y-m-d');
+                if (!isset($grouped[$day])) {
+                    $grouped[$day] = [
+                        'revenue_with_disc' => 0,
+                        'revenue_without_disc' => 0,
+                        'orders_with_disc' => 0,
+                        'orders_without_disc' => 0,
+                    ];
+                }
+                if ($o->coupon_id) {
+                    $grouped[$day]['revenue_with_disc'] += (float) $o->total_price;
+                    $grouped[$day]['orders_with_disc'] += 1;
+                } else {
+                    $grouped[$day]['revenue_without_disc'] += (float) $o->total_price;
+                    $grouped[$day]['orders_without_disc'] += 1;
+                }
+            }
+            ksort($grouped);
+            $chartLabels = collect(array_keys($grouped));
+            $chartRevenueWithDiscount = collect(array_column($grouped, 'revenue_with_disc'));
+            $chartRevenueWithoutDiscount = collect(array_column($grouped, 'revenue_without_disc'));
+            $chartOrdersWithDiscount = collect(array_column($grouped, 'orders_with_disc'));
+            $chartOrdersWithoutDiscount = collect(array_column($grouped, 'orders_without_disc'));
+            $chartRevenue = $chartRevenueWithDiscount->zip($chartRevenueWithoutDiscount)
+                ->map(fn ($pair) => (float) ($pair[0] + $pair[1]));
+            $chartOrders = $chartOrdersWithDiscount->zip($chartOrdersWithoutDiscount)
+                ->map(fn ($pair) => (int) ($pair[0] + $pair[1]));
         }
 
-        // Align orders to revenue labels
-        $chartLabels = $chartData->pluck('day');
-        $ordersMap = $chartOrders->pluck('orders', 'day');
-        $ordersSeries = $chartLabels->map(function ($day) use ($ordersMap) {
-            return (int) ($ordersMap[$day] ?? 0);
-        });
-
-        // Orders with/without coupon per day
-        $ordersWithCouponByDay = (clone $baseQuery)
-            ->whereNotNull('coupon_id')
-            ->selectRaw('date(created_at) as day')
-            ->selectRaw('COUNT(*) as orders')
-            ->groupBy(DB::raw('date(created_at)'))
-            ->pluck('orders', 'day');
-        $ordersWithoutCouponByDay = (clone $baseQuery)
-            ->whereNull('coupon_id')
-            ->selectRaw('date(created_at) as day')
-            ->selectRaw('COUNT(*) as orders')
-            ->groupBy(DB::raw('date(created_at)'))
-            ->pluck('orders', 'day');
-        $ordersWithCouponSeries = $chartLabels->map(fn($d) => (int) ($ordersWithCouponByDay[$d] ?? 0));
-        $ordersWithoutCouponSeries = $chartLabels->map(fn($d) => (int) ($ordersWithoutCouponByDay[$d] ?? 0));
+        $growthRevenue = $prevSummary->revenue > 0
+            ? (($net - $prevSummary->revenue) / $prevSummary->revenue) * 100
+            : null;
+        $growthOrders = $prevSummary->orders > 0
+            ? (($ordersCount - $prevSummary->orders) / $prevSummary->orders) * 100
+            : null;
 
         $paymentPie = collect();
-
-        $statuses = DB::table('checkouts')->distinct()->pluck('status')->filter()->values();
-        $methods = collect();
 
         return view('admins.reports.income', [
             'from' => $from->toDateString(),
             'to' => $to->toDateString(),
-            'status' => $status,
-            'paymentMethod' => $method,
-            'hasPaymentMethod' => $hasPaymentMethod,
             'range' => $range,
             'summary' => $summary,
-            'sumPrice' => $sumPrice,
             'discounts' => $discounts,
             'gross' => $gross,
-            'refunds' => $refunds,
             'net' => $net,
+            'refunds' => $refunds,
+            'grossWithDiscount' => $grossWithDiscount,
+            'netWithDiscount' => $netWithDiscount,
+            'ordersWithDiscount' => $ordersWithDiscount,
+            'revenueWithoutDiscount' => $revenueWithoutDiscount,
+            'ordersWithoutDiscount' => $ordersWithoutDiscount,
+            'ordersCount' => $ordersCount,
             'avgOrderValue' => $avgOrderValue,
             'avgDailyRevenue' => $avgDailyRevenue,
             'avgDailyOrders' => $avgDailyOrders,
-            'revenueWithCoupon' => $revenueWithCoupon,
-            'revenueWithoutCoupon' => $revenueWithoutCoupon,
-            'ordersWithCoupon' => $ordersWithCoupon,
-            'ordersWithoutCoupon' => $ordersWithoutCoupon,
             'growthRevenue' => $growthRevenue,
             'growthOrders' => $growthOrders,
-            'byStatus' => $byStatus,
             'chartLabels' => $chartLabels,
-            'chartRevenue' => $chartData->pluck('revenue'),
-            'chartOrdersSeries' => $ordersSeries,
-            'chartOrdersWithCoupon' => $ordersWithCouponSeries,
-            'chartOrdersWithoutCoupon' => $ordersWithoutCouponSeries,
-            'paymentPie' => $paymentPie,
+            'chartRevenue' => $chartRevenue,
+            'chartRevenueWithDiscount' => $chartRevenueWithDiscount,
+            'chartRevenueWithoutDiscount' => $chartRevenueWithoutDiscount,
+            'chartOrders' => $chartOrders,
+            'chartOrdersWithDiscount' => $chartOrdersWithDiscount,
+            'chartOrdersWithoutDiscount' => $chartOrdersWithoutDiscount,
             'recent' => $recent,
             'orders' => $orders,
             'subtotalAll' => $subtotalAll,
-            'statuses' => $statuses,
-            'methods' => $methods,
         ]);
     }
 
@@ -281,9 +285,8 @@ class AdminIncomeController extends Controller
         $method = $request->input('payment_method');
 
         $query = DB::table('checkouts')
-            ->whereBetween('created_at', [$from, $to]);
-        if ($status) $query->where('status', $status);
-        if ($method && $hasPaymentMethod) $query->where('payment_method', $method);
+            ->whereBetween('created_at', [$from, $to])
+            ->whereIn(DB::raw("LOWER(status)"), ['paid', 'completed']);
 
         $rows = $query->orderByDesc('created_at')->get();
 

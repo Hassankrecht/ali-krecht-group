@@ -12,13 +12,13 @@ use Illuminate\Support\Facades\Schema;
 
 class AdminOrderController extends Controller
 {
-    protected array $statuses = ['Pending', 'Paid', 'Shipped', 'Cancelled'];
+    protected array $statuses = ['Pending', 'Paid', 'Shipped', 'Cancelled', 'Refunded', 'Completed'];
 
     public function index(Request $request)
     {
         $status = $request->query('status');
-        $from   = $request->query('from');
-        $to     = $request->query('to');
+        $from   = $request->query('from') ? Carbon::parse($request->query('from'))->startOfDay() : null;
+        $to     = $request->query('to') ? Carbon::parse($request->query('to'))->endOfDay() : null;
         $range  = $request->query('range');
         $q      = $request->query('q');
         $hasCoupon = $request->query('has_coupon');
@@ -30,37 +30,39 @@ class AdminOrderController extends Controller
         $fCoupon = $request->query('f_coupon');
         $fAccount = $request->query('f_account');
 
-        if ($range) {
-            $today = Carbon::today();
-            $end   = $today->copy()->endOfDay();
-            $start = null;
+        if ($range && (!$from || !$to)) {
+            $now = Carbon::now();
             switch ($range) {
-                case 'today':
-                    $start = $today->copy()->startOfDay();
+                case 'daily':
+                    $from = $now->copy()->startOfDay();
+                    $to   = $now->copy()->endOfDay();
                     break;
-                case 'last_7':
-                    $start = $today->copy()->subDays(6)->startOfDay();
+                case 'weekly':
+                    $from = $now->copy()->subDays(6)->startOfDay();
+                    $to   = $now->copy()->endOfDay();
                     break;
-                case 'last_30':
-                    $start = $today->copy()->subDays(29)->startOfDay();
+                case 'monthly':
+                    $from = $now->copy()->subDays(29)->startOfDay();
+                    $to   = $now->copy()->endOfDay();
                     break;
-                case 'last_month':
-                    $start = $today->copy()->subMonth()->startOfMonth();
-                    $end   = $today->copy()->subMonth()->endOfMonth();
+                case '3m':
+                    $from = $now->copy()->subMonthsNoOverflow(3)->startOfDay();
+                    $to   = $now->copy()->endOfDay();
                     break;
-                case 'last_6m':
-                    $start = $today->copy()->subMonthsNoOverflow(6)->startOfDay();
+                case '6m':
+                    $from = $now->copy()->subMonthsNoOverflow(6)->startOfDay();
+                    $to   = $now->copy()->endOfDay();
                     break;
-                case 'last_year':
-                    $start = $today->copy()->subYear()->startOfDay();
+                case '1y':
+                    $from = $now->copy()->subYear()->startOfDay();
+                    $to   = $now->copy()->endOfDay();
                     break;
-                default:
-                    $start = null;
-                    $end   = null;
             }
-            if ($start) { $from = $start->toDateString(); }
-            if ($end)   { $to   = $end->toDateString(); }
         }
+
+        // fallback defaults to today
+        $from = $from ?: Carbon::now()->startOfDay();
+        $to   = $to   ?: Carbon::now()->endOfDay();
 
         $ordersQuery = Checkout::with(['user', 'coupon'])
             ->when($status, fn($q) => $q->where('checkouts.status', $status))
@@ -180,8 +182,8 @@ class AdminOrderController extends Controller
             'orders' => $orders,
             'statuses' => $this->statuses,
             'filterStatus' => $status,
-            'dateFrom' => $from,
-            'dateTo' => $to,
+            'dateFrom' => $from->toDateString(),
+            'dateTo' => $to->toDateString(),
             'range' => $range,
             'search' => $q,
             'hasCoupon' => $hasCoupon,
@@ -283,4 +285,121 @@ class AdminOrderController extends Controller
         $order->delete();
         return redirect()->route('admin.orders.index')->with('success', 'Order deleted.');
     }
+
+    public function export(Request $request)
+    {
+        $status = $request->query('status');
+        $from   = $request->query('from');
+        $to     = $request->query('to');
+        $range  = $request->query('range');
+        $q      = $request->query('q');
+        $hasCoupon = $request->query('has_coupon');
+
+        if ($range) {
+            $today = Carbon::today();
+            $end   = $today->copy()->endOfDay();
+            $start = null;
+            switch ($range) {
+                case 'today': $start = $today->copy()->startOfDay(); break;
+                case 'last_7': $start = $today->copy()->subDays(6)->startOfDay(); break;
+                case 'last_30': $start = $today->copy()->subDays(29)->startOfDay(); break;
+                case 'last_month':
+                    $start = $today->copy()->subMonth()->startOfMonth();
+                    $end   = $today->copy()->subMonth()->endOfMonth();
+                    break;
+                case 'last_6m': $start = $today->copy()->subMonthsNoOverflow(6)->startOfDay(); break;
+                case 'last_year': $start = $today->copy()->subYear()->startOfDay(); break;
+            }
+            if ($start) { $from = $start->toDateString(); }
+            if ($end)   { $to   = $end->toDateString(); }
+        }
+
+        $orders = Checkout::with(['user', 'coupon'])
+            ->when($status, fn($q) => $q->where('checkouts.status', $status))
+            ->when($from, fn($q) => $q->whereDate('checkouts.created_at', '>=', Carbon::parse($from)))
+            ->when($to, fn($q) => $q->whereDate('checkouts.created_at', '<=', Carbon::parse($to)))
+            ->when($q, function($query) use ($q) {
+                $query->where(function($qq) use ($q){
+                    $qq->where('checkouts.id', $q)
+                       ->orWhere('checkouts.name', 'like', "%{$q}%")
+                       ->orWhere('checkouts.email', 'like', "%{$q}%")
+                       ->orWhereHas('coupon', fn($c) => $c->where('code', 'like', "%{$q}%"));
+                });
+            })
+            ->when($hasCoupon === 'with', fn($qq) => $qq->whereNotNull('coupon_id'))
+            ->when($hasCoupon === 'without', fn($qq) => $qq->whereNull('coupon_id'))
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $filename = 'orders_export_' . now()->format('Ymd_His') . '.csv';
+        
+        $callback = function() use ($orders) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Order ID', 'Customer', 'Email', 'Phone', 'Status', 'Total', 'Discount', 'Coupon', 'Created At']);
+            
+            foreach ($orders as $order) {
+                fputcsv($out, [
+                    $order->id,
+                    $order->name,
+                    $order->email,
+                    $order->phone ?? '',
+                    $order->status,
+                    $order->total_price,
+                    $order->discount_amount ?? 0,
+                    $order->coupon?->code ?? '',
+                    $order->created_at->format('Y-m-d H:i:s'),
+                ]);
+            }
+            
+            fclose($out);
+        };
+
+        return response()->streamDownload($callback, $filename, [
+            'Content-Type' => 'text/csv',
+        ]);
+    }
+
+    public function bulkUpdate(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|json',
+            'status' => 'required|in:' . implode(',', $this->statuses),
+        ]);
+
+        $ids = json_decode($validated['ids']);
+        $newStatus = $validated['status'];
+
+        $orders = Checkout::whereIn('id', $ids)->get();
+        
+        foreach ($orders as $order) {
+            $oldStatus = $order->status;
+            $order->status = $newStatus;
+
+            if ($newStatus === 'Paid' && Schema::hasColumn('checkouts', 'paid_at') && empty($order->paid_at)) {
+                $order->paid_at = now();
+            }
+
+            $order->save();
+
+            if ($newStatus === 'Paid' && $oldStatus !== 'Paid' && $order->user_id) {
+                $total = $order->total_before_discount ?? $order->total_price;
+                app(PostpayCouponAssigner::class)->assign($order->user_id, $total);
+            }
+        }
+
+        return redirect()->route('admin.orders.index')->with('success', count($ids) . ' order(s) updated successfully.');
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|json',
+        ]);
+
+        $ids = json_decode($validated['ids']);
+        Checkout::whereIn('id', $ids)->delete();
+
+        return redirect()->route('admin.orders.index')->with('success', count($ids) . ' order(s) deleted successfully.');
+    }
 }
+
