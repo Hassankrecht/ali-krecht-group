@@ -117,6 +117,34 @@
                             value="{{ old('price') }}" required>
                     </div>
 
+
+                    {{-- Standard Set Components --}}
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3" style="color: #c7954b;">Standard Set Components</h5>
+                        <div id="components-list">
+                            @php
+                                $components = old('components', []);
+                                $locales = config('app.supported_locales', ['en', 'ar']);
+                            @endphp
+                            @foreach ($components as $i => $component)
+                                <div class="component-row mb-2 d-flex gap-2 flex-wrap">
+                                    @foreach($locales as $locale)
+                                        <div class="d-flex flex-column">
+                                            <label class="small mb-1">Name ({{ strtoupper($locale) }})</label>
+                                            <input type="text" name="components[{{ $i }}][name_translations][{{ $locale }}]" value="{{ $component['name_translations'][$locale] ?? '' }}" placeholder="Name ({{ strtoupper($locale) }})" class="form-control" required>
+                                        </div>
+                                    @endforeach
+                                    <input type="text" name="components[{{ $i }}][width]" value="{{ $component['width'] ?? '' }}" placeholder="Width" class="form-control">
+                                    <input type="text" name="components[{{ $i }}][length]" value="{{ $component['length'] ?? '' }}" placeholder="Length" class="form-control">
+                                    <input type="text" name="components[{{ $i }}][height]" value="{{ $component['height'] ?? '' }}" placeholder="Height" class="form-control">
+                                    <input type="text" name="components[{{ $i }}][material]" value="{{ $component['material'] ?? '' }}" placeholder="Material" class="form-control">
+                                    <button type="button" class="btn btn-danger btn-remove-component align-self-end">Remove</button>
+                                </div>
+                            @endforeach
+                        </div>
+                        <button type="button" id="add-component" class="btn btn-secondary mt-2">Add Component</button>
+                    </div>
+
                     {{-- Main Image --}}
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Main Image</label>
@@ -225,80 +253,32 @@
 
 @push('scripts')
 <script>
-function saveParentCategory() {
-    const name = document.getElementById('parentCatName').value;
-    if (!name) {
-        alert('Please enter category name');
-        return;
-    }
-    
-    const translations = {};
-    @foreach(config('app.supported_locales', []) as $locale)
-        @continue($locale === config('app.locale'))
-        translations['{{ $locale }}'] = {
-            name: document.getElementById('parentCatName_{{ $locale }}').value || name
-        };
-    @endforeach
-    
-    fetch('{{ route('admin.categories.store') }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({ name, translations })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Error: ' + (data.message || 'Failed to save category'));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Failed to save category');
+// Dynamic add/remove for product components (multilingual)
+document.getElementById('add-component').onclick = function() {
+    var list = document.getElementById('components-list');
+    var index = list.children.length;
+    var locales = @json(config('app.supported_locales', ['en', 'ar']));
+    var row = document.createElement('div');
+    row.className = 'component-row mb-2 d-flex gap-2 flex-wrap';
+    var html = '';
+    locales.forEach(function(locale) {
+        html += '<div class="d-flex flex-column">';
+        html += `<label class=\"small mb-1\">Name (${locale.toUpperCase()})</label>`;
+        html += `<input type=\"text\" name=\"components[${index}][name_translations][${locale}]\" placeholder=\"Name (${locale.toUpperCase()})\" class=\"form-control\" required>`;
+        html += '</div>';
     });
-}
-
-function saveChildCategory() {
-    const parentId = document.getElementById('childCatParent').value;
-    const name = document.getElementById('childCatName').value;
-    
-    if (!parentId || !name) {
-        alert('Please select parent and enter category name');
-        return;
+    html += `<input type="text" name="components[${index}][width]" placeholder="Width" class="form-control">`;
+    html += `<input type="text" name="components[${index}][length]" placeholder="Length" class="form-control">`;
+    html += `<input type="text" name="components[${index}][height]" placeholder="Height" class="form-control">`;
+    html += `<input type="text" name="components[${index}][material]" placeholder="Material" class="form-control">`;
+    html += `<button type="button" class="btn btn-danger btn-remove-component align-self-end">Remove</button>`;
+    row.innerHTML = html;
+    list.appendChild(row);
+};
+document.addEventListener('click', function(e) {
+    if(e.target.classList.contains('btn-remove-component')) {
+        e.target.parentElement.remove();
     }
-    
-    const translations = {};
-    @foreach(config('app.supported_locales', []) as $locale)
-        @continue($locale === config('app.locale'))
-        translations['{{ $locale }}'] = {
-            name: document.getElementById('childCatName_{{ $locale }}').value || name
-        };
-    @endforeach
-    
-    fetch('{{ route('admin.categories.store') }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({ name, parent_id: parentId, translations })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Error: ' + (data.message || 'Failed to save category'));
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Failed to save category');
-    });
-}
+});
 </script>
 @endpush

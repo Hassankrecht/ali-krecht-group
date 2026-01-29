@@ -4,7 +4,7 @@
 @section('meta_description', __('messages.meta.product_show_description', ['product' => $product->title_localized ?? $product->title]))
 
 @section('content')
-    <div class=" akg-hero-img-box">
+    <div class="akg-hero-img-box">
         <img src="{{ asset('assets/img/ChatGPT Image Nov 7, 2025, 12_10_16 PM.png') }}" alt="{{ __('messages.product_show.breadcrumb') }}"
             class="akg-hero-img" loading="lazy">
 
@@ -64,20 +64,48 @@
             {{-- RIGHT INFO --}}
             <div class="col-lg-6">
 
-                <h2 class="text-gold fw-bold">{{ $product->title_localized }}</h2>
-                <h4 class="text-light mb-3">${{ number_format($product->price, 2) }}</h4>
+                <h2 class="text-gold fw-bold d-flex align-items-center gap-2 mb-2">
+                    {{ $product->title_localized }}
+                    {{-- BADGES: Custom Made, 3–7 Days Delivery, Lebanese Craftsmanship --}}
+                    <span class="badge bg-primary text-light ms-1 badge-sm">{{ __('Custom Made') }}</span>
+                    <span class="badge bg-success text-light ms-1 badge-sm"><i class="fa fa-truck me-1"></i> {{ __('3–7 Days Delivery') }}</span>
+                    <span class="badge bg-warning text-dark ms-1 badge-sm"><i class="fa fa-star me-1"></i> {{ __('Lebanese Craftsmanship') }}</span>
+                </h2>
+
+                {{-- TRUST SIGNALS --}}
+                <div class="mb-2">
+                    <span class="text-success fw-semibold me-3"><i class="fa fa-check-circle me-1"></i> {{ __('Handcrafted Quality') }}</span>
+                    <span class="text-info fw-semibold me-3"><i class="fa fa-shield-alt me-1"></i> {{ __('Satisfaction Guarantee') }}</span>
+                    <span class="text-warning fw-semibold"><i class="fa fa-award me-1"></i> {{ __('Premium Materials') }}</span>
+                </div>
+
+                <h4 class="text-light mb-1">{{ __('messages.product_show.starting_from') ?? 'Starting from' }} ${{ number_format($product->price, 2) }}</h4>
+                <p class="text-muted mb-3">{{ __('messages.product_show.price_note') ?? 'Price applies to the displayed standard size and materials.' }}</p>
 
                 <p class="text-muted">{{ $product->description_localized }}</p>
 
+                {{-- ADD TO CART (STANDARD SIZE ONLY) --}}
                 <form action="{{ route('cart.add', $product->id) }}" method="POST" class="d-inline">
                     @csrf
                     <button type="submit"
                             class="btn btn-gold text-dark fw-semibold px-4 mt-3"
                             data-track-action="buy_click"
                             data-track-meta='@json(["product_id" => $product->id, "source" => "product_show"])'>
-                        <i class="fa fa-cart-plus me-1"></i> {{ __('messages.product_show.add_to_cart') }}
+                        <i class="fa fa-cart-plus me-1"></i> {{ __('messages.product_show.add_to_cart_standard') ?? 'Add to Cart (Standard Size)' }}
                     </button>
                 </form>
+
+                {{-- CUSTOM SIZE CTA (redirects to contact) --}}
+                <a href="{{ route('contact') }}" class="btn btn-outline-gold text-light fw-semibold px-4 ms-2 mt-3">
+                    <i class="fa fa-ruler-combined me-1"></i> {{ __('Request Custom Size') }}
+                </a>
+                <div class="small text-muted mt-1">{{ __('Custom sizes & finishes available on request. Contact us for a quote.') }}</div>
+
+                {{-- DELIVERY & PRODUCTION TIME SECTION --}}
+                <div class="mt-4">
+                    <h6 class="fw-bold mb-1"><i class="fa fa-clock me-1"></i> {{ __('Delivery & Production Time') }}</h6>
+                    <div class="text-muted">{{ __('3–7 working days for most products. Delivery time may vary by project size and location.') }}</div>
+                </div>
 
                 <hr class="my-4 border-gold">
 
@@ -95,6 +123,38 @@
                         <strong>{{ __('messages.product_show.price_label') }}:</strong> ${{ number_format($product->price, 2) }}
                     </li>
                 </ul>
+
+                {{-- STANDARD SET COMPONENTS & DIMENSIONS --}}
+                <h4 class="text-gold fw-bold mb-3">{{ __('messages.product_show.standard_set_components') ?? 'Standard Set Components & Dimensions' }}</h4>
+                @if($product->productComponents && $product->productComponents->count())
+                <div class="table-responsive mb-2">
+                    <table class="table table-dark table-bordered align-middle mb-0">
+                        <thead class="table-secondary text-dark">
+                            <tr>
+                                <th>{{ __('messages.product_show.component_name') ?? 'Component' }}</th>
+                                <th>{{ __('messages.product_show.width_label') ?? 'Width' }}</th>
+                                <th>{{ __('messages.product_show.length_label') ?? 'Length' }}</th>
+                                <th>{{ __('messages.product_show.height_label') ?? 'Height' }}</th>
+                                <th>{{ __('messages.product_show.material_label') ?? 'Material' }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($product->productComponents as $component)
+                                <tr>
+                                    <td>{{ $component->name_translated }}</td>
+                                    <td>{{ $component->width }}</td>
+                                    <td>{{ $component->length }}</td>
+                                    <td>{{ $component->height }}</td>
+                                    <td>{{ $component->material }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @else
+                    <p class="text-muted">{{ __('messages.product_show.no_components') ?? 'No standard components defined for this product.' }}</p>
+                @endif
+                <p class="text-muted mb-4 small">{{ __('messages.product_show.components_disclaimer') ?? 'All dimensions apply to the base price. Custom sizes and layouts are available upon request.' }}</p>
 
                 {{-- FEATURES --}}
                 <h4 class="text-gold fw-bold mb-3">{{ __('messages.product_show.features') }}</h4>

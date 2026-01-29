@@ -1,6 +1,18 @@
 <?php
 
 return [
+        'products' => [
+            'badge_custom_made' => 'Custom Made',
+            'badge_delivery' => '3–7 Days Delivery',
+            'badge_craftsmanship' => 'Lebanese Craftsmanship',
+            'trust_handcrafted' => 'Handcrafted Quality',
+            'trust_guarantee' => 'Satisfaction Guarantee',
+            'trust_materials' => 'Premium Materials',
+            'request_custom_size' => 'Request Custom Size',
+            'custom_sizes_note' => 'Custom sizes & finishes available on request. Contact us for a quote.',
+            'delivery_time_title' => 'Delivery & Production Time',
+            'delivery_time_note' => '3–7 working days for most products. Delivery time may vary by project size and location.',
+        ],
     'nav' => [
         'home' => 'Home',
         'about' => 'About',
@@ -134,6 +146,21 @@ return [
     'product_show' => [
         'breadcrumb' => 'Product Details',
         'add_to_cart' => 'Add to Cart',
+        'add_to_cart_standard' => 'Add to Cart (Standard Size)',
+        'customize_cta' => 'Customize this product',
+        'starting_from' => 'Starting from',
+        'price_note' => 'Price applies to the displayed standard size and materials.',
+        'standard_set_components' => 'Standard Set Components & Dimensions',
+        'component_name' => 'Component',
+        'width_label' => 'Width',
+        'length_label' => 'Length',
+        'height_label' => 'Height',
+        'material_label' => 'Material',
+        'no_components' => 'No standard components defined for this product.',
+        'components_disclaimer' => 'All dimensions apply to the base price. Custom sizes and layouts are available upon request.',
+        'standard_dimensions' => 'Standard Dimensions',
+        'finish_label' => 'Finish',
+        'dimensions_note' => 'These dimensions apply to the base price. Custom sizes are available upon request.',
         'specs' => 'Specifications',
         'features' => 'Key Features',
         'best_for' => 'Best Used For',

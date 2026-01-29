@@ -1,3 +1,10 @@
+/* Smaller badge for product page */
+.badge-sm {
+    font-size: 0.5em;
+    padding: 0.15em 0.35em;
+    line-height: 1;
+    border-radius: 0.3rem;
+}
 /* ============================================================
    ROOT THEME COLORS — AKG LUXURY
 ============================================================ */

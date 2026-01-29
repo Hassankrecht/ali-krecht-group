@@ -149,6 +149,25 @@ class AdminProductController extends Controller
         }
     }
 
+    // Save product components
+    if ($request->has('components')) {
+        foreach ($request->components as $component) {
+            $translations = isset($component['name_translations']) ? array_filter($component['name_translations']) : [];
+            if (!empty($translations)) {
+                // Use the current app locale, or the first available translation as fallback for 'name'
+                $name = $translations[app()->getLocale()] ?? collect($translations)->first();
+                $product->productComponents()->create([
+                    'name' => $name,
+                    'name_translations' => $translations,
+                    'width' => $component['width'] ?? null,
+                    'length' => $component['length'] ?? null,
+                    'height' => $component['height'] ?? null,
+                    'material' => $component['material'] ?? null,
+                ]);
+            }
+        }
+    }
+
     // After creating a product, redirect to the edit page so the admin can
     // immediately add gallery images or change the main image.
     return redirect()->route('admin.products.edit', $product->id)
@@ -207,6 +226,25 @@ class AdminProductController extends Controller
         // Upload new image
         $product->image = $this->storeAssetTo('products', $request->image);
         $product->save();
+    }
+
+    // Update product components
+    $product->productComponents()->delete(); // Remove old components
+    if ($request->has('components')) {
+        foreach ($request->components as $component) {
+            $translations = isset($component['name_translations']) ? array_filter($component['name_translations']) : [];
+            if (!empty($translations)) {
+                $name = $translations[app()->getLocale()] ?? collect($translations)->first();
+                $product->productComponents()->create([
+                    'name' => $name,
+                    'name_translations' => $translations,
+                    'width' => $component['width'] ?? null,
+                    'length' => $component['length'] ?? null,
+                    'height' => $component['height'] ?? null,
+                    'material' => $component['material'] ?? null,
+                ]);
+            }
+        }
     }
 
     return redirect()

@@ -52,4 +52,9 @@ class Product extends Model
 
         return $translation[$field] ?? $this->{$field};
     }
+
+    public function productComponents()
+    {
+        return $this->hasMany(ProductComponent::class);
+    }
 }
