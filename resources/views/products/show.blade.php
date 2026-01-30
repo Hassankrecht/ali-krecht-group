@@ -67,16 +67,16 @@
                 <h2 class="text-gold fw-bold d-flex align-items-center gap-2 mb-2">
                     {{ $product->title_localized }}
                     {{-- BADGES: Custom Made, 3–7 Days Delivery, Lebanese Craftsmanship --}}
-                    <span class="badge bg-primary text-light ms-1 badge-sm">{{ __('Custom Made') }}</span>
-                    <span class="badge bg-success text-light ms-1 badge-sm"><i class="fa fa-truck me-1"></i> {{ __('3–7 Days Delivery') }}</span>
-                    <span class="badge bg-warning text-dark ms-1 badge-sm"><i class="fa fa-star me-1"></i> {{ __('Lebanese Craftsmanship') }}</span>
+                    <span class="badge bg-primary text-light ms-1 badge-sm">{{ __('messages.products.badge_custom_made') }}</span>
+                    <span class="badge bg-success text-light ms-1 badge-sm"><i class="fa fa-truck me-1"></i> {{ __('messages.products.badge_delivery') }}</span>
+                    <span class="badge bg-warning text-dark ms-1 badge-sm"><i class="fa fa-star me-1"></i> {{ __('messages.products.badge_craftsmanship') }}</span>
                 </h2>
 
                 {{-- TRUST SIGNALS --}}
                 <div class="mb-2">
-                    <span class="text-success fw-semibold me-3"><i class="fa fa-check-circle me-1"></i> {{ __('Handcrafted Quality') }}</span>
-                    <span class="text-info fw-semibold me-3"><i class="fa fa-shield-alt me-1"></i> {{ __('Satisfaction Guarantee') }}</span>
-                    <span class="text-warning fw-semibold"><i class="fa fa-award me-1"></i> {{ __('Premium Materials') }}</span>
+                    <span class="text-success fw-semibold me-3"><i class="fa fa-check-circle me-1"></i> {{ __('messages.products.trust_handcrafted') }}</span>
+                    <span class="text-info fw-semibold me-3"><i class="fa fa-shield-alt me-1"></i> {{ __('messages.products.trust_guarantee') }}</span>
+                    <span class="text-warning fw-semibold"><i class="fa fa-award me-1"></i> {{ __('messages.products.trust_materials') }}</span>
                 </div>
 
                 <h4 class="text-light mb-1">{{ __('messages.product_show.starting_from') ?? 'Starting from' }} ${{ number_format($product->price, 2) }}</h4>
@@ -97,14 +97,15 @@
 
                 {{-- CUSTOM SIZE CTA (redirects to contact) --}}
                 <a href="{{ route('contact') }}" class="btn btn-outline-gold text-light fw-semibold px-4 ms-2 mt-3">
-                    <i class="fa fa-ruler-combined me-1"></i> {{ __('Request Custom Size') }}
+                    <i class="fa fa-ruler-combined me-1"></i> {{ __('messages.products.request_custom_size') }}
                 </a>
                 <div class="small text-muted mt-1">{{ __('Custom sizes & finishes available on request. Contact us for a quote.') }}</div>
+                <div class="small text-muted mt-1">{{ __('messages.products.custom_sizes_note') }}</div>
 
                 {{-- DELIVERY & PRODUCTION TIME SECTION --}}
                 <div class="mt-4">
-                    <h6 class="fw-bold mb-1"><i class="fa fa-clock me-1"></i> {{ __('Delivery & Production Time') }}</h6>
-                    <div class="text-muted">{{ __('3–7 working days for most products. Delivery time may vary by project size and location.') }}</div>
+                    <h6 class="fw-bold mb-1"><i class="fa fa-clock me-1"></i> {{ __('messages.products.delivery_time_title') }}</h6>
+                    <div class="text-muted">{{ __('messages.products.delivery_time_note') }}</div>
                 </div>
 
                 <hr class="my-4 border-gold">

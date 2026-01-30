@@ -1,18 +1,7 @@
 <?php
 
 return [
-        'products' => [
-            'badge_custom_made' => 'Custom Made',
-            'badge_delivery' => '3–7 Days Delivery',
-            'badge_craftsmanship' => 'Lebanese Craftsmanship',
-            'trust_handcrafted' => 'Handcrafted Quality',
-            'trust_guarantee' => 'Satisfaction Guarantee',
-            'trust_materials' => 'Premium Materials',
-            'request_custom_size' => 'Request Custom Size',
-            'custom_sizes_note' => 'Custom sizes & finishes available on request. Contact us for a quote.',
-            'delivery_time_title' => 'Delivery & Production Time',
-            'delivery_time_note' => '3–7 working days for most products. Delivery time may vary by project size and location.',
-        ],
+       
     'nav' => [
         'home' => 'Home',
         'about' => 'About',
@@ -142,7 +131,18 @@ return [
         'no_products_hint' => 'Please check another category or visit our projects.',
         'see_all_projects' => 'View Projects',
         'none' => 'No products available.',
-    ],
+   
+            'badge_custom_made' => 'Custom Made',
+            'badge_delivery' => '3–7 Days Delivery',
+            'badge_craftsmanship' => 'Lebanese Craftsmanship',
+            'trust_handcrafted' => 'Handcrafted Quality',
+            'trust_guarantee' => 'Satisfaction Guarantee',
+            'trust_materials' => 'Premium Materials',
+            'request_custom_size' => 'Request Custom Size',
+            'custom_sizes_note' => 'Custom sizes & finishes available on request. Contact us for a quote.',
+            'delivery_time_title' => 'Delivery & Production Time',
+            'delivery_time_note' => '3–7 working days for most products. Delivery time may vary by project size and location.',
+        ],
     'product_show' => [
         'breadcrumb' => 'Product Details',
         'add_to_cart' => 'Add to Cart',

@@ -1,29 +1,7 @@
-    'products' => [
-        'badge_custom_made' => 'تفصيل حسب الطلب',
-        'badge_delivery' => 'توصيل خلال ٣–٧ أيام',
-        'badge_craftsmanship' => 'حِرَفِيَّة لبنانية',
-        'trust_handcrafted' => 'جودة مصنوعة يدوياً',
-        'trust_guarantee' => 'ضمان الرضا',
-        'trust_materials' => 'خامات فاخرة',
-        'request_custom_size' => 'طلب مقاس مخصص',
-        'custom_sizes_note' => 'مقاسات وتشطيبات مخصصة متاحة عند الطلب. تواصل معنا للحصول على عرض سعر.',
-        'delivery_time_title' => 'مدة التوصيل والإنتاج',
-        'delivery_time_note' => '٣–٧ أيام عمل لمعظم المنتجات. قد تختلف مدة التوصيل حسب حجم المشروع والموقع.',
-    ],
 <?php
 
 return [
-    // --- Custom product badges and info ---
-    'Custom Made' => 'تفصيل حسب الطلب',
-    '3–7 Days Delivery' => 'توصيل خلال ٣–٧ أيام',
-    'Lebanese Craftsmanship' => 'حرفة لبنانية أصيلة',
-    'Handcrafted Quality' => 'جودة يدوية الصنع',
-    'Satisfaction Guarantee' => 'ضمان الرضا',
-    'Premium Materials' => 'مواد فاخرة',
-    'Request Custom Size' => 'طلب مقاس مخصص',
-    'Custom sizes & finishes available on request. Contact us for a quote.' => 'مقاسات وتشطيبات مخصصة متوفرة عند الطلب. تواصل معنا للحصول على عرض سعر.',
-    'Delivery & Production Time' => 'مدة الإنتاج والتوصيل',
-    '3–7 working days for most products. Delivery time may vary by project size and location.' => '٣–٧ أيام عمل لمعظم المنتجات. قد تختلف مدة التوصيل حسب حجم المشروع والموقع.',
+   
     'nav' => [
         'home' => 'الرئيسية',
         'about' => 'من نحن',
@@ -156,6 +134,19 @@ return [
         'no_products_hint' => 'جرّب فئة أخرى أو شاهد مشاريعنا.',
         'see_all_projects' => 'عرض المشاريع',
         'none' => 'لا توجد منتجات متاحة.',
+    
+        'badge_custom_made' => 'تفصيل حسب الطلب',
+        'badge_delivery' => 'توصيل خلال ٣–٧ أيام',
+        'badge_craftsmanship' => 'حِرَفِيَّة لبنانية',
+        'trust_handcrafted' => 'جودة مصنوعة يدوياً',
+        'trust_guarantee' => 'ضمان الرضا',
+        'trust_materials' => 'خامات فاخرة',
+        'request_custom_size' => 'طلب مقاس مخصص',
+        'custom_sizes_note' => 'مقاسات وتشطيبات مخصصة متاحة عند الطلب. تواصل معنا للحصول على عرض سعر.',
+        'delivery_time_title' => 'مدة التوصيل والإنتاج',
+        'delivery_time_note' => '٣–٧ أيام عمل لمعظم المنتجات. قد تختلف مدة التوصيل حسب حجم المشروع والموقع.',
+    
+    
     ],
     'product_show' => [
         'breadcrumb' => 'تفاصيل المنتج',
