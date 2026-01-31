@@ -279,13 +279,13 @@ class AdminProductController extends Controller
     /* ============================================================
         ADD IMAGES TO GALLERY
     ============================================================ */
-    public function addImages(StoreProductRequest $request, Product $product)
+    public function addImages(\Illuminate\Http\Request $request, Product $product)
     {
         $request->validate([
             'gallery.*' => 'required|image|mimes:jpg,jpeg,png,webp|max:4096',
         ]);
 
-        foreach ($request->gallery as $file) {
+        foreach ($request->file('gallery') as $file) {
 
             $galleryName = $this->storeAssetTo('product_gallery', $file);
 
