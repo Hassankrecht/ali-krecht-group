@@ -16,6 +16,7 @@ class AdminHomeSettingController extends Controller
         $settings = HomeSetting::first();
         return view('admins.home-settings', compact('settings'));
     }
+    
 
     public function update(Request $request)
     {
@@ -34,8 +35,10 @@ class AdminHomeSettingController extends Controller
             if ($request->hasFile('banner_image')) {
                 // احذف القديم ثم خزّن الجديد
                 $this->deleteAsset($settings->banner_image_path);
-                $settings->banner_image_path = $request->file('banner_image')->store('home', 'public');
+                $settings->banner_image_path = $this->storeBanner($request->file('banner_image'));
+                
             }
+            
             $settings->banner_enabled = $request->boolean('banner_enabled', false);
             $settings->banner_text = $data['banner_text'] ?? $settings->banner_text;
             $settings->banner_link = $data['banner_link'] ?? $settings->banner_link;
@@ -223,6 +226,19 @@ class AdminHomeSettingController extends Controller
         $file->move($dir, $name);
         return 'assets/home/' . $name;
     }
+    private function storeBanner(UploadedFile $file): string
+{
+    $dir = public_path('assets/banner');
+
+    if (!is_dir($dir)) {
+        mkdir($dir, 0755, true);
+    }
+
+    $name = $file->hashName();
+    $file->move($dir, $name);
+
+    return 'assets/banner/' . $name;
+}
 
     /**
      * حذف ملف مفرد من public/assets أو من تخزين public.
@@ -241,6 +257,7 @@ class AdminHomeSettingController extends Controller
             }
             return;
         }
+        
 
         // assets/...
         if (str_starts_with($path, 'assets/')) {

@@ -419,7 +419,7 @@
                                 <label class="form-check-label" for="btnSecondaryVisible">Show</label>
                             </div>
                         </div>
-                        <div class="col-12 text-end">
+                        <div class="col-12 text-start">
                             <button class="btn btn-gold">Save header</button>
                         </div>
                     </form>
@@ -481,7 +481,7 @@
                                 <small class="text-muted d-block mt-1">Current: {{ $settings->banner_image_path }}</small>
                             @endif
                         </div>
-                        <div class="col-12 text-end">
+                        <div class="col-12 text-start">
                             <button class="btn btn-gold">Save banner</button>
                         </div>
                     </form>
@@ -575,7 +575,7 @@
                                 <option value="pill" {{ $gsStyle==='pill'?'selected':'' }}>Pill</option>
                             </select>
                         </div>
-                        <div class="col-12 text-end">
+                        <div class="col-12 text-start">
                             <button class="btn btn-gold">Save theme</button>
                         </div>
                     </form>
