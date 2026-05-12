@@ -59,6 +59,17 @@ class OrderReportController extends Controller
             $q->where('checkouts.status', $status);
         }
 
+
+        $sourcePlatform = $request->input('source_platform');
+        if (in_array($sourcePlatform, ['web', 'android', 'ios'], true)) {
+            $q->where('checkouts.source_platform', $sourcePlatform);
+        } elseif ($sourcePlatform === 'unknown') {
+            $q->where(function ($sub) {
+                $sub->whereNull('checkouts.source_platform')
+                    ->orWhere('checkouts.source_platform', '');
+            });
+        }
+
         // Discount filter: with / without / all
         $discountFilter = $request->input('discount_filter');
         if ($discountFilter === 'with') {
@@ -137,7 +148,7 @@ class OrderReportController extends Controller
     {
         [$q, $from, $to] = $this->baseQuery($request);
 
-        $orders = $q->select([
+        $orders = (clone $q)->select([
                 'checkouts.id',
                 'checkouts.user_id',
                 'users.name as user_name',
@@ -145,6 +156,7 @@ class OrderReportController extends Controller
                 'checkouts.name as guest_name',
                 'checkouts.email as guest_email',
                 'checkouts.status',
+                'checkouts.source_platform',
                 'checkouts.total_before_discount',
                 'checkouts.discount_amount',
                 'checkouts.total_price',
@@ -225,6 +237,16 @@ class OrderReportController extends Controller
             ->limit(50)
             ->get();
 
+        $platformBreakdown = (clone $q)
+            ->selectRaw("COALESCE(NULLIF(checkouts.source_platform, ''), 'unknown') as platform")
+            ->selectRaw('COUNT(*) as orders')
+            ->selectRaw('COALESCE(SUM(checkouts.total_price),0) as revenue')
+            ->groupBy(DB::raw("COALESCE(NULLIF(checkouts.source_platform, ''), 'unknown')"))
+            ->reorder()
+            ->orderByDesc('orders')
+            ->get();
+        $platformSummary = $platformBreakdown->keyBy('platform');
+
         $summary = [
             'orders' => (clone $q)->count(),
             'net' => (clone $q)->sum('checkouts.total_price'),
@@ -273,6 +295,9 @@ class OrderReportController extends Controller
             ->selectRaw("SUM(CASE WHEN checkouts.status = 'pending' THEN 1 ELSE 0 END) as pending_orders")
             ->selectRaw("SUM(CASE WHEN checkouts.user_id IS NOT NULL AND checkouts.user_id > 0 THEN 1 ELSE 0 END) as registered_orders")
             ->selectRaw("SUM(CASE WHEN checkouts.user_id IS NULL OR checkouts.user_id = 0 THEN 1 ELSE 0 END) as guest_orders")
+            ->selectRaw("SUM(CASE WHEN checkouts.source_platform = 'web' THEN 1 ELSE 0 END) as web_orders")
+            ->selectRaw("SUM(CASE WHEN checkouts.source_platform = 'android' THEN 1 ELSE 0 END) as android_orders")
+            ->selectRaw("SUM(CASE WHEN checkouts.source_platform = 'ios' THEN 1 ELSE 0 END) as ios_orders")
             ->groupBy(DB::raw('date(checkouts.created_at)'))
             ->orderBy('day')
             ->get();
@@ -284,6 +309,9 @@ class OrderReportController extends Controller
         $chartPendingOrders = $chartBreakdown->pluck('pending_orders');
         $chartRegisteredOrders = $chartBreakdown->pluck('registered_orders');
         $chartGuestOrders = $chartBreakdown->pluck('guest_orders');
+        $chartWebOrders = $chartBreakdown->pluck('web_orders');
+        $chartAndroidOrders = $chartBreakdown->pluck('android_orders');
+        $chartIosOrders = $chartBreakdown->pluck('ios_orders');
 
         // Status breakdown for pie chart
         $statusBreakdown = (clone $baseQueryForAggregates)
@@ -331,6 +359,7 @@ class OrderReportController extends Controller
                 'discounts' => $facetDiscounts,
                 'totals' => $facetTotals,
                 'refunds' => $facetRefunds,
+                'platforms' => $platformBreakdown,
                 'emails' => $facetEmails,
                 'ids' => (clone $q)->select('checkouts.id as value', DB::raw('COUNT(*) as count'))->groupBy('checkouts.id')->reorder()->orderByDesc('count')->limit(50)->get(),
             ],
@@ -345,6 +374,11 @@ class OrderReportController extends Controller
             'chartPendingOrders' => $chartPendingOrders,
             'chartRegisteredOrders' => $chartRegisteredOrders,
             'chartGuestOrders' => $chartGuestOrders,
+            'chartWebOrders' => $chartWebOrders,
+            'chartAndroidOrders' => $chartAndroidOrders,
+            'chartIosOrders' => $chartIosOrders,
+            'platformBreakdown' => $platformBreakdown,
+            'platformSummary' => $platformSummary,
             'statusBreakdown' => $statusBreakdown,
             'growthRevenue' => $growthRevenue,
             'growthOrders' => $growthOrders,
@@ -359,7 +393,7 @@ class OrderReportController extends Controller
     {
         [$q, $from, $to] = $this->baseQuery($request);
 
-        $rows = $q->select([
+        $rows = (clone $q)->select([
                 'checkouts.id',
                 'checkouts.user_id',
                 'users.name as user_name',
@@ -367,6 +401,7 @@ class OrderReportController extends Controller
                 'checkouts.name as guest_name',
                 'checkouts.email as guest_email',
                 'checkouts.status',
+                'checkouts.source_platform',
                 'checkouts.total_before_discount',
                 'checkouts.discount_amount',
                 'checkouts.total_price',
@@ -381,7 +416,7 @@ class OrderReportController extends Controller
 
         $callback = function () use ($rows) {
             $out = fopen('php://output', 'w');
-            fputcsv($out, ['Order ID', 'User ID', 'User Name', 'Email', 'Status', 'Subtotal', 'Discount', 'Net total', 'Refund', 'Coupon code', 'Created at']);
+            fputcsv($out, ['Order ID', 'User ID', 'User Name', 'Email', 'Status', 'Source Platform', 'Subtotal', 'Discount', 'Net total', 'Refund', 'Coupon code', 'Created at']);
             foreach ($rows as $r) {
                 $subtotal = $r->total_before_discount ?? ($r->total_price + $r->discount_amount);
                 fputcsv($out, [
@@ -390,6 +425,7 @@ class OrderReportController extends Controller
                     $r->user_name,
                     $r->user_email,
                     $r->status,
+                    $r->source_platform ?: 'unknown',
                     $subtotal,
                     $r->discount_amount,
                     $r->total_price,
@@ -406,3 +442,5 @@ class OrderReportController extends Controller
         ]);
     }
 }
+
+

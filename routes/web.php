@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminCouponController;
 use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminIncomeController;
+use App\Http\Controllers\Admin\AdminAppHomeSettingController;
 use App\Http\Controllers\Admin\AdminHomeSettingController;
 use App\Http\Controllers\PageEventController;
 use App\Http\Controllers\CouponController;
@@ -203,6 +204,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('orders-bulk-delete', [AdminOrderController::class, 'bulkDelete'])->name('orders.bulk-delete');
         Route::get('home-settings', [AdminHomeSettingController::class, 'edit'])->name('home.settings.edit');
         Route::post('home-settings', [AdminHomeSettingController::class, 'update'])->name('home.settings.update');
+        Route::get('app-home-settings', [AdminAppHomeSettingController::class, 'edit'])->name('app-home-settings.edit');
+        Route::post('app-home-settings', [AdminAppHomeSettingController::class, 'update'])->name('app-home-settings.update');
         Route::get('income', [AdminIncomeController::class, 'index'])->name('income.index');
         Route::get('income/export', [AdminIncomeController::class, 'export'])->name('income.export');
         Route::get('reports/orders', [OrderReportController::class, 'index'])->name('reports.orders.index');

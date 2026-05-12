@@ -124,4 +124,9 @@ return [
 
     'password_timeout' => 10800,
 
+    'google_client_ids' => env('GOOGLE_CLIENT_IDS', env('GOOGLE_CLIENT_ID')),
+    'facebook_app_id' => env('FACEBOOK_APP_ID'),
+    'facebook_app_secret' => env('FACEBOOK_APP_SECRET'),
+
 ];
+

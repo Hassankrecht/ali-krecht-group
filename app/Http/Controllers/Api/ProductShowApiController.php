@@ -16,7 +16,7 @@ class ProductShowApiController extends Controller
      */
     public function show($id)
     {
-        $product = Product::with('images')->find($id);
+        $product = Product::with(['images', 'category.translations', 'translations'])->find($id);
         if (!$product) {
             return response()->json(['message' => 'Product not found'], 404);
         }

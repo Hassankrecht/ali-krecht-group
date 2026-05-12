@@ -179,13 +179,30 @@
         <a href="{{ route('admin.reports.orders.index') }}"
             class="{{ request()->routeIs('admin.reports.orders.*') ? 'active' : '' }}"><i
                 class="bi bi-table me-2"></i>Orders report</a>
-        <a href="{{ route('admin.orders.index') }}"><i class="bi bi-receipt me-2"></i>Orders</a>
-        <a href="{{ route('admin.projects.index') }}"><i class="bi bi-building me-2"></i>Projects</a>
-        <a href="{{ route('admin.coupons.index') }}"><i class="bi bi-ticket-perforated me-2"></i>Coupons</a>
-        <a href="{{ route('admin.products.index') }}"><i class="bi bi-box-seam me-2"></i>Products</a>
-        <a href="{{ route('admin.reviews.index') }}"><i class="bi bi-chat-quote me-2"></i>Testimonials</a>
-        <a href="{{ route('admin.home.settings.edit') }}"><i class="bi bi-house-door me-2"></i>Home header</a>
-        <a href="{{ route('admin.admin-users.index') }}"><i class="bi bi-people me-2"></i>Admins</a>
+        <a href="{{ route('admin.orders.index') }}"
+            class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}"><i
+                class="bi bi-receipt me-2"></i>Orders</a>
+        <a href="{{ route('admin.projects.index') }}"
+            class="{{ request()->routeIs('admin.projects.*') ? 'active' : '' }}"><i
+                class="bi bi-building me-2"></i>Projects</a>
+        <a href="{{ route('admin.coupons.index') }}"
+            class="{{ request()->routeIs('admin.coupons.*') ? 'active' : '' }}"><i
+                class="bi bi-ticket-perforated me-2"></i>Coupons</a>
+        <a href="{{ route('admin.products.index') }}"
+            class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}"><i
+                class="bi bi-box-seam me-2"></i>Products</a>
+        <a href="{{ route('admin.reviews.index') }}"
+            class="{{ request()->routeIs('admin.reviews.*') ? 'active' : '' }}"><i
+                class="bi bi-chat-quote me-2"></i>Testimonials</a>
+        <a href="{{ route('admin.home.settings.edit') }}"
+            class="{{ request()->routeIs('admin.home.settings.*') ? 'active' : '' }}"><i
+                class="bi bi-house-door me-2"></i>Website Home</a>
+        <a href="{{ route('admin.app-home-settings.edit') }}"
+            class="{{ request()->routeIs('admin.app-home-settings.*') ? 'active' : '' }}"><i
+                class="bi bi-phone me-2"></i>App Home</a>
+        <a href="{{ route('admin.admin-users.index') }}"
+            class="{{ request()->routeIs('admin.admin-users.*') ? 'active' : '' }}"><i
+                class="bi bi-people me-2"></i>Admins</a>
         <form action="{{ route('admin.logout') }}" method="POST" class="mt-4 px-3">
             @csrf
             <button class="btn btn-sm btn-outline-dark w-100">Logout</button>

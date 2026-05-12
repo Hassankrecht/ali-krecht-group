@@ -70,8 +70,8 @@ class WelcomeCouponAssigner
             'used_count'      => 0,
             'min_total'       => $coupon->min_total,
             'generated_for'   => 'welcome_auto',
-            'starts_at'       => $coupon->starts_at ?: $now,
-            'expiration_date' => $coupon->expiry_days ? Carbon::now()->addDays($coupon->expiry_days) : $coupon->expiration_date,
+            'starts_at'       => $now,
+            'expiration_date' => $coupon->expiry_days ? Carbon::now()->addDays($coupon->expiry_days) : null,
             'expiry_days'     => $coupon->expiry_days,
             'status'          => true,
         ]);
@@ -83,3 +83,4 @@ class WelcomeCouponAssigner
         );
     }
 }
+

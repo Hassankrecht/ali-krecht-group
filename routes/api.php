@@ -3,6 +3,18 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\Api\AddressApiController;
+use App\Http\Controllers\Api\AppHomeSettingApiController;
+use App\Http\Controllers\Api\AuthApiController;
+use App\Http\Controllers\Api\CategoryApiController;
+use App\Http\Controllers\Api\ContactApiController;
+use App\Http\Controllers\Api\CouponApiController;
+use App\Http\Controllers\Api\OrderApiController;
+use App\Http\Controllers\Api\OrderShowApiController;
+use App\Http\Controllers\Api\ProductApiController;
+use App\Http\Controllers\Api\ProductShowApiController;
+use App\Http\Controllers\Api\PublicAssetApiController;
+use App\Http\Controllers\Api\UserApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,8 +27,40 @@ use App\Http\Controllers\SitemapController;
 |
 */
 
-// User profile update endpoint
-Route::middleware('auth:sanctum')->patch('/user', [\App\Http\Controllers\Api\UserApiController::class, 'update']);
+// Public media endpoint for Flutter Web image loading
+Route::get('/media/{path}', [PublicAssetApiController::class, 'show'])->where('path', '.*');
+
+// Mobile app authentication endpoints
+Route::post('/register', [AuthApiController::class, 'register']);
+Route::post('/login', [AuthApiController::class, 'login']);
+Route::post('/auth/google', [AuthApiController::class, 'googleLogin']);
+Route::post('/auth/facebook', [AuthApiController::class, 'facebookLogin']);
+Route::post('/forgot-password', [AuthApiController::class, 'forgotPassword']);
+Route::middleware('auth:sanctum')->post('/logout', [AuthApiController::class, 'logout']);
+
+// Category endpoints
+Route::get('/categories', [CategoryApiController::class, 'index']);
+Route::get('/categories/parents', [CategoryApiController::class, 'parents']);
+Route::get('/categories/{id}', [CategoryApiController::class, 'show']);
+
+// Coupon endpoints
+Route::get('/coupons', [CouponApiController::class, 'index']);
+
+// Contact endpoint
+Route::post('/contact', [ContactApiController::class, 'store']);
+
+// Flutter app home/settings endpoint
+Route::get('/app-home-settings', [AppHomeSettingApiController::class, 'show']);
+Route::get('/app-settings', [AppHomeSettingApiController::class, 'show']);
+
+// User profile endpoints
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/profile', [UserApiController::class, 'show']);
+    Route::put('/profile', [UserApiController::class, 'update']);
+    Route::put('/profile/password', [UserApiController::class, 'updatePassword']);
+    Route::get('/user', [UserApiController::class, 'show']);
+    Route::patch('/user', [UserApiController::class, 'update']);
+});
 
 // Product reviews endpoints
 Route::get('/products/{id}/reviews', [\App\Http\Controllers\Api\ReviewApiController::class, 'index']);
@@ -31,17 +75,30 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // Product endpoints
-Route::middleware('auth:sanctum')->get('/products', [\App\Http\Controllers\Api\ProductApiController::class, 'index']);
-Route::get('/products/{id}', [\App\Http\Controllers\Api\ProductShowApiController::class, 'show']);
+Route::get('/products', [ProductApiController::class, 'index']);
+Route::get('/products/popular', [ProductApiController::class, 'popular']);
+Route::get('/products/featured', [ProductApiController::class, 'featured']);
+Route::get('/products/{id}', [ProductShowApiController::class, 'show']);
 
 // Order endpoints (auth required)
-Route::middleware('auth:sanctum')->get('/orders', [\App\Http\Controllers\Api\OrderApiController::class, 'index']);
-Route::middleware('auth:sanctum')->get('/orders/{id}', [\App\Http\Controllers\Api\OrderShowApiController::class, 'show']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/orders', [OrderApiController::class, 'index']);
+    Route::post('/orders', [OrderApiController::class, 'store']);
+    Route::put('/orders/{id}/cancel', [OrderApiController::class, 'cancel']);
+    Route::get('/orders/{id}', [OrderShowApiController::class, 'show']);
+});
 
-// Authenticated user info
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Saved address endpoints (auth required)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/addresses', [AddressApiController::class, 'index']);
+    Route::post('/addresses', [AddressApiController::class, 'store']);
+    Route::put('/addresses/{id}', [AddressApiController::class, 'update']);
+    Route::delete('/addresses/{id}', [AddressApiController::class, 'destroy']);
+    Route::put('/addresses/{id}/default', [AddressApiController::class, 'setDefault']);
 });
 
 // Sitemap.xml
 Route::get('/sitemap.xml', [SitemapController::class, 'index']);
+
+
+

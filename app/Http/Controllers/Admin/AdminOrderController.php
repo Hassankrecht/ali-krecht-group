@@ -29,6 +29,7 @@ class AdminOrderController extends Controller
         $fDiscount = $request->query('f_discount');
         $fCoupon = $request->query('f_coupon');
         $fAccount = $request->query('f_account');
+        $fPlatform = $request->query('f_platform');
 
         if ($range && (!$from || !$to)) {
             $now = Carbon::now();
@@ -105,6 +106,15 @@ class AdminOrderController extends Controller
                 $ordersQuery->where(function($sub){ $sub->whereNull('user_id')->orWhere('user_id', 0); });
             }
         }
+        if ($fPlatform) {
+            if (in_array($fPlatform, ['web', 'android', 'ios'], true)) {
+                $ordersQuery->where('checkouts.source_platform', $fPlatform);
+            } elseif ($fPlatform === 'unknown') {
+                $ordersQuery->where(function($sub){
+                    $sub->whereNull('checkouts.source_platform')->orWhere('checkouts.source_platform', '');
+                });
+            }
+        }
 
         // ترتيب
         switch ($sort) {
@@ -165,6 +175,12 @@ class AdminOrderController extends Controller
             ['label'=>'Registered','value'=>'registered','count'=>(clone $aggQuery)->whereNotNull('user_id')->where('user_id','>',0)->count()],
             ['label'=>'Guest','value'=>'guest','count'=>(clone $aggQuery)->where(function($sub){ $sub->whereNull('user_id')->orWhere('user_id',0); })->count()],
         ]);
+        $facetPlatforms = (clone $aggQuery)
+            ->selectRaw("COALESCE(NULLIF(checkouts.source_platform, ''), 'unknown') as value")
+            ->selectRaw('COUNT(*) as count')
+            ->groupBy(DB::raw("COALESCE(NULLIF(checkouts.source_platform, ''), 'unknown')"))
+            ->orderByDesc('count')
+            ->get();
 
         // إحصاءات سريعة
         $totalOrders     = (clone $aggQuery)->count();
@@ -202,6 +218,7 @@ class AdminOrderController extends Controller
                 'discounts' => $facetDiscounts,
                 'coupons' => $facetCoupons,
                 'account' => $facetAccount,
+                'platforms' => $facetPlatforms,
             ],
             'f' => [
                 'name' => $fName,
@@ -210,6 +227,7 @@ class AdminOrderController extends Controller
                 'discount' => $fDiscount,
             'coupon' => $fCoupon,
                 'account' => $fAccount,
+                'platform' => $fPlatform,
             ],
         ]);
     }

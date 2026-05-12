@@ -20,18 +20,83 @@ class OrderResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'user_id' => $this->user_id,
+            'customer_name' => $this->name,
+            'customer' => $this->name,
+            'customer_phone' => $this->phone_number,
+            'phone' => $this->phone_number,
+            'delivery_address' => $this->address,
+            'address' => $this->address,
+            'subtotal' => $this->total_before_discount ?? $this->total_price,
+            'delivery_fee' => $this->delivery_fee ?? 0,
+            'delivery' => $this->delivery_fee ?? 0,
+            'discount' => $this->discount_amount ?? 0,
+            'coupon_id' => $this->coupon_id,
+            'coupon_code' => $this->coupon?->code,
+            'coupon' => $this->coupon ? [
+                'id' => $this->coupon->id,
+                'code' => $this->coupon->code,
+                'type' => $this->coupon->type,
+                'value' => $this->coupon->value,
+                'generated_for' => $this->coupon->generated_for,
+            ] : null,
+            'total' => $this->total_price,
             'total_price' => $this->total_price,
             'status' => $this->status,
-            'created_at' => $this->created_at,
+            'payment_method' => $this->payment_method,
+            'payment' => $this->payment_method,
+            'order_note' => $this->order_note,
+            'source_platform' => $this->source_platform ?? 'web',
             'items' => $this->items ? $this->items->map(function ($item) {
                 return [
+                    'id' => $item->id,
+                    'order_id' => $item->checkout_id,
+                    'checkout_id' => $item->checkout_id,
                     'product_id' => $item->product_id,
                     'name' => $item->name,
+                    'image' => $item->image,
+                    'image_url' => $this->assetUrl($item->image),
                     'quantity' => $item->quantity,
+                    'qty' => $item->quantity,
                     'price' => $item->price,
+                    'total' => $item->total_price,
                     'total_price' => $item->total_price,
+                    'created_at' => $item->created_at,
+                    'updated_at' => $item->updated_at,
                 ];
             })->all() : [],
+            'date' => optional($this->created_at)->toDateTimeString(),
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
+    private function assetUrl(?string $path): ?string
+    {
+        if (!$path) {
+            return null;
+        }
+
+        $path = str_replace('\\', '/', $path);
+        $path = ltrim($path, '/');
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        if (str_starts_with($path, 'public/')) {
+            $path = substr($path, strlen('public/'));
+        }
+
+        if (str_starts_with($path, 'assets/') || str_starts_with($path, 'storage/')) {
+            return url('api/media/' . $path);
+        }
+
+        return url('api/media/storage/' . $path);
+    }
 }
+
+
+
+
+
+

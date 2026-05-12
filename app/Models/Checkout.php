@@ -22,6 +22,10 @@ class Checkout extends Model
         'total_price',
         'total_before_discount',
         'discount_amount',
+        'delivery_fee',
+        'payment_method',
+        'order_note',
+        'source_platform',
         'status', // Pending, Paid, Shipped, Cancelled
     ];
 

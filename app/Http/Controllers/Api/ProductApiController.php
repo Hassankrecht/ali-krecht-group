@@ -15,7 +15,41 @@ class ProductApiController extends Controller
      */
     public function index(Request $request)
     {
-        $products = Product::with('images')->paginate(10);
+        $products = Product::with(['images', 'category.translations', 'translations'])
+            ->when($request->filled('category_id'), function ($query) use ($request) {
+                $query->where('category_id', $request->integer('category_id'));
+            })
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->string('search')->toString();
+                $query->where(function ($innerQuery) use ($search) {
+                    $innerQuery
+                        ->where('title', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            })
+            ->orderByDesc('id')
+            ->paginate($request->integer('per_page', 20));
+
+        return ProductResource::collection($products);
+    }
+
+    public function popular(Request $request)
+    {
+        $products = Product::with(['images', 'category.translations', 'translations'])
+            ->orderByDesc('id')
+            ->limit($request->integer('limit', 20))
+            ->get();
+
+        return ProductResource::collection($products);
+    }
+
+    public function featured(Request $request)
+    {
+        $products = Product::with(['images', 'category.translations', 'translations'])
+            ->orderByDesc('id')
+            ->limit($request->integer('limit', 20))
+            ->get();
+
         return ProductResource::collection($products);
     }
 }

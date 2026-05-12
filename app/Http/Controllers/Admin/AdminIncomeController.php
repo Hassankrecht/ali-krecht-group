@@ -15,6 +15,7 @@ class AdminIncomeController extends Controller
         $range = $request->input('range', 'last_30');
         $fromInput = $request->input('from');
         $toInput = $request->input('to');
+        $sourcePlatform = $request->input('source_platform');
         $from = $fromInput ? Carbon::parse($fromInput)->startOfDay() : null;
         $to = $toInput ? Carbon::parse($toInput)->endOfDay() : null;
 
@@ -61,6 +62,14 @@ class AdminIncomeController extends Controller
             ->whereBetween('created_at', [$from, $to])
             ->whereIn(DB::raw("LOWER(status)"), ['paid', 'completed']);
 
+        if (in_array($sourcePlatform, ['web', 'android', 'ios'], true)) {
+            $baseQuery->where('source_platform', $sourcePlatform);
+        } elseif ($sourcePlatform === 'unknown') {
+            $baseQuery->where(function ($sub) {
+                $sub->whereNull('source_platform')->orWhere('source_platform', '');
+            });
+        }
+
         $summary = (clone $baseQuery)
             ->selectRaw('COALESCE(SUM(total_price),0) as revenue_after_discount')
             ->selectRaw('COALESCE(SUM(discount_amount),0) as discounts')
@@ -105,6 +114,15 @@ class AdminIncomeController extends Controller
             ->map(fn ($pair) => (float) ($pair[0] + $pair[1]));
         $chartOrders = $chartOrdersWithDiscount->zip($chartOrdersWithoutDiscount)
             ->map(fn ($pair) => (int) ($pair[0] + $pair[1]));
+
+        $platformBreakdown = (clone $baseQuery)
+            ->selectRaw("COALESCE(NULLIF(source_platform, ''), 'unknown') as platform")
+            ->selectRaw('COUNT(*) as orders')
+            ->selectRaw('COALESCE(SUM(total_price),0) as revenue')
+            ->groupBy(DB::raw("COALESCE(NULLIF(source_platform, ''), 'unknown')"))
+            ->orderByDesc('orders')
+            ->get();
+        $platformSummary = $platformBreakdown->keyBy('platform');
 
         $recent = (clone $baseQuery)
             ->orderByDesc('created_at')
@@ -189,6 +207,14 @@ class AdminIncomeController extends Controller
         $prevQuery = DB::table('checkouts')
             ->whereBetween('created_at', [$prevFrom, $prevTo])
             ->whereIn(DB::raw("LOWER(status)"), ['paid', 'completed']);
+
+        if (in_array($sourcePlatform, ['web', 'android', 'ios'], true)) {
+            $prevQuery->where('source_platform', $sourcePlatform);
+        } elseif ($sourcePlatform === 'unknown') {
+            $prevQuery->where(function ($sub) {
+                $sub->whereNull('source_platform')->orWhere('source_platform', '');
+            });
+        }
         $prevSummary = (clone $prevQuery)
             ->selectRaw('COALESCE(SUM(total_price),0) as revenue')
             ->selectRaw('COUNT(*) as orders')
@@ -241,6 +267,7 @@ class AdminIncomeController extends Controller
             'from' => $from->toDateString(),
             'to' => $to->toDateString(),
             'range' => $range,
+            'sourcePlatform' => $sourcePlatform,
             'summary' => $summary,
             'discounts' => $discounts,
             'gross' => $gross,
@@ -251,6 +278,8 @@ class AdminIncomeController extends Controller
             'ordersWithDiscount' => $ordersWithDiscount,
             'revenueWithoutDiscount' => $revenueWithoutDiscount,
             'ordersWithoutDiscount' => $ordersWithoutDiscount,
+            'platformBreakdown' => $platformBreakdown,
+            'platformSummary' => $platformSummary,
             'ordersCount' => $ordersCount,
             'avgOrderValue' => $avgOrderValue,
             'avgDailyRevenue' => $avgDailyRevenue,
@@ -276,6 +305,7 @@ class AdminIncomeController extends Controller
         $from = $request->input('from') ? Carbon::parse($request->input('from'))->startOfDay() : null;
         $to = $request->input('to') ? Carbon::parse($request->input('to'))->endOfDay() : null;
         $hasPaymentMethod = Schema::hasColumn('checkouts', 'payment_method');
+        $sourcePlatform = $request->input('source_platform');
         if (!$from || !$to) {
             $now = Carbon::now();
             $from = $now->copy()->subDays(29)->startOfDay();
@@ -288,17 +318,26 @@ class AdminIncomeController extends Controller
             ->whereBetween('created_at', [$from, $to])
             ->whereIn(DB::raw("LOWER(status)"), ['paid', 'completed']);
 
+        if (in_array($sourcePlatform, ['web', 'android', 'ios'], true)) {
+            $query->where('source_platform', $sourcePlatform);
+        } elseif ($sourcePlatform === 'unknown') {
+            $query->where(function ($sub) {
+                $sub->whereNull('source_platform')->orWhere('source_platform', '');
+            });
+        }
+
         $rows = $query->orderByDesc('created_at')->get();
 
         $filename = 'income_export_' . now()->format('Ymd_His') . '.csv';
         $callback = function () use ($rows, $hasPaymentMethod) {
             $out = fopen('php://output', 'w');
-            fputcsv($out, ['ID', 'Status', 'Payment Method', 'Subtotal', 'Discount', 'Total (after)', 'Date']);
+            fputcsv($out, ['ID', 'Status', 'Platform', 'Payment Method', 'Subtotal', 'Discount', 'Total (after)', 'Date']);
             foreach ($rows as $r) {
                 $subtotal = $r->total_before_discount ?? ($r->total_price + $r->discount_amount);
                 fputcsv($out, [
                     $r->id,
                     $r->status,
+                    $r->source_platform ?: 'unknown',
                     $hasPaymentMethod ? $r->payment_method : '',
                     $subtotal,
                     $r->discount_amount,

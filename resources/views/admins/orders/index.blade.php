@@ -45,6 +45,7 @@
         <input type="hidden" name="f_discount" value="{{ $f['discount'] ?? '' }}">
         <input type="hidden" name="f_coupon" value="{{ $f['coupon'] ?? '' }}">
         <input type="hidden" name="f_account" value="{{ $f['account'] ?? '' }}">
+        <input type="hidden" name="f_platform" value="{{ $f['platform'] ?? '' }}">
         
         <div class="col-md-3">
             <label class="form-label small mb-1">Search</label>
@@ -90,6 +91,7 @@
     if($filterStatus) $activeFilters[] = "Status: {$filterStatus}";
     if($hasCoupon === 'with') $activeFilters[] = "With Coupon";
     if($hasCoupon === 'without') $activeFilters[] = "Without Coupon";
+    if(!empty($f['platform'])) $activeFilters[] = "Platform: {$f['platform']}";
     if($dateFrom || $dateTo) $activeFilters[] = "Date Range";
 @endphp
 @if(count($activeFilters) > 0)
@@ -252,6 +254,28 @@
                         @endif
                     </th>
                     <th>Status</th>
+                    <th>Platform
+                        @if(!empty($facets['platforms']))
+                        <div class="dropdown d-inline float-end">
+                            <button class="btn btn-link btn-sm p-0 ms-1" style="color:#c7954b" type="button" data-bs-toggle="dropdown" aria-label="Filter platform"><i class="bi bi-funnel"></i></button>
+                            <div class="dropdown-menu dropdown-menu-dark p-2 small" style="max-height:300px;overflow:auto;">
+                                <a href="#" class="dropdown-item facet-option" data-field="f_platform" data-value="">{{ __('All') }}</a>
+                                @foreach($facets['platforms'] as $item)
+                                    @php
+                                        $platformValue = $item->value ?? 'unknown';
+                                        $platformLabel = match($platformValue) {
+                                            'web' => 'Website',
+                                            'android' => 'Android app',
+                                            'ios' => 'iOS app',
+                                            default => 'Unknown',
+                                        };
+                                    @endphp
+                                    <a href="#" class="dropdown-item facet-option" data-field="f_platform" data-value="{{ $platformValue }}">{{ $platformLabel }} <span class="text-light">({{ $item->count }})</span></a>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+                    </th>
                     <th>Total</th>
                     <th>Created</th>
                     <th style="width: 50px;"></th>
@@ -291,6 +315,7 @@
                         <td><strong>#{{ $order->id }}</strong></td>
                         <td>{{ $order->name }}</td>
                         <td><span class="badge bg-{{ $statusColor }}">{{ $order->status }}</span></td>
+                        <td><span class="badge bg-dark text-gold">{{ $order->source_platform ?: 'unknown' }}</span></td>
                         <td><strong>${{ number_format($order->total_price, 2) }}</strong></td>
                         <td>{{ $order->created_at->format('Y-m-d H:i') }}</td>
                         <td onclick="event.stopPropagation();">
@@ -325,7 +350,7 @@
                     </tr>
                     <!-- Expanded Details Row -->
                     <tr class="expand-details d-none" data-order-id="{{ $order->id }}">
-                        <td colspan="8">
+                        <td colspan="9">
                             <div class="p-3 bg-dark rounded">
                                 <div class="row g-3">
                                     <div class="col-md-6">
@@ -357,7 +382,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-4">No orders found.</td>
+                        <td colspan="9" class="text-center text-muted py-4">No orders found.</td>
                     </tr>
                 @endforelse
             </tbody>

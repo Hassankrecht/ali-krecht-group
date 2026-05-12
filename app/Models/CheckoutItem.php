@@ -23,4 +23,7 @@ class CheckoutItem extends Model
     {
         return $this->belongsTo(Checkout::class);
     }
+
 }
+
+

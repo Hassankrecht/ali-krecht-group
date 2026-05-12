@@ -173,6 +173,7 @@ class AdminCouponController extends Controller
             'min_total'       => 'nullable|numeric|min:0',
             'status'          => 'nullable|boolean',
             'generated_for'   => 'nullable|string|max:50',
+            'user_id'         => 'nullable|integer|exists:users,id',
             'expiry_days'     => 'nullable|integer|min:1',
         ]);
 
@@ -212,6 +213,7 @@ class AdminCouponController extends Controller
             'min_total'       => 'nullable|numeric|min:0',
             'status'          => 'nullable|boolean',
             'generated_for'   => 'nullable|string|max:50',
+            'user_id'         => 'nullable|integer|exists:users,id',
             'expiry_days'     => 'nullable|integer|min:1',
         ]);
 

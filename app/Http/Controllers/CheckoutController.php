@@ -254,6 +254,7 @@ class CheckoutController extends Controller
             'total_before_discount' => $subtotal,
             'discount_amount' => $discount,
             'coupon_id' => $couponId,
+            'source_platform' => 'web',
             'status'      => 'Pending',
         ]);
 
@@ -388,3 +389,4 @@ class CheckoutController extends Controller
         }
     }
 }
+

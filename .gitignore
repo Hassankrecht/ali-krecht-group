@@ -77,6 +77,7 @@ vite.config.js
 /public/image/
 /public/assets/img/
 /public/assets/gallery/
+/public/assets/banner/
 /public/assets/home/
 /public/assets/videos/
 /public/assets/product/
