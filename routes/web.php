@@ -37,6 +37,7 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index']);
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
+Route::view('/privacy-policy', 'privacy-policy')->name('privacy.policy');
 Route::get('/services', [HomeController::class, 'services'])->name('services');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 Route::get('/services/{slug}', [\App\Http\Controllers\ServiceController::class, 'show'])->name('services.show');
