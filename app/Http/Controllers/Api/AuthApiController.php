@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\WelcomeCouponAssigner;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
@@ -69,7 +70,7 @@ class AuthApiController extends Controller
         ]);
 
         $payload = $this->verifyGoogleIdToken($validated['id_token']);
-        $email = $payload['email'] ?? null;
+        $email = isset($payload['email']) ? strtolower(trim($payload['email'])) : null;
 
         if (!$email || empty($payload['email_verified'])) {
             throw ValidationException::withMessages([
@@ -93,7 +94,21 @@ class AuthApiController extends Controller
         $user->auth_provider = 'google';
         $user->avatar = $payload['picture'] ?? $user->avatar;
         $user->email_verified_at = $user->email_verified_at ?: now();
-        $user->save();
+        try {
+            $user->save();
+        } catch (QueryException $e) {
+            if ($e->getCode() !== '23000') {
+                throw $e;
+            }
+
+            $user = User::where('email', $email)->firstOrFail();
+            $user->google_id = $payload['sub'];
+            $user->auth_provider = 'google';
+            $user->avatar = $payload['picture'] ?? $user->avatar;
+            $user->email_verified_at = $user->email_verified_at ?: now();
+            $user->save();
+            $isNewUser = false;
+        }
 
         app(WelcomeCouponAssigner::class)->assign($user->id);
 
@@ -110,7 +125,7 @@ class AuthApiController extends Controller
         ]);
 
         $payload = $this->verifyFacebookAccessToken($validated['access_token']);
-        $email = $payload['email'] ?? null;
+        $email = isset($payload['email']) ? strtolower(trim($payload['email'])) : null;
 
         if (!$email) {
             throw ValidationException::withMessages([
@@ -134,7 +149,21 @@ class AuthApiController extends Controller
         $user->auth_provider = 'facebook';
         $user->avatar = $payload['picture']['data']['url'] ?? $user->avatar;
         $user->email_verified_at = $user->email_verified_at ?: now();
-        $user->save();
+        try {
+            $user->save();
+        } catch (QueryException $e) {
+            if ($e->getCode() !== '23000') {
+                throw $e;
+            }
+
+            $user = User::where('email', $email)->firstOrFail();
+            $user->facebook_id = $payload['id'];
+            $user->auth_provider = 'facebook';
+            $user->avatar = $payload['picture']['data']['url'] ?? $user->avatar;
+            $user->email_verified_at = $user->email_verified_at ?: now();
+            $user->save();
+            $isNewUser = false;
+        }
 
         app(WelcomeCouponAssigner::class)->assign($user->id);
 
