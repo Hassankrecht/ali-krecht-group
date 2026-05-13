@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderResource;
+use App\Mail\OrderPlacedMail;
 use App\Models\Checkout;
 use App\Models\CheckoutItem;
 use App\Models\Coupon;
@@ -13,6 +14,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class OrderApiController extends Controller
@@ -45,10 +48,13 @@ class OrderApiController extends Controller
             'discount' => ['nullable', 'numeric', 'min:0'],
             'coupon_code' => ['nullable', 'string', 'max:100'],
             'customer_name' => ['required', 'string', 'max:255'],
-            'customer_phone' => ['required', 'string', 'max:50'],
+            'customer_phone' => ['required', 'string', 'regex:/^\+961\d{8}$/'],
             'delivery_address' => ['required', 'string', 'max:500'],
+            'street_address' => ['nullable', 'string', 'max:500'],
+            'city' => ['nullable', 'string', 'max:100'],
             'order_note' => ['nullable', 'string', 'max:1000'],
             'payment_method' => ['nullable', 'string', 'max:100'],
+            'privacy_accepted' => ['accepted'],
             'source_platform' => ['nullable', 'in:web,android,ios'],
         ]);
 
@@ -75,6 +81,8 @@ class OrderApiController extends Controller
             $coupon = $this->resolveCoupon($couponCode, $user->id, $subtotal);
             $discount = $coupon ? $this->calculateCouponDiscount($coupon, $subtotal) : 0;
             $total = max($subtotal + $deliveryFee - $discount, 0);
+            $streetAddress = trim($validated['street_address'] ?? $validated['delivery_address']);
+            $city = trim($validated['city'] ?? $user->town ?? '');
 
             $checkout = Checkout::create([
                 'user_id' => $user->id,
@@ -82,10 +90,10 @@ class OrderApiController extends Controller
                 'name' => $validated['customer_name'],
                 'email' => $user->email,
                 'phone_number' => $validated['customer_phone'],
-                'town' => $user->town ?? '',
-                'country' => $user->country ?? '',
+                'town' => $city,
+                'country' => $user->country ?? 'Lebanon',
                 'zipcode' => $user->zipcode ?? '',
-                'address' => $validated['delivery_address'],
+                'address' => $streetAddress,
                 'total_price' => $total,
                 'total_before_discount' => $subtotal,
                 'discount_amount' => $discount,
@@ -127,6 +135,7 @@ class OrderApiController extends Controller
         });
 
         app(PostpayCouponAssigner::class)->assign($user->id, (float) ($checkout->total_before_discount ?? $subtotal));
+        $this->sendOrderEmails($checkout->load(['items', 'coupon', 'user']));
 
         return (new OrderResource($checkout->load(['items', 'coupon'])))
             ->response()
@@ -218,6 +227,19 @@ class OrderApiController extends Controller
             : (float) $coupon->value;
 
         return min($discount, $subtotal);
+    }
+
+    private function sendOrderEmails(Checkout $checkout): void
+    {
+        try {
+            Mail::to($checkout->email)->send(new OrderPlacedMail($checkout, false));
+            Mail::to(config('mail.admin_address', 'h.krecht01@gmail.com'))->send(new OrderPlacedMail($checkout, true));
+        } catch (\Throwable $e) {
+            Log::warning('Flutter order email failed', [
+                'checkout_id' => $checkout->id,
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 }
 

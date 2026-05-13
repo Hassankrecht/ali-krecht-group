@@ -25,8 +25,12 @@ class OrderResource extends JsonResource
             'customer' => $this->name,
             'customer_phone' => $this->phone_number,
             'phone' => $this->phone_number,
-            'delivery_address' => $this->address,
+            'delivery_address' => $this->fullAddress(),
             'address' => $this->address,
+            'street_address' => $this->address,
+            'city' => $this->town,
+            'country' => $this->country,
+            'full_address' => $this->fullAddress(),
             'subtotal' => $this->total_before_discount ?? $this->total_price,
             'delivery_fee' => $this->delivery_fee ?? 0,
             'delivery' => $this->delivery_fee ?? 0,
@@ -92,6 +96,13 @@ class OrderResource extends JsonResource
         }
 
         return url('api/media/storage/' . $path);
+    }
+
+    private function fullAddress(): string
+    {
+        return collect([$this->address, $this->town, $this->country])
+            ->filter(fn ($part) => filled($part))
+            ->implode(', ');
     }
 }
 

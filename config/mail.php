@@ -130,9 +130,7 @@ return [
             resource_path('views/vendor/mail'),
         ],
     ],
-'from' => [
-    'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-    'name' => env('MAIL_FROM_NAME', 'Example'),
-],
+
+    'admin_address' => env('MAIL_ADMIN_ADDRESS', 'h.krecht01@gmail.com'),
 
 ];
