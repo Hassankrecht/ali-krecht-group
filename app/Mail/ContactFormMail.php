@@ -25,9 +25,10 @@ class ContactFormMail extends Mailable
 
     public function build()
     {
-        return $this->from('h.krecht01@gmail.com', 'Restoran Contact')
-                    ->subject('New Contact Message')
-                    ->view('emails.contact')  // تأكد أن هذا الملف موجود في resources/views/emails/contact.blade.php
+        return $this->from(config('mail.from.address'), 'Ali Krecht Group Contact')
+                    ->replyTo($this->data['email'], $this->data['name'])
+                    ->subject('New AKG Contact Message: ' . $this->data['subject'])
+                    ->view('emails.contact')
                     ->with('data', $this->data);
     }
 
