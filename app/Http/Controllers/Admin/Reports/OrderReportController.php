@@ -238,10 +238,10 @@ class OrderReportController extends Controller
             ->get();
 
         $platformBreakdown = (clone $q)
-            ->selectRaw("COALESCE(NULLIF(checkouts.source_platform, ''), 'unknown') as platform")
+            ->selectRaw("CASE WHEN checkouts.source_platform IS NULL OR checkouts.source_platform = '' THEN 'unknown' ELSE checkouts.source_platform END as platform")
             ->selectRaw('COUNT(*) as orders')
             ->selectRaw('COALESCE(SUM(checkouts.total_price),0) as revenue')
-            ->groupBy(DB::raw("COALESCE(NULLIF(checkouts.source_platform, ''), 'unknown')"))
+            ->groupBy('checkouts.source_platform')
             ->reorder()
             ->orderByDesc('orders')
             ->get();

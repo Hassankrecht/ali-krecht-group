@@ -116,10 +116,10 @@ class AdminIncomeController extends Controller
             ->map(fn ($pair) => (int) ($pair[0] + $pair[1]));
 
         $platformBreakdown = (clone $baseQuery)
-            ->selectRaw("COALESCE(NULLIF(source_platform, ''), 'unknown') as platform")
+            ->selectRaw("CASE WHEN source_platform IS NULL OR source_platform = '' THEN 'unknown' ELSE source_platform END as platform")
             ->selectRaw('COUNT(*) as orders')
             ->selectRaw('COALESCE(SUM(total_price),0) as revenue')
-            ->groupBy(DB::raw("COALESCE(NULLIF(source_platform, ''), 'unknown')"))
+            ->groupBy('source_platform')
             ->orderByDesc('orders')
             ->get();
         $platformSummary = $platformBreakdown->keyBy('platform');

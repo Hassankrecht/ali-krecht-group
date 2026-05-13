@@ -176,9 +176,9 @@ class AdminOrderController extends Controller
             ['label'=>'Guest','value'=>'guest','count'=>(clone $aggQuery)->where(function($sub){ $sub->whereNull('user_id')->orWhere('user_id',0); })->count()],
         ]);
         $facetPlatforms = (clone $aggQuery)
-            ->selectRaw("COALESCE(NULLIF(checkouts.source_platform, ''), 'unknown') as value")
+            ->selectRaw("CASE WHEN checkouts.source_platform IS NULL OR checkouts.source_platform = '' THEN 'unknown' ELSE checkouts.source_platform END as value")
             ->selectRaw('COUNT(*) as count')
-            ->groupBy(DB::raw("COALESCE(NULLIF(checkouts.source_platform, ''), 'unknown')"))
+            ->groupBy('checkouts.source_platform')
             ->orderByDesc('count')
             ->get();
 
