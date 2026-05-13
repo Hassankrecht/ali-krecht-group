@@ -360,7 +360,7 @@
                                             <dd class="col-sm-8">{{ $order->email }}</dd>
                                             
                                             <dt class="col-sm-4">Phone:</dt>
-                                            <dd class="col-sm-8">{{ $order->phone ?? '—' }}</dd>
+                                            <dd class="col-sm-8">{{ $order->phone_number ?? '—' }}</dd>
                                         </dl>
                                     </div>
                                     <div class="col-md-6">

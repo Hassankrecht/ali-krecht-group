@@ -360,7 +360,7 @@ class AdminOrderController extends Controller
                     $order->id,
                     $order->name,
                     $order->email,
-                    $order->phone ?? '',
+                    $order->phone_number ?? '',
                     $order->status,
                     $order->total_price,
                     $order->discount_amount ?? 0,
