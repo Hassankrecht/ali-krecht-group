@@ -51,7 +51,7 @@ class ProductResource extends JsonResource
             'category' => $this->whenLoaded('category', function () {
                 return [
                     'id' => $this->category->id,
-                    'name' => $this->englishCategoryName($this->category),
+                    'name' => $this->localizedCategoryName($this->category),
                     'parent_id' => $this->category->parent_id,
                 ];
             }),

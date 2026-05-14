@@ -19,7 +19,7 @@ class CategoryResource extends JsonResource
             'parent' => $this->whenLoaded('parent', function () {
                 return [
                     'id' => $this->parent->id,
-                    'name' => $this->englishName($this->parent),
+                    'name' => $this->localizedName($this->parent),
                     'parent_id' => $this->parent->parent_id,
                 ];
             }),
@@ -27,7 +27,7 @@ class CategoryResource extends JsonResource
                 return $this->children->map(function ($child) {
                     return [
                         'id' => $child->id,
-                        'name' => $this->englishName($child),
+                        'name' => $this->localizedName($child),
                         'parent_id' => $child->parent_id,
                     ];
                 })->values();
