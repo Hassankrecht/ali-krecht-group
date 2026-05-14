@@ -19,11 +19,15 @@ class ProductResource extends JsonResource
      */
     public function toArray($request)
     {
-        $english = $this->relationLoaded('translations')
-            ? $this->translations->firstWhere('locale', 'en')
+        $locale = app()->getLocale();
+        $fallback = config('app.fallback_locale', 'en');
+        $translation = $this->relationLoaded('translations')
+            ? $this->translations->firstWhere('locale', $locale)
+                ?? $this->translations->firstWhere('locale', $fallback)
             : null;
-        $title = $english?->title ?? $this->title;
-        $description = $english?->description ?? $this->description;
+
+        $title = $translation?->title ?? $this->title;
+        $description = $translation?->description ?? $this->description;
         $gallery = $this->whenLoaded('images', function () {
             return $this->images
                 ->sortBy('order')
@@ -58,10 +62,14 @@ class ProductResource extends JsonResource
         ];
     }
 
-    private function englishCategoryName($category): string
+    private function localizedCategoryName($category): string
     {
         if ($category && $category->relationLoaded('translations')) {
-            $translation = $category->translations->firstWhere('locale', 'en');
+            $locale = app()->getLocale();
+            $fallback = config('app.fallback_locale', 'en');
+            $translation = $category->translations->firstWhere('locale', $locale)
+                ?? $category->translations->firstWhere('locale', $fallback);
+
             if ($translation?->name) {
                 return $translation->name;
             }

@@ -12,7 +12,7 @@ class CategoryResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->englishName($this->resource),
+            'name' => $this->localizedName($this->resource),
             'description' => null,
             'icon' => null,
             'parent_id' => $this->parent_id,
@@ -38,10 +38,14 @@ class CategoryResource extends JsonResource
             'updated_at' => $this->updated_at,
         ];
     }
-    private function englishName($category): string
+    private function localizedName($category): string
     {
         if ($category && $category->relationLoaded('translations')) {
-            $translation = $category->translations->firstWhere('locale', 'en');
+            $locale = app()->getLocale();
+            $fallback = config('app.fallback_locale', 'en');
+            $translation = $category->translations->firstWhere('locale', $locale)
+                ?? $category->translations->firstWhere('locale', $fallback);
+
             if ($translation?->name) {
                 return $translation->name;
             }
