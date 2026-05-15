@@ -998,12 +998,21 @@
                 </h2>
             </div>
 
+            @php
+                $productDisplayCategories = $productDisplayCategories ?? $childCategories ?? collect();
+                $activeProductCategoryId = optional($productDisplayCategories->first())->id;
+            @endphp
+
             @if (isset($parentCategories) && $parentCategories->count())
                 @php
                     $activeParent = $parentCategories->first()->id ?? null;
-                    $activeChildId =
-                        optional($parentCategories->first()->children->first())->id ??
-                        optional(($childCategories ?? collect())->first())->id;
+                    foreach ($parentCategories as $parent) {
+                        $hasActiveChild = $parent->children->contains(fn($child) => $child->id === $activeProductCategoryId);
+                        if ($parent->id === $activeProductCategoryId || $hasActiveChild) {
+                            $activeParent = $parent->id;
+                            break;
+                        }
+                    }
                 @endphp
                 <div class="akg-newcard mb-4 p-3 text-center akg-cat-nav">
                     <ul class="nav nav-pills justify-content-center mb-3 flex-wrap gap-2" id="prodParentNav">
@@ -1021,14 +1030,17 @@
                             id="prod-child-{{ $parent->id }}">
                             @forelse($parent->children as $child)
                                 <li class="nav-item">
-                                    <a class="nav-link {{ $child->id === $activeChildId ? 'active' : '' }}"
+                                    <a class="nav-link {{ $child->id === $activeProductCategoryId ? 'active' : '' }}"
                                         data-bs-toggle="pill" href="#tab-{{ $child->id }}">
                                         {{ $child->name_localized }}
                                     </a>
                                 </li>
                             @empty
                                 <li class="nav-item">
-                                    <span class="nav-link">{{ __('messages.products.all') }}</span>
+                                    <a class="nav-link {{ $parent->id === $activeProductCategoryId ? 'active' : '' }}"
+                                        data-bs-toggle="pill" href="#tab-{{ $parent->id }}">
+                                        {{ __('messages.products.all') }}
+                                    </a>
                                 </li>
                             @endforelse
                         </ul>
@@ -1036,16 +1048,13 @@
                 </div>
             @endif
 
-            @php
-                $childCategories = $childCategories ?? collect();
-            @endphp
             <div class="tab-content">
-                @forelse ($childCategories as $child)
+                @forelse ($productDisplayCategories as $child)
                     @php
                         $products = $productsByCategory[$child->id] ?? collect();
                     @endphp
                     <div id="tab-{{ $child->id }}"
-                        class="tab-pane fade {{ $child->id === ($activeChildId ?? null) ? 'show active' : '' }}">
+                        class="tab-pane fade {{ $child->id === ($activeProductCategoryId ?? null) ? 'show active' : '' }}">
                         <div class="row g-4 justify-content-center">
 
                             @forelse ($products as $product)

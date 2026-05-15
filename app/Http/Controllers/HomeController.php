@@ -142,9 +142,16 @@ class HomeController extends Controller
             $childCategories = $parentCategories;
         }
 
-        // جلب آخر 4 منتجات لكل فئة فرعية
+        // الفئات التي يمكن عرض منتجاتها في الصفحة الرئيسية:
+        // فئات فرعية + أي فئة رئيسية لا تحتوي على فئات فرعية.
+        $productDisplayCategories = $childCategories
+            ->concat($parentCategories->filter(fn($category) => $category->children->isEmpty()))
+            ->unique('id')
+            ->values();
+
+        // جلب آخر 4 منتجات لكل فئة قابلة للعرض
         $productsByCategory = [];
-        foreach ($childCategories as $category) {
+        foreach ($productDisplayCategories as $category) {
             $productsByCategory[$category->id] = Product::with(['images', 'translations', 'category.translations'])
                 ->where('category_id', $category->id)
                 ->orderBy('id', 'desc')
@@ -215,6 +222,7 @@ class HomeController extends Controller
             'categories' => $parentCategories, // للتوافق القديم
             'parentCategories' => $parentCategories,
             'childCategories' => $childCategories,
+            'productDisplayCategories' => $productDisplayCategories,
             'productsByCategory' => $productsByCategory,
             'reviews' => $reviews,
             'services' => $services,
