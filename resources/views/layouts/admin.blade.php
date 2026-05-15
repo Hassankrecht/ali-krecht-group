@@ -203,6 +203,9 @@
         <a href="{{ route('admin.admin-users.index') }}"
             class="{{ request()->routeIs('admin.admin-users.*') ? 'active' : '' }}"><i
                 class="bi bi-people me-2"></i>Admins</a>
+        <a href="{{ route('admin.users.index') }}"
+            class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}"><i
+                class="bi bi-person-lines-fill me-2"></i>Users</a>
         <form action="{{ route('admin.logout') }}" method="POST" class="mt-4 px-3">
             @csrf
             <button class="btn btn-sm btn-outline-dark w-100">Logout</button>

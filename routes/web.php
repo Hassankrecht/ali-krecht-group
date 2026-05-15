@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\AdminIncomeController;
 use App\Http\Controllers\Admin\AdminAppHomeSettingController;
 use App\Http\Controllers\Admin\AdminHomeSettingController;
+use App\Http\Controllers\Admin\RegisteredUserController;
 use App\Http\Controllers\PageEventController;
 use App\Http\Controllers\CouponController;
 use App\Models\Admin\Admin;
@@ -193,6 +194,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Admin users CRUD
         Route::resource('admin-users', AdminUserController::class)->parameters(['admin-users' => 'admin_user']);
+
+        // Registered website users
+        Route::get('users', [RegisteredUserController::class, 'index'])->name('users.index');
 
         // Coupons
         Route::resource('coupons', AdminCouponController::class)->only(['index','store','update','destroy']);
