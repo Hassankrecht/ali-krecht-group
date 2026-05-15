@@ -24,6 +24,11 @@ class CheckoutItem extends Model
         return $this->belongsTo(Checkout::class);
     }
 
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+
 }
 
 

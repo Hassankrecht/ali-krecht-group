@@ -19,15 +19,14 @@ class ProductResource extends JsonResource
      */
     public function toArray($request)
     {
-        $locale = app()->getLocale();
-        $fallback = config('app.fallback_locale', 'en');
-        $translation = $this->relationLoaded('translations')
-            ? $this->translations->firstWhere('locale', $locale)
-                ?? $this->translations->firstWhere('locale', $fallback)
-            : null;
+        $englishTranslation = $this->translationFor('en');
+        $arabicTranslation = $this->translationFor('ar');
 
-        $title = $translation?->title ?? $this->title;
-        $description = $translation?->description ?? $this->description;
+        $title = $englishTranslation?->title ?? $this->title;
+        $titleAr = $arabicTranslation?->title ?? $title;
+        $description = $englishTranslation?->description
+            ?? ($this->hasArabic($this->description) ? null : $this->description);
+        $descriptionAr = $arabicTranslation?->description ?? $description;
         $gallery = $this->whenLoaded('images', function () {
             return $this->images
                 ->sortBy('order')
@@ -41,8 +40,11 @@ class ProductResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $title,
-            'title' => $this->title,
+            'name_ar' => $titleAr,
+            'title' => $title,
+            'title_ar' => $titleAr,
             'description' => $description,
+            'description_ar' => $descriptionAr,
             'price' => $this->price,
             'image' => $mainImage,
             'gallery' => $gallery,
@@ -51,7 +53,8 @@ class ProductResource extends JsonResource
             'category' => $this->whenLoaded('category', function () {
                 return [
                     'id' => $this->category->id,
-                    'name' => $this->localizedCategoryName($this->category),
+                    'name' => $this->categoryNameFor($this->category, 'en'),
+                    'name_ar' => $this->categoryNameFor($this->category, 'ar'),
                     'parent_id' => $this->category->parent_id,
                 ];
             }),
@@ -62,21 +65,39 @@ class ProductResource extends JsonResource
         ];
     }
 
-    private function localizedCategoryName($category): string
+    private function translationFor(string $locale)
+    {
+        if (!$this->relationLoaded('translations')) {
+            return null;
+        }
+
+        return $this->translations->firstWhere('locale', $locale);
+    }
+
+    private function categoryNameFor($category, string $locale): string
     {
         if ($category && $category->relationLoaded('translations')) {
-            $locale = app()->getLocale();
-            $fallback = config('app.fallback_locale', 'en');
-            $translation = $category->translations->firstWhere('locale', $locale)
-                ?? $category->translations->firstWhere('locale', $fallback);
+            $translation = $category->translations->firstWhere('locale', $locale);
 
             if ($translation?->name) {
                 return $translation->name;
             }
         }
 
-        return $category->name_localized ?? $category->name ?? '';
+        $fallback = $category->name_localized ?? $category->name ?? '';
+
+        if ($locale === 'en' && $this->hasArabic($fallback)) {
+            return '';
+        }
+
+        return $fallback;
     }
+
+    private function hasArabic(?string $value): bool
+    {
+        return is_string($value) && preg_match('/[\x{0600}-\x{06FF}]/u', $value) === 1;
+    }
+
     private function imageUrl(?string $path): ?string
     {
         if (!$path) {
@@ -100,6 +121,3 @@ class ProductResource extends JsonResource
         return url('api/media/storage/' . $path);
     }
 }
-
-
-

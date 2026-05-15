@@ -52,19 +52,46 @@ class OrderResource extends JsonResource
             'order_note' => $this->order_note,
             'source_platform' => $this->source_platform ?? 'web',
             'items' => $this->items ? $this->items->map(function ($item) {
+                $product = $item->relationLoaded('product') ? $item->product : null;
+                $englishTranslation = $product && $product->relationLoaded('translations')
+                    ? $product->translations->firstWhere('locale', 'en')
+                    : null;
+                $arabicTranslation = $product && $product->relationLoaded('translations')
+                    ? $product->translations->firstWhere('locale', 'ar')
+                    : null;
+                $name = $englishTranslation?->title ?? $product?->title ?? $item->name;
+                $nameAr = $arabicTranslation?->title ?? $name;
+                $description = $englishTranslation?->description ?? $product?->description;
+                $descriptionAr = $arabicTranslation?->description ?? $description;
+                $image = $product?->image ?? $item->image;
+
                 return [
                     'id' => $item->id,
                     'order_id' => $item->checkout_id,
                     'checkout_id' => $item->checkout_id,
                     'product_id' => $item->product_id,
-                    'name' => $item->name,
-                    'image' => $item->image,
-                    'image_url' => $this->assetUrl($item->image),
+                    'name' => $name,
+                    'name_ar' => $nameAr,
+                    'description' => $description,
+                    'description_ar' => $descriptionAr,
+                    'image' => $image,
+                    'image_url' => $this->assetUrl($image),
                     'quantity' => $item->quantity,
                     'qty' => $item->quantity,
                     'price' => $item->price,
                     'total' => $item->total_price,
                     'total_price' => $item->total_price,
+                    'product' => $product ? [
+                        'id' => $product->id,
+                        'name' => $name,
+                        'name_ar' => $nameAr,
+                        'title' => $name,
+                        'title_ar' => $nameAr,
+                        'description' => $description,
+                        'description_ar' => $descriptionAr,
+                        'price' => $product->price,
+                        'image' => $this->assetUrl($image),
+                    ] : null,
                     'created_at' => $item->created_at,
                     'updated_at' => $item->updated_at,
                 ];

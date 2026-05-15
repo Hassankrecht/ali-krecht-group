@@ -17,7 +17,9 @@ class OrderShowApiController extends Controller
     public function show($id)
     {
         $user = Auth::user();
-        $order = Checkout::with('items')->where('user_id', $user->id)->find($id);
+        $order = Checkout::with(['items.product.translations', 'coupon'])
+            ->where('user_id', $user->id)
+            ->find($id);
         if (!$order) {
             return response()->json(['message' => 'Order not found'], 404);
         }

@@ -27,7 +27,7 @@ class OrderApiController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $orders = Checkout::with(['items', 'coupon'])
+        $orders = Checkout::with(['items.product.translations', 'coupon'])
             ->where('user_id', $user->id)
             ->orderByDesc('created_at')
             ->paginate($request->integer('per_page', 20));
@@ -137,7 +137,7 @@ class OrderApiController extends Controller
         app(PostpayCouponAssigner::class)->assign($user->id, (float) ($checkout->total_before_discount ?? $subtotal));
         $this->sendOrderEmails($checkout->load(['items', 'coupon', 'user']));
 
-        return (new OrderResource($checkout->load(['items', 'coupon'])))
+        return (new OrderResource($checkout->load(['items.product.translations', 'coupon'])))
             ->response()
             ->setStatusCode(201);
     }
@@ -163,7 +163,7 @@ class OrderApiController extends Controller
 
         $order->save();
 
-        return new OrderResource($order->load(['items', 'coupon']));
+        return new OrderResource($order->load(['items.product.translations', 'coupon']));
     }
 
     private function resolveCoupon(?string $couponCode, int $userId, float $subtotal): ?Coupon

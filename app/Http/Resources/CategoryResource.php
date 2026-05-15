@@ -12,14 +12,17 @@ class CategoryResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'name' => $this->localizedName($this->resource),
+            'name' => $this->nameFor($this->resource, 'en'),
+            'name_ar' => $this->nameFor($this->resource, 'ar'),
             'description' => null,
+            'description_ar' => null,
             'icon' => null,
             'parent_id' => $this->parent_id,
             'parent' => $this->whenLoaded('parent', function () {
                 return [
                     'id' => $this->parent->id,
-                    'name' => $this->localizedName($this->parent),
+                    'name' => $this->nameFor($this->parent, 'en'),
+                    'name_ar' => $this->nameFor($this->parent, 'ar'),
                     'parent_id' => $this->parent->parent_id,
                 ];
             }),
@@ -27,7 +30,8 @@ class CategoryResource extends JsonResource
                 return $this->children->map(function ($child) {
                     return [
                         'id' => $child->id,
-                        'name' => $this->localizedName($child),
+                        'name' => $this->nameFor($child, 'en'),
+                        'name_ar' => $this->nameFor($child, 'ar'),
                         'parent_id' => $child->parent_id,
                     ];
                 })->values();
@@ -38,21 +42,28 @@ class CategoryResource extends JsonResource
             'updated_at' => $this->updated_at,
         ];
     }
-    private function localizedName($category): string
+
+    private function nameFor($category, string $locale): string
     {
         if ($category && $category->relationLoaded('translations')) {
-            $locale = app()->getLocale();
-            $fallback = config('app.fallback_locale', 'en');
-            $translation = $category->translations->firstWhere('locale', $locale)
-                ?? $category->translations->firstWhere('locale', $fallback);
+            $translation = $category->translations->firstWhere('locale', $locale);
 
             if ($translation?->name) {
                 return $translation->name;
             }
         }
 
-        return $category->name_localized ?? $category->name ?? '';
+        $fallback = $category->name_localized ?? $category->name ?? '';
+
+        if ($locale === 'en' && $this->hasArabic($fallback)) {
+            return '';
+        }
+
+        return $fallback;
+    }
+
+    private function hasArabic(?string $value): bool
+    {
+        return is_string($value) && preg_match('/[\x{0600}-\x{06FF}]/u', $value) === 1;
     }
 }
-
-
